@@ -33,6 +33,7 @@
     "@arcjet/next": "^1.0.0-beta.6",
     "@clerk/localizations": "^3.15.0",
     "@clerk/nextjs": "^6.19.0",
+    "@dimo-network/login-with-dimo": "^0.0.23",
     "@electric-sql/pglite": "^0.3.0",
     "@hookform/resolvers": "^5.0.1",
     "@logtail/pino": "^0.5.4",
@@ -48,6 +49,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.56.2",
+    "react-hot-toast": "^2.5.2",
     "zod": "^3.24.4"
   },
   "devDependencies": {

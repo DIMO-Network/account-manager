@@ -1,6 +1,7 @@
-import { getI18nPath } from '@/utils/Helpers';
-import { SignIn } from '@clerk/nextjs';
+import { DimoAuthWrapper } from '@/components/auth/DimoAuthWrapper';
+import { SignInContent } from '@/components/auth/SignInContent';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Suspense } from 'react';
 
 type ISignInPageProps = {
   params: Promise<{ locale: string }>;
@@ -24,6 +25,17 @@ export default async function SignInPage(props: ISignInPageProps) {
   setRequestLocale(locale);
 
   return (
-    <SignIn path={getI18nPath('/sign-in', locale)} />
+    <DimoAuthWrapper>
+      <Suspense
+        fallback={(
+          <div className="space-y-8">
+            <div className="animate-pulse bg-gray-200 h-8 rounded mb-4"></div>
+            <div className="animate-pulse bg-gray-200 h-32 rounded"></div>
+          </div>
+        )}
+      >
+        <SignInContent locale={locale} />
+      </Suspense>
+    </DimoAuthWrapper>
   );
-};
+}
