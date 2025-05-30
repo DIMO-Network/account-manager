@@ -19,7 +19,7 @@ function DimoCallback() {
       const error = searchParams.get('error');
       if (error) {
         console.error('DIMO auth error:', error);
-        router.push('/sign-up?error=dimo_failed');
+        router.push('/sign-in?error=dimo_failed');
         return;
       }
 
@@ -32,17 +32,12 @@ function DimoCallback() {
         try {
           const jwt = getValidJWT();
 
-          // Determine if this is a sign-in or sign-up based on the referring page or session storage
-          const isSignIn
-            = document.referrer.includes('/sign-in')
-              || sessionStorage.getItem('dimo_flow') === 'sign-in';
-
-          // Clear the flow indicator
+          // Clear any flow indicators from session storage
           sessionStorage.removeItem('dimo_flow');
 
-          console.warn('Processing DIMO auth - isSignIn:', isSignIn, 'email:', email);
+          console.warn('Processing DIMO auth - email:', email);
 
-          // Register/update user with your backend
+          // Register/update user with your backend (always treated as sign-in)
           const response = await fetch('/api/auth/dimo/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -51,7 +46,6 @@ function DimoCallback() {
               walletAddress,
               dimoToken: jwt,
               sharedVehicles: [], // Add if you have this data
-              isSignIn,
             }),
           });
 
@@ -59,46 +53,28 @@ function DimoCallback() {
           console.warn('API response:', result);
 
           if (response.ok) {
-            if (isSignIn) {
-              // Sign-in flow: Always redirect to dashboard (create account if needed)
-              if (result.signInToken) {
-                console.warn('Auto-signing in with token and redirecting to dashboard');
-                // Auto sign-in with token - this will take them to dashboard
-                window.location.href = `/sign-in#/factor-one?redirect_url=${encodeURIComponent('/dashboard')}&token=${result.signInToken}`;
-                return;
-              } else {
-                console.warn('No sign-in token, redirecting to dashboard manually');
-                // Fallback - redirect directly to dashboard
-                router.push('/dashboard');
-              }
+            // Always use sign-in flow - create account if needed
+            if (result.signInToken) {
+              console.warn('Auto-signing in with token and redirecting to dashboard');
+              // Auto sign-in with token - this will take them to dashboard
+              window.location.href = `/sign-in#/factor-one?redirect_url=${encodeURIComponent('/dashboard')}&token=${result.signInToken}`;
+              return;
             } else {
-              // Sign-up flow: Redirect to sign-in page for manual completion
-              if (result.user.isNewUser) {
-                router.push(`/sign-in?email_address=${encodeURIComponent(email)}&message=dimo_registered`);
-              } else {
-                // Existing user in sign-up flow - still redirect to sign-in
-                router.push(`/sign-in?email_address=${encodeURIComponent(email)}&message=dimo_updated`);
-              }
+              console.warn('No sign-in token, redirecting to sign-in page');
+              // Redirect to sign-in page with email pre-filled
+              const message = result.user?.isNewUser ? 'dimo_registered' : 'dimo_updated';
+              router.push(`/sign-in?email_address=${encodeURIComponent(email)}&message=${message}`);
             }
           } else {
             throw new Error(result.error);
           }
         } catch (error) {
           console.error('Failed to process DIMO auth:', error);
-
-          // Determine which page to redirect to based on the flow
-          const isSignInFlow
-            = document.referrer.includes('/sign-in')
-              || sessionStorage.getItem('dimo_flow') === 'sign-in';
-
-          const errorPage = isSignInFlow ? 'sign-in' : 'sign-up';
-          const errorParam = isSignInFlow ? 'signin_failed' : 'registration_failed';
-
-          router.push(`/${errorPage}?error=${errorParam}`);
+          router.push('/sign-in?error=auth_failed');
         }
       } else {
-        // No auth detected, redirect back to sign up
-        router.push('/sign-up?error=auth_incomplete');
+        // No auth detected, redirect back to sign-in
+        router.push('/sign-in?error=auth_incomplete');
       }
 
       setIsProcessing(false);

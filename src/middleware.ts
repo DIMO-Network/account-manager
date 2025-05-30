@@ -16,8 +16,6 @@ const isProtectedRoute = createRouteMatcher([
 const isAuthPage = createRouteMatcher([
   '/sign-in(.*)',
   '/:locale/sign-in(.*)',
-  '/sign-up(.*)',
-  '/:locale/sign-up(.*)',
 ]);
 
 // Improve security with Arcjet
