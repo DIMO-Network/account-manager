@@ -1,7 +1,10 @@
 {
-  "name": "next-js-boilerplate",
-  "version": "3.67.2",
-  "author": "Ixartz (https://github.com/ixartz)",
+  "name": "dimo-subscription-demo",
+  "version": "1.0.0",
+  "author": "Bean Jackson <jaggedbytes@protonmail.com>",
+  "contributors": [
+    "Ixartz (https://github.com/ixartz)"
+  ],
   "engines": {
     "node": ">=20"
   },

@@ -8,7 +8,7 @@
     "sign_up_link": "Sign up"
   },
   "BaseTemplate": {
-    "description": "Starter code for your Nextjs Boilerplate with Tailwind CSS",
+    "description": "Web app to manage subscriptions on DIMO",
     "made_with": "Made with <author></author>."
   },
   "Index": {

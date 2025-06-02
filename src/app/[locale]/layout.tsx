@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { PostHogProvider } from '@/components/analytics/PostHogProvider';
 import { DimoAuthWrapper } from '@/components/auth/DimoAuthWrapper';
-import { DemoBadge } from '@/components/DemoBadge';
 import { routing } from '@/libs/i18nRouting';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
@@ -58,7 +57,6 @@ export default async function RootLayout(props: {
               {props.children}
             </DimoAuthWrapper>
           </PostHogProvider>
-          <DemoBadge />
         </NextIntlClientProvider>
       </body>
     </html>

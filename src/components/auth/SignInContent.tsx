@@ -1,7 +1,5 @@
 'use client';
 
-import { getI18nPath } from '@/utils/Helpers';
-import { SignIn } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import { DimoSignIn } from './DimoSignIn';
 
@@ -9,7 +7,7 @@ type SignInContentProps = {
   locale: string;
 };
 
-export const SignInContent = ({ locale }: SignInContentProps) => {
+export const SignInContent = ({}: SignInContentProps) => {
   const searchParams = useSearchParams();
 
   const error = searchParams.get('error');
@@ -35,22 +33,6 @@ export const SignInContent = ({ locale }: SignInContentProps) => {
           </p>
         </div>
       )}
-
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Sign in with Email</h2>
-        <SignIn path={getI18nPath('/sign-in', locale)} />
-      </div>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
-        </div>
-      </div>
 
       <DimoSignIn />
     </div>
