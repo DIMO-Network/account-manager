@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { getDimoVehicles } from '@/app/actions/getDimoVehicles';
 
 interface Vehicle {
@@ -18,6 +19,7 @@ export const DimoVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -42,6 +44,10 @@ export const DimoVehicles = () => {
 
     fetchVehicles();
   }, []);
+
+  const handleVehicleClick = (tokenId: string) => {
+    router.push(`/dashboard/vehicles/${tokenId}`);
+  };
 
   if (loading) {
     return (
@@ -83,7 +89,11 @@ export const DimoVehicles = () => {
       <h2 className="text-xl font-bold mb-4">Your DIMO Vehicles ({vehicles.length})</h2>
       <div className="grid gap-4">
         {vehicles.map((vehicle) => (
-          <div key={vehicle.tokenId} className="border rounded-lg p-4 bg-white shadow-sm">
+          <div 
+            key={vehicle.tokenId} 
+            className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md hover:bg-gray-50 cursor-pointer transition-all duration-200 transform hover:scale-[1.02]"
+            onClick={() => handleVehicleClick(vehicle.tokenId)}
+          >
             <h3 className="font-semibold text-lg">
               {vehicle.definition.year} {vehicle.definition.make} {vehicle.definition.model}
             </h3>
@@ -91,6 +101,12 @@ export const DimoVehicles = () => {
               <p>Token ID: {vehicle.tokenId}</p>
               <p>Owner: {vehicle.owner}</p>
               <p>Connected: {new Date(vehicle.mintedAt).toLocaleDateString()}</p>
+            </div>
+            <div className="mt-3 flex items-center text-blue-600 text-sm font-medium">
+              <span>View Details</span>
+              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </div>
           </div>
         ))}
