@@ -109,7 +109,7 @@ export const DimoSignIn = () => {
           mode="popup"
           onSuccess={handleDimoSuccess}
           onError={handleDimoError}
-          permissionTemplateId="2"
+          permissionTemplateId="1"
           authenticatedLabel="Access Dashboard"
           unAuthenticatedLabel="Sign in with DIMO"
           utm="utm_campaign=by_road_signin"
