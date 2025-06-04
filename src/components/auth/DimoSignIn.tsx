@@ -1,12 +1,13 @@
 'use client';
 
-import { useSignIn } from '@clerk/nextjs';
+import { useSignIn, useUser } from '@clerk/nextjs';
 import { LoginWithDimo, useDimoAuthState } from '@dimo-network/login-with-dimo';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export const DimoSignIn = () => {
   const { signIn, setActive, isLoaded } = useSignIn();
+  const { isSignedIn } = useUser();
   const { email, walletAddress, getValidJWT } = useDimoAuthState();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -14,6 +15,11 @@ export const DimoSignIn = () => {
 
   const handleDimoSuccess = async (authData: any) => {
     console.warn('DIMO Success - authData:', authData);
+
+    if (isSignedIn) {
+      router.push('/dashboard');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -24,14 +30,11 @@ export const DimoSignIn = () => {
       const dimoWallet = walletAddress;
       const dimoToken = getValidJWT();
 
-      console.warn('DIMO Auth State:', { dimoEmail, dimoWallet, dimoToken: !!dimoToken });
-
       if (!dimoEmail || !dimoToken) {
         throw new Error('DIMO authentication incomplete - missing email or token');
       }
 
       // Sync user with backend
-      console.warn('Making API call to register/sync user...');
       const response = await fetch('/api/auth/dimo/register', {
         method: 'POST',
         headers: {
@@ -45,7 +48,6 @@ export const DimoSignIn = () => {
       });
 
       const result = await response.json();
-      console.warn('API Response:', result);
 
       if (!response.ok) {
         throw new Error(result.error || `Server error: ${response.status}`);
@@ -66,7 +68,6 @@ export const DimoSignIn = () => {
 
         if (signInAttempt.status === 'complete') {
           await setActive({ session: signInAttempt.createdSessionId });
-          console.warn('Successfully signed in, redirecting to dashboard...');
           router.push('/dashboard');
         } else {
           throw new Error('Sign-in incomplete');
