@@ -1,5 +1,5 @@
-import { DimoVehicles } from '@/components/DimoVehicles';
 import { getTranslations } from 'next-intl/server';
+import { DimoVehicles } from '@/components/DimoVehicles';
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string }>;
@@ -15,7 +15,7 @@ export async function generateMetadata(props: {
   };
 }
 
-export default function Dashboard() {
+export default async function Dashboard() {
   return (
     <div className="py-5 [&_p]:my-6">
       <DimoVehicles />

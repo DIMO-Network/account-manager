@@ -1,6 +1,6 @@
 'use server';
 
-interface VehicleDetail {
+type VehicleDetail = {
   tokenId: string;
   owner: string;
   mintedAt: string;
@@ -11,6 +11,7 @@ interface VehicleDetail {
   };
   aftermarketDevice?: {
     tokenId: number;
+    serial: string;
     owner: string;
     pairedAt: string;
     manufacturer: {
@@ -21,7 +22,7 @@ interface VehicleDetail {
     tokenId: number;
     // Add other synthetic device fields as needed
   } | null;
-}
+};
 
 export async function getDimoVehicleDetails(tokenId: string): Promise<{
   success: boolean;
@@ -50,6 +51,7 @@ export async function getDimoVehicleDetails(tokenId: string): Promise<{
               }
               aftermarketDevice {
                 tokenId
+                serial
                 owner
                 pairedAt
                 manufacturer {
@@ -63,9 +65,9 @@ export async function getDimoVehicleDetails(tokenId: string): Promise<{
           }
         `,
         variables: {
-          tokenId: parseInt(tokenId)
-        }
-      })
+          tokenId: Number.parseInt(tokenId),
+        },
+      }),
     });
 
     if (!response.ok) {
@@ -73,7 +75,7 @@ export async function getDimoVehicleDetails(tokenId: string): Promise<{
     }
 
     const data = await response.json();
-    
+
     if (data.errors) {
       throw new Error(data.errors[0]?.message || 'GraphQL query failed');
     }
@@ -81,19 +83,19 @@ export async function getDimoVehicleDetails(tokenId: string): Promise<{
     if (!data.data?.vehicle) {
       return {
         success: false,
-        error: 'Vehicle not found'
+        error: 'Vehicle not found',
       };
     }
 
     return {
       success: true,
-      vehicle: data.data.vehicle
+      vehicle: data.data.vehicle,
     };
   } catch (error) {
     console.error('Error fetching vehicle details:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
