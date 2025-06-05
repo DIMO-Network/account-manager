@@ -100,4 +100,32 @@ export class SubscriptionService {
       },
     });
   }
+
+  static async cancelSubscription(subscriptionId: string): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    try {
+      const canceledSubscription = await stripe.subscriptions.cancel(subscriptionId);
+
+      // Update local database to reflect cancellation
+      if (canceledSubscription.metadata?.serial_number) {
+        await db.update(deviceSubscriptionSchema)
+          .set({
+            subscriptionStatus: 'canceled',
+            isActive: false,
+            updatedAt: new Date(),
+          })
+          .where(eq(deviceSubscriptionSchema.serialNumber, canceledSubscription.metadata.serial_number));
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error canceling subscription:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 }

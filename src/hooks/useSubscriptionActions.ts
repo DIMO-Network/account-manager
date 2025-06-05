@@ -1,9 +1,10 @@
 import { useCallback, useState, useTransition } from 'react';
-import { createCheckoutAction } from '@/app/actions/subscriptionActions';
+import { cancelSubscriptionAction, createCheckoutAction } from '@/app/actions/subscriptionActions';
 
 export const useSubscriptionActions = () => {
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [activating, startActivationTransition] = useTransition();
+  const [canceling, startCancellationTransition] = useTransition();
 
   const activateSubscription = useCallback(async (
     serialNumber: string,
@@ -11,34 +12,64 @@ export const useSubscriptionActions = () => {
   ) => {
     if (!userEmail) {
       setError('User email is required to activate subscription');
-      return;
+      return { success: false };
     }
 
-    startTransition(async () => {
-      setError(null);
+    return new Promise<{ success: boolean }>((resolve) => {
+      startActivationTransition(async () => {
+        setError(null);
 
-      try {
-        const result = await createCheckoutAction(
-          serialNumber,
-          userEmail,
-          'price_1RUVNj4dLDxx1E1eF1HR4mRZ',
-        );
+        try {
+          const result = await createCheckoutAction(
+            serialNumber,
+            userEmail,
+            'price_1RUVNj4dLDxx1E1eF1HR4mRZ',
+          );
 
-        if (result.success && result.data.url) {
-          window.location.href = result.data.url;
-        } else {
-          setError(result.error || 'Failed to create checkout session');
+          if (result.success && result.data.url) {
+            window.location.href = result.data.url;
+            resolve({ success: true });
+          } else {
+            setError(result.error || 'Failed to create checkout session');
+            resolve({ success: false });
+          }
+        } catch (err) {
+          console.error('Error creating checkout session:', err);
+          setError(err instanceof Error ? err.message : 'Failed to create checkout session');
+          resolve({ success: false });
         }
-      } catch (err) {
-        console.error('Error creating checkout session:', err);
-        setError(err instanceof Error ? err.message : 'Failed to create checkout session');
-      }
+      });
+    });
+  }, []);
+
+  const cancelSubscription = useCallback(async (subscriptionId: string) => {
+    return new Promise<{ success: boolean }>((resolve) => {
+      startCancellationTransition(async () => {
+        setError(null);
+
+        try {
+          const result = await cancelSubscriptionAction(subscriptionId);
+
+          if (result.success) {
+            resolve({ success: true });
+          } else {
+            setError(result.error || 'Failed to cancel subscription');
+            resolve({ success: false });
+          }
+        } catch (err) {
+          console.error('Error canceling subscription:', err);
+          setError(err instanceof Error ? err.message : 'Failed to cancel subscription');
+          resolve({ success: false });
+        }
+      });
     });
   }, []);
 
   return {
-    activating: isPending,
+    activating,
+    canceling,
     error,
     activateSubscription,
+    cancelSubscription,
   };
 };

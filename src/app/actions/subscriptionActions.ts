@@ -45,3 +45,19 @@ export async function createCheckoutAction(
     };
   }
 }
+
+export async function cancelSubscriptionAction(subscriptionId: string) {
+  try {
+    const result = await SubscriptionService.cancelSubscription(subscriptionId);
+
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
+
+    return { success: result.success, error: result.error };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}

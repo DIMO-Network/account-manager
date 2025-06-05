@@ -5,6 +5,8 @@ type SubscriptionStatusCardProps = {
   subscription?: any;
   isPolling: boolean;
   onRefreshAction: () => void;
+  onCancelAction?: () => void;
+  canceling?: boolean;
   compact?: boolean;
 };
 
@@ -13,6 +15,8 @@ export const SubscriptionStatusCard = ({
   subscription,
   isPolling,
   onRefreshAction,
+  onCancelAction,
+  canceling = false,
   compact = false,
 }: SubscriptionStatusCardProps) => {
   const cardClasses = compact
@@ -22,21 +26,37 @@ export const SubscriptionStatusCard = ({
   if (hasActiveSubscription) {
     return (
       <div className={`${cardClasses} bg-green-50 border-green-200`}>
-        <div className="flex items-center">
-          <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-          <span className="text-green-800 font-medium">
-            Active
-            {subscription?.planType && ` (${subscription.planType})`}
-          </span>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            <span className="text-green-800 font-medium">
+              Active
+              {subscription?.planType && ` (${subscription.planType})`}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onRefreshAction}
+              className={`${compact ? 'text-xs' : 'text-sm'} text-blue-600 hover:text-blue-800`}
+              type="button"
+              title="Refresh status"
+              disabled={canceling}
+            >
+              ↻
+            </button>
+            {onCancelAction && (
+              <button
+                onClick={onCancelAction}
+                disabled={canceling}
+                className={`${compact ? 'text-xs px-2 py-1' : 'text-sm px-3 py-1'} text-red-600 hover:text-red-800 hover:bg-red-50 border border-red-300 rounded transition-colors disabled:opacity-50`}
+                type="button"
+                title="Cancel subscription"
+              >
+                {canceling ? 'Canceling...' : 'Cancel'}
+              </button>
+            )}
+          </div>
         </div>
-        <button
-          onClick={onRefreshAction}
-          className={`${compact ? 'text-xs' : 'text-sm'} text-blue-600 hover:text-blue-800`}
-          type="button"
-          title="Refresh status"
-        >
-          ↻
-        </button>
       </div>
     );
   }
