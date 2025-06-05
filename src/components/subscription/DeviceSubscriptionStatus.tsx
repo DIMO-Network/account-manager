@@ -1,9 +1,9 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { ActivateButton } from '@/components/subscription/ActivateButton';
 import { SubscriptionStatusCard } from '@/components/subscription/SubscriptionStatusCard';
-import { useCheckoutPolling } from '@/hooks/useCheckoutPolling';
+import { useCheckoutSuccess } from '@/hooks/useCheckoutSuccess';
 import { useSubscriptionActions } from '@/hooks/useSubscriptionActions';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 
@@ -20,12 +20,13 @@ export const DeviceSubscriptionStatus = ({
 }: SubscriptionStatusProps) => {
   const { subscriptionData, loading, error, checkStatus } = useSubscriptionStatus(serialNumber);
   const { activating, error: activationError, activateSubscription } = useSubscriptionActions();
+  const { showSuccessState, serialFromCheckout, clearSuccessState } = useCheckoutSuccess();
 
-  const { isPolling } = useCheckoutPolling({
-    serialNumber,
-    subscriptionData,
-    checkStatus,
-  });
+  useEffect(() => {
+    if (subscriptionData?.hasActiveSubscription && showSuccessState && serialFromCheckout === serialNumber) {
+      clearSuccessState();
+    }
+  }, [subscriptionData?.hasActiveSubscription, showSuccessState, serialFromCheckout, serialNumber, clearSuccessState]);
 
   const handleRefresh = useCallback(() => {
     checkStatus(true);
@@ -34,6 +35,10 @@ export const DeviceSubscriptionStatus = ({
   const handleActivate = useCallback(() => {
     activateSubscription(serialNumber, userEmail);
   }, [activateSubscription, serialNumber, userEmail]);
+
+  const shouldShowOptimisticSuccess = showSuccessState
+    && serialFromCheckout === serialNumber
+    && !subscriptionData?.hasActiveSubscription;
 
   if (loading) {
     return (
@@ -45,7 +50,6 @@ export const DeviceSubscriptionStatus = ({
   }
 
   const displayError = error || activationError;
-  const isActivating = activating || isPolling;
   const hasActiveSubscription = subscriptionData?.hasActiveSubscription || false;
 
   if (compact) {
@@ -63,18 +67,44 @@ export const DeviceSubscriptionStatus = ({
           </div>
         )}
 
-        <SubscriptionStatusCard
-          hasActiveSubscription={hasActiveSubscription}
-          subscription={subscriptionData?.subscription}
-          isPolling={isActivating}
-          onRefreshAction={handleRefresh}
-          compact={true}
-        />
+        {shouldShowOptimisticSuccess
+          ? (
+              <div className="p-2 bg-green-50 border border-green-200 rounded text-xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    <span className="text-green-800 font-medium">
+                      ✅ Subscription Activated!
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleRefresh}
+                    className="text-green-600 hover:text-green-800 text-xs"
+                    type="button"
+                    title="Refresh to confirm"
+                  >
+                    ↻
+                  </button>
+                </div>
+                <p className="text-green-700 mt-1">
+                  Your R1 device subscription is now active.
+                </p>
+              </div>
+            )
+          : (
+              <SubscriptionStatusCard
+                hasActiveSubscription={hasActiveSubscription}
+                subscription={subscriptionData?.subscription}
+                isPolling={activating}
+                onRefreshAction={handleRefresh}
+                compact={true}
+              />
+            )}
 
-        {!hasActiveSubscription && !isActivating && (
+        {!hasActiveSubscription && !shouldShowOptimisticSuccess && !activating && (
           <ActivateButton
             onActivateAction={handleActivate}
-            activating={isActivating}
+            activating={activating}
             compact={true}
           />
         )}
@@ -114,15 +144,43 @@ export const DeviceSubscriptionStatus = ({
           {serialNumber}
         </div>
 
-        <SubscriptionStatusCard
-          hasActiveSubscription={hasActiveSubscription}
-          subscription={subscriptionData?.subscription}
-          isPolling={isActivating}
-          onRefreshAction={handleRefresh}
-          compact={true}
-        />
+        {shouldShowOptimisticSuccess
+          ? (
+              <div className="p-4 bg-green-50 border border-green-200 rounded">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                    <div>
+                      <span className="text-green-800 font-medium text-lg">
+                        ✅ Subscription Activated Successfully!
+                      </span>
+                      <p className="text-green-700 text-sm mt-1">
+                        Your R1 device subscription is now active and ready to use.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleRefresh}
+                    className="text-green-600 hover:text-green-800 text-sm"
+                    type="button"
+                    title="Refresh to confirm"
+                  >
+                    ↻ Refresh
+                  </button>
+                </div>
+              </div>
+            )
+          : (
+              <SubscriptionStatusCard
+                hasActiveSubscription={hasActiveSubscription}
+                subscription={subscriptionData?.subscription}
+                isPolling={activating}
+                onRefreshAction={handleRefresh}
+                compact={true}
+              />
+            )}
 
-        {!hasActiveSubscription && !isActivating && (
+        {!hasActiveSubscription && !shouldShowOptimisticSuccess && !activating && (
           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
             <div className="flex items-center justify-between">
               <div>
@@ -132,7 +190,7 @@ export const DeviceSubscriptionStatus = ({
               </div>
               <ActivateButton
                 onActivateAction={handleActivate}
-                activating={isActivating}
+                activating={activating}
                 compact={true}
               />
             </div>
