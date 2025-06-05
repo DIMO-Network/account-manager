@@ -4,7 +4,7 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getDimoVehicles } from '@/app/actions/getDimoVehicles';
-import { DeviceSubscriptionStatus } from '@/components/DeviceSubscriptionStatus';
+import { DeviceSubscriptionStatus } from '@/components/subscription/DeviceSubscriptionStatus';
 
 type Vehicle = {
   tokenId: string;

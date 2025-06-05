@@ -2,7 +2,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
-import { DeviceSubscriptionStatus } from '@/components/DeviceSubscriptionStatus';
+import { DeviceSubscriptionStatus } from '@/components/subscription/DeviceSubscriptionStatus';
 
 type VehicleDetailPageProps = {
   params: Promise<{ locale: string; tokenId: string }>;
