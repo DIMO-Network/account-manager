@@ -2,30 +2,27 @@
 
 import type Stripe from 'stripe';
 import type { PaymentMethodsResponse } from '@/types/paymentMethod';
-import { useUser } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
+import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { PaymentMethodCard } from './PaymentMethodCard';
 
 export const PaymentMethodsList = () => {
-  const { user } = useUser();
+  const { customerId, loading: customerLoading, error: customerError } = useStripeCustomer();
   const [paymentMethods, setPaymentMethods] = useState<Stripe.PaymentMethod[]>([]);
   const [defaultPaymentMethodId, setDefaultPaymentMethodId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Get customer ID from user metadata
-  const customerId = user?.publicMetadata?.stripeCustomerId as string;
-
   const fetchPaymentMethods = useCallback(async () => {
     if (!customerId) {
-      setError('No customer ID found');
-      setLoading(false);
       return;
     }
 
     try {
       setError(null);
+      setLoading(true);
+
       const response = await fetch(`/api/payment-methods?customer_id=${customerId}`);
 
       if (!response.ok) {
@@ -45,8 +42,10 @@ export const PaymentMethodsList = () => {
   }, [customerId]);
 
   useEffect(() => {
-    fetchPaymentMethods();
-  }, [fetchPaymentMethods]);
+    if (customerId) {
+      fetchPaymentMethods();
+    }
+  }, [fetchPaymentMethods, customerId]);
 
   const handleSetDefault = async (paymentMethodId: string) => {
     if (!customerId) {
@@ -89,6 +88,7 @@ export const PaymentMethodsList = () => {
         throw new Error(errorData.error || 'Failed to remove payment method');
       }
 
+      // Remove from local state
       setPaymentMethods(prev => prev.filter(pm => pm.id !== paymentMethodId));
 
       // If this was the default, clear default
@@ -103,6 +103,32 @@ export const PaymentMethodsList = () => {
     }
   };
 
+  // Show loading state while getting customer
+  if (customerLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="animate-pulse bg-gray-200 h-8 rounded w-1/3"></div>
+        <div className="animate-pulse bg-gray-200 h-24 rounded-lg"></div>
+        <div className="animate-pulse bg-gray-200 h-24 rounded-lg"></div>
+      </div>
+    );
+  }
+
+  // Show customer error
+  if (customerError) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-red-800 font-semibold">Error setting up payment methods</h3>
+            <p className="text-red-600 text-sm mt-1">{customerError}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state while fetching payment methods
   if (loading) {
     return (
       <div className="space-y-4">
@@ -136,7 +162,7 @@ export const PaymentMethodsList = () => {
     return (
       <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
         <p className="text-yellow-800">
-          No Stripe customer ID found. Payment methods will be available after your first subscription.
+          Unable to load payment methods. Please try refreshing the page.
         </p>
       </div>
     );
@@ -161,11 +187,21 @@ export const PaymentMethodsList = () => {
     );
   }
 
+  // Group payment methods by type (though we're only showing cards for now)
   const cardPaymentMethods = paymentMethods.filter(pm => pm.type === 'card');
   const otherPaymentMethods = paymentMethods.filter(pm => pm.type !== 'card');
 
   return (
     <div className="space-y-6">
+      {/* Customer Info */}
+      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <p className="text-blue-800 text-sm">
+          <strong>Customer ID:</strong>
+          {' '}
+          {customerId}
+        </p>
+      </div>
+
       {/* Card Payment Methods */}
       {cardPaymentMethods.length > 0 && (
         <div className="space-y-4">

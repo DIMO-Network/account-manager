@@ -1,47 +1,33 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
 import { stripe } from '@/libs/Stripe';
 import { getBaseUrl } from '@/utils/Helpers';
 
 export async function POST(request: NextRequest) {
   try {
-    const { serialNumber, userEmail, priceId } = await request.json();
+    const { serialNumber, priceId } = await request.json();
 
-    if (!serialNumber || !userEmail || !priceId) {
+    if (!serialNumber || !priceId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 },
       );
     }
 
-    // Create or get customer
-    let customer;
-    const existingCustomers = await stripe.customers.search({
-      query: `email:'${userEmail}'`,
-      limit: 1,
-    });
+    // Get or create customer using the server action
+    const customerResult = await getOrCreateStripeCustomer();
 
-    if (existingCustomers.data.length > 0) {
-      customer = existingCustomers.data[0];
-    } else {
-      customer = await stripe.customers.create({
-        email: userEmail,
-        metadata: {
-          device_serial: serialNumber,
-        },
-      });
-    }
-
-    if (!customer) {
+    if (!customerResult.success || !customerResult.customerId) {
       return NextResponse.json(
-        { error: 'Customer not found or created' },
+        { error: customerResult.error || 'Failed to get customer' },
         { status: 400 },
       );
     }
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
-      customer: customer.id,
+      customer: customerResult.customerId,
       payment_method_types: ['card'],
       line_items: [
         {

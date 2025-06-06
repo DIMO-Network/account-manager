@@ -1,9 +1,9 @@
 import type { NextFetchEvent, NextRequest } from 'next/server';
-import arcjet from '@/libs/Arcjet';
 import { detectBot } from '@arcjet/next';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
+import arcjet from '@/libs/Arcjet';
 import { routing } from './libs/i18nRouting';
 
 const handleI18nRouting = createMiddleware(routing);
@@ -16,6 +16,12 @@ const isProtectedRoute = createRouteMatcher([
 const isAuthPage = createRouteMatcher([
   '/sign-in(.*)',
   '/:locale/sign-in(.*)',
+]);
+
+const isProtectedApiRoute = createRouteMatcher([
+  '/api/stripe/customer',
+  '/api/payment-methods',
+  '/api/subscriptions/(.*)',
 ]);
 
 // Improve security with Arcjet
@@ -48,12 +54,20 @@ export default async function middleware(
 
   // Clerk keyless mode doesn't work with i18n, this is why we need to run the middleware conditionally
   if (
-    isAuthPage(request) || isProtectedRoute(request)
+    isAuthPage(request)
+    || isProtectedRoute(request)
+    || isProtectedApiRoute(request)
   ) {
     return clerkMiddleware(async (auth, req) => {
+      // Protect API routes
+      if (isProtectedApiRoute(req)) {
+        await auth.protect();
+        return NextResponse.next();
+      }
+
+      // Protect dashboard routes
       if (isProtectedRoute(req)) {
         const locale = req.nextUrl.pathname.match(/(\/.*)\/dashboard/)?.at(1) ?? '';
-
         const signInUrl = new URL(`${locale}/sign-in`, req.url);
 
         await auth.protect({
@@ -70,7 +84,5 @@ export default async function middleware(
 
 export const config = {
   // Match all pathnames except for
-  // - … if they start with `/api`, `/trpc`, `/_next` or `/_vercel`
-  // - … the ones containing a dot (e.g. `favicon.ico`)
-  matcher: '/((?!api|_next|_vercel|monitoring|.*\\..*).*)',
+  matcher: '/((?!_next|_vercel|monitoring|.*\\..*).*)',
 };
