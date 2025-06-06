@@ -24,16 +24,17 @@ const isProtectedApiRoute = createRouteMatcher([
   '/api/subscriptions/(.*)',
 ]);
 
+// ADD THIS: Match ALL API routes to exclude them from i18n
+const isApiRoute = createRouteMatcher(['/api/(.*)']);
+
 // Improve security with Arcjet
 const aj = arcjet.withRule(
   detectBot({
     mode: 'LIVE',
-    // Block all bots except the following
     allow: [
-      // See https://docs.arcjet.com/bot-protection/identifying-bots
-      'CATEGORY:SEARCH_ENGINE', // Allow search engines
-      'CATEGORY:PREVIEW', // Allow preview links to show OG images
-      'CATEGORY:MONITOR', // Allow uptime monitoring services
+      'CATEGORY:SEARCH_ENGINE',
+      'CATEGORY:PREVIEW',
+      'CATEGORY:MONITOR',
     ],
   }),
 );
@@ -43,7 +44,6 @@ export default async function middleware(
   event: NextFetchEvent,
 ) {
   // Verify the request with Arcjet
-  // Use `process.env` instead of Env to reduce bundle size in middleware
   if (process.env.ARCJET_KEY) {
     const decision = await aj.protect(request);
 
@@ -52,19 +52,26 @@ export default async function middleware(
     }
   }
 
+  // Handle API routes FIRST - don't apply i18n to them
+  if (isApiRoute(request)) {
+    // Only apply Clerk protection to specific API routes
+    if (isProtectedApiRoute(request)) {
+      return clerkMiddleware(async (auth) => {
+        await auth.protect();
+        return NextResponse.next();
+      })(request, event);
+    }
+
+    // For unprotected API routes, just continue without i18n
+    return NextResponse.next();
+  }
+
   // Clerk keyless mode doesn't work with i18n, this is why we need to run the middleware conditionally
   if (
     isAuthPage(request)
     || isProtectedRoute(request)
-    || isProtectedApiRoute(request)
   ) {
     return clerkMiddleware(async (auth, req) => {
-      // Protect API routes
-      if (isProtectedApiRoute(req)) {
-        await auth.protect();
-        return NextResponse.next();
-      }
-
       // Protect dashboard routes
       if (isProtectedRoute(req)) {
         const locale = req.nextUrl.pathname.match(/(\/.*)\/dashboard/)?.at(1) ?? '';
@@ -79,6 +86,7 @@ export default async function middleware(
     })(request, event);
   }
 
+  // Apply i18n routing to non-API routes
   return handleI18nRouting(request);
 }
 

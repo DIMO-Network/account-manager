@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
-import { logger } from '@/libs/Logger';
 import { clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { logger } from '@/libs/Logger';
 
 export async function POST(request: NextRequest) {
   try {
