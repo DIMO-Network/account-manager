@@ -1,8 +1,8 @@
-import { LocaleSwitcher } from '@/components/LocaleSwitcher';
-import { BaseTemplate } from '@/templates/BaseTemplate';
 import { SignOutButton } from '@clerk/nextjs';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
+import { LocaleSwitcher } from '@/components/LocaleSwitcher';
+import { BaseTemplate } from '@/templates/BaseTemplate';
 
 export default async function DashboardLayout(props: {
   children: React.ReactNode;
@@ -25,6 +25,14 @@ export default async function DashboardLayout(props: {
               className="border-none text-gray-700 hover:text-gray-900"
             >
               {t('dashboard_link')}
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/dashboard/payment-methods/"
+              className="border-none text-gray-700 hover:text-gray-900"
+            >
+              {t('payment_methods_link')}
             </Link>
           </li>
           <li>

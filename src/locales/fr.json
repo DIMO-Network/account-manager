@@ -71,5 +71,11 @@
     "dashboard_link": "Tableau de bord",
     "user_profile_link": "Gérer votre compte",
     "sign_out": "Se déconnecter"
+  },
+  "PaymentMethods": {
+    "meta_title": "Payment Methods",
+    "meta_description": "Manage your saved payment methods and billing information.",
+    "title": "Payment Methods",
+    "description": "Manage your saved payment methods for subscriptions and billing."
   }
 }

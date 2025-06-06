@@ -69,10 +69,17 @@
   },
   "DashboardLayout": {
     "dashboard_link": "Dashboard",
+    "payment_methods_link": "Payment Methods",
     "user_profile_link": "Manage your account",
     "sign_out": "Sign out"
   },
   "VehicleDetail": {
     "meta_title": "Vehicle Details"
+  },
+  "PaymentMethods": {
+    "meta_title": "Payment Methods",
+    "meta_description": "Manage your saved payment methods and billing information.",
+    "title": "Payment Methods",
+    "description": "Manage your saved payment methods for subscriptions and billing."
   }
 }
