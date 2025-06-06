@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivateButton } from '@/components/subscription/ActivateButton';
 import { SubscriptionStatusCard } from '@/components/subscription/SubscriptionStatusCard';
+import { useCancellationSuccess } from '@/hooks/useCancellationSuccess';
 import { useCheckoutSuccess } from '@/hooks/useCheckoutSuccess';
 import { useSubscriptionActions } from '@/hooks/useSubscriptionActions';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
@@ -21,8 +22,14 @@ export const DeviceSubscriptionStatus = ({
   const { subscriptionData, loading, error, checkStatus } = useSubscriptionStatus(serialNumber);
   const { activating, canceling, error: actionError, activateSubscription, cancelSubscription } = useSubscriptionActions();
   const { showSuccessState, serialFromCheckout, clearSuccessState } = useCheckoutSuccess();
+  const {
+    showCancellationSuccess,
+    canceledSerial,
+    initiateCancellation,
+    clearCancellationSuccess,
+  } = useCancellationSuccess();
+
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [justCanceled, setJustCanceled] = useState(false);
 
   useEffect(() => {
     if (subscriptionData?.hasActiveSubscription && showSuccessState && serialFromCheckout === serialNumber) {
@@ -30,11 +37,12 @@ export const DeviceSubscriptionStatus = ({
     }
   }, [subscriptionData?.hasActiveSubscription, showSuccessState, serialFromCheckout, serialNumber, clearSuccessState]);
 
+  // Clear cancellation success when subscription becomes active (user activated a new one)
   useEffect(() => {
-    if (justCanceled && !subscriptionData?.hasActiveSubscription) {
-      setJustCanceled(false);
+    if (subscriptionData?.hasActiveSubscription && showCancellationSuccess && canceledSerial === serialNumber) {
+      clearCancellationSuccess();
     }
-  }, [justCanceled, subscriptionData?.hasActiveSubscription]);
+  }, [subscriptionData?.hasActiveSubscription, showCancellationSuccess, canceledSerial, serialNumber, clearCancellationSuccess]);
 
   const handleRefresh = useCallback(() => {
     checkStatus(true);
@@ -50,15 +58,16 @@ export const DeviceSubscriptionStatus = ({
 
   const handleCancelConfirm = useCallback(async () => {
     if (subscriptionData?.subscription?.id) {
-      setJustCanceled(true);
+      initiateCancellation(serialNumber);
       await cancelSubscription(subscriptionData.subscription.id);
       setShowCancelConfirm(false);
 
+      // Refresh status after a short delay to ensure Stripe has processed the cancellation
       setTimeout(() => {
         checkStatus(true);
       }, 1000);
     }
-  }, [cancelSubscription, subscriptionData?.subscription?.id, checkStatus]);
+  }, [cancelSubscription, subscriptionData?.subscription?.id, checkStatus, serialNumber, initiateCancellation]);
 
   const handleCancelCancel = useCallback(() => {
     setShowCancelConfirm(false);
@@ -68,7 +77,10 @@ export const DeviceSubscriptionStatus = ({
     && serialFromCheckout === serialNumber
     && !subscriptionData?.hasActiveSubscription;
 
-  const shouldShowCancellationSuccess = justCanceled && !subscriptionData?.hasActiveSubscription && !canceling;
+  const shouldShowCancellationSuccess = showCancellationSuccess
+    && canceledSerial === serialNumber
+    && !subscriptionData?.hasActiveSubscription
+    && !canceling;
 
   if (loading) {
     return (
@@ -97,7 +109,6 @@ export const DeviceSubscriptionStatus = ({
           </div>
         )}
 
-        {/* Cancel Confirmation */}
         {showCancelConfirm && (
           <div className="p-3 bg-red-50 border border-red-200 rounded">
             <p className="text-red-800 text-xs font-medium mb-2">
@@ -126,7 +137,6 @@ export const DeviceSubscriptionStatus = ({
           </div>
         )}
 
-        {/* Cancellation Success Message */}
         {shouldShowCancellationSuccess && (
           <div className="p-2 bg-orange-50 border border-orange-200 rounded text-xs">
             <div className="flex items-center justify-between">
@@ -137,12 +147,12 @@ export const DeviceSubscriptionStatus = ({
                 </span>
               </div>
               <button
-                onClick={handleRefresh}
+                onClick={clearCancellationSuccess}
                 className="text-orange-600 hover:text-orange-800 text-xs"
                 type="button"
-                title="Refresh status"
+                title="Clear message"
               >
-                ↻
+                ✕
               </button>
             </div>
             <p className="text-orange-700 mt-1">
@@ -151,7 +161,6 @@ export const DeviceSubscriptionStatus = ({
           </div>
         )}
 
-        {/* Normal status display when not showing confirmation or cancellation success */}
         {!showCancelConfirm && !shouldShowCancellationSuccess && (
           <>
             {shouldShowOptimisticSuccess
@@ -192,7 +201,6 @@ export const DeviceSubscriptionStatus = ({
           </>
         )}
 
-        {/* Show Activate button when no active subscription and not in other states */}
         {!hasActiveSubscription && !shouldShowOptimisticSuccess && !activating && !showCancelConfirm && (
           <ActivateButton
             onActivateAction={handleActivate}
@@ -214,7 +222,7 @@ export const DeviceSubscriptionStatus = ({
     );
   }
 
-  // Full-size version
+  // Full-size version follows the same pattern...
   return (
     <div className="p-4 border rounded-lg">
       <h3 className="text-lg font-semibold mb-3">Device Subscription</h3>
@@ -236,7 +244,6 @@ export const DeviceSubscriptionStatus = ({
           {serialNumber}
         </div>
 
-        {/* Cancel Confirmation */}
         {showCancelConfirm && (
           <div className="p-4 bg-red-50 border border-red-200 rounded">
             <h4 className="text-red-800 font-medium mb-2">
@@ -265,7 +272,6 @@ export const DeviceSubscriptionStatus = ({
           </div>
         )}
 
-        {/* Cancellation Success Message */}
         {shouldShowCancellationSuccess && (
           <div className="p-4 bg-orange-50 border border-orange-200 rounded">
             <div className="flex items-center justify-between">
@@ -281,18 +287,17 @@ export const DeviceSubscriptionStatus = ({
                 </div>
               </div>
               <button
-                onClick={handleRefresh}
+                onClick={clearCancellationSuccess}
                 className="text-orange-600 hover:text-orange-800 text-sm"
                 type="button"
-                title="Refresh status"
+                title="Clear message"
               >
-                ↻ Refresh
+                ✕
               </button>
             </div>
           </div>
         )}
 
-        {/* Normal status display when not showing confirmation or cancellation success */}
         {!showCancelConfirm && !shouldShowCancellationSuccess && (
           <>
             {shouldShowOptimisticSuccess
@@ -335,7 +340,6 @@ export const DeviceSubscriptionStatus = ({
           </>
         )}
 
-        {/* Show Activate button when no active subscription and not in other states */}
         {!hasActiveSubscription && !shouldShowOptimisticSuccess && !activating && !showCancelConfirm && (
           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
             <div className="flex items-center justify-between">
