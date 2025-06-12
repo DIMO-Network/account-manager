@@ -1,3 +1,24 @@
+# 1.0.0 (2025-06-12)
+
+
+### Bug Fixes
+
+* exclude i18n routing to API routes ([4ec7659](https://github.com/jaggedbytes/by-road/commit/4ec76594dd582a68e7291f7bc8ae4dc3d22d06b0))
+* redirect user to dashboard if already signed in ([24cdc6e](https://github.com/jaggedbytes/by-road/commit/24cdc6ee4223596d933499151e8185f6ddcd0f01))
+
+
+### Features
+
+* add activation workflow to owned vehicles ([7f2e3cd](https://github.com/jaggedbytes/by-road/commit/7f2e3cda723098de75064c4d11cfce4fe006cd04))
+* add cancellation workflow for active subscriptions ([cfcfc67](https://github.com/jaggedbytes/by-road/commit/cfcfc67c190372f7f46eda4c43637e58d259bef1))
+* add Login With DIMO component to sign in ([fd9a592](https://github.com/jaggedbytes/by-road/commit/fd9a5921b34a2f3d5a8b8075bb5efa1e43859cec))
+* add Vehicle Details page ([daa5d3c](https://github.com/jaggedbytes/by-road/commit/daa5d3c927008bd0967afc85207a5c834e0646cd))
+* create payment method route ([d8ae6d9](https://github.com/jaggedbytes/by-road/commit/d8ae6d95d8030547cc6c9c555b3a205878f4762e))
+* get customer ID from Stripe using user's email ([d382e9d](https://github.com/jaggedbytes/by-road/commit/d382e9d5ff84357889bcd5f0b79beb8773e3361d))
+* replace subscription polling with optimistic success state ([434873a](https://github.com/jaggedbytes/by-road/commit/434873ac0268aaa3822c42570e42e46ea0a07595))
+* show list of owned vehicles after login ([e9299bc](https://github.com/jaggedbytes/by-road/commit/e9299bcaf403fad4bec36b90673d8ce173299e30))
+* use saved payment method for returning customers ([1ea0197](https://github.com/jaggedbytes/by-road/commit/1ea019746b3ac9c8f6bcafc7facb152c72cf1567))
+
 ## [3.67.2](https://github.com/ixartz/Next-js-Boilerplate/compare/v3.67.1...v3.67.2) (2025-05-09)
 
 
