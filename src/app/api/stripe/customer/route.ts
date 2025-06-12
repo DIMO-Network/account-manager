@@ -1,9 +1,8 @@
-import type { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const { userId } = await auth();
 

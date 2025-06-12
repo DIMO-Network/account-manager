@@ -3,20 +3,20 @@
 type SubscriptionStatusCardProps = {
   hasActiveSubscription: boolean;
   subscription?: any;
-  isPolling: boolean;
+  isBusy: boolean;
+  busyState?: 'loading' | 'activating' | 'canceling';
   onRefreshAction: () => void;
   onCancelAction?: () => void;
-  canceling?: boolean;
   compact?: boolean;
 };
 
 export const SubscriptionStatusCard = ({
   hasActiveSubscription,
   subscription,
-  isPolling,
+  isBusy,
+  busyState = 'loading',
   onRefreshAction,
   onCancelAction,
-  canceling = false,
   compact = false,
 }: SubscriptionStatusCardProps) => {
   const cardClasses = compact
@@ -40,19 +40,19 @@ export const SubscriptionStatusCard = ({
               className={`${compact ? 'text-xs' : 'text-sm'} text-blue-600 hover:text-blue-800`}
               type="button"
               title="Refresh status"
-              disabled={canceling}
+              disabled={isBusy}
             >
               ↻
             </button>
             {onCancelAction && (
               <button
                 onClick={onCancelAction}
-                disabled={canceling}
+                disabled={isBusy}
                 className={`${compact ? 'text-xs px-2 py-1' : 'text-sm px-3 py-1'} text-red-600 hover:text-red-800 hover:bg-red-50 border border-red-300 rounded transition-colors disabled:opacity-50`}
                 type="button"
                 title="Cancel subscription"
               >
-                {canceling ? 'Canceling...' : 'Cancel'}
+                {busyState === 'canceling' ? 'Canceling...' : 'Cancel'}
               </button>
             )}
           </div>
@@ -61,28 +61,42 @@ export const SubscriptionStatusCard = ({
     );
   }
 
-  if (isPolling) {
+  if (isBusy) {
+    const messages = {
+      loading: 'Checking status...',
+      activating: 'Activating subscription...',
+      canceling: 'Canceling subscription...',
+    };
+
+    const descriptions = {
+      loading: 'Please wait while we check your subscription.',
+      activating: 'Payment successful! This usually takes a few seconds...',
+      canceling: 'Please wait while we process the cancellation.',
+    };
+
     return (
       <div className={`${cardClasses} bg-blue-50 border-blue-200`}>
-        <div className="flex items-center">
-          <div className="animate-spin rounded-full h-3 w-3 border border-blue-500 border-t-transparent mr-2"></div>
-          <div>
-            <span className="text-blue-800 font-medium">Activating subscription...</span>
-            {!compact && (
-              <p className={`${compact ? 'text-xs' : 'text-sm'} text-blue-700 mt-1`}>
-                Payment successful! This usually takes 10-30 seconds...
-              </p>
-            )}
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center">
+            <div className="animate-spin rounded-full h-3 w-3 border border-blue-500 border-t-transparent mr-2"></div>
+            <div>
+              <span className="text-blue-800 font-medium">{messages[busyState]}</span>
+              {!compact && (
+                <p className={`${compact ? 'text-xs' : 'text-sm'} text-blue-700 mt-1`}>
+                  {descriptions[busyState]}
+                </p>
+              )}
+            </div>
           </div>
+          <button
+            onClick={onRefreshAction}
+            className={`${compact ? 'text-xs' : 'text-sm'} text-blue-600 hover:text-blue-800`}
+            type="button"
+            title="Check now"
+          >
+            ↻
+          </button>
         </div>
-        <button
-          onClick={onRefreshAction}
-          className={`${compact ? 'text-xs' : 'text-sm'} text-blue-600 hover:text-blue-800`}
-          type="button"
-          title="Check now"
-        >
-          ↻
-        </button>
       </div>
     );
   }

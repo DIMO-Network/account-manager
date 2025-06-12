@@ -31,13 +31,18 @@ export const DeviceSubscriptionStatus = ({
 
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
+  // Consolidate all loading states into one
+  const isBusy = loading || activating || canceling;
+
+  // Determine what type of operation we're doing for better messaging
+  const busyState = activating ? 'activating' : canceling ? 'canceling' : 'loading';
+
   useEffect(() => {
     if (subscriptionData?.hasActiveSubscription && showSuccessState && serialFromCheckout === serialNumber) {
       clearSuccessState();
     }
   }, [subscriptionData?.hasActiveSubscription, showSuccessState, serialFromCheckout, serialNumber, clearSuccessState]);
 
-  // Clear cancellation success when subscription becomes active (user activated a new one)
   useEffect(() => {
     if (subscriptionData?.hasActiveSubscription && showCancellationSuccess && canceledSerial === serialNumber) {
       clearCancellationSuccess();
@@ -61,8 +66,6 @@ export const DeviceSubscriptionStatus = ({
       initiateCancellation(serialNumber);
       await cancelSubscription(subscriptionData.subscription.id);
       setShowCancelConfirm(false);
-
-      // Refresh status after a short delay to ensure Stripe has processed the cancellation
       setTimeout(() => {
         checkStatus(true);
       }, 1000);
@@ -82,7 +85,8 @@ export const DeviceSubscriptionStatus = ({
     && !subscriptionData?.hasActiveSubscription
     && !canceling;
 
-  if (loading) {
+  // Show initial loading state
+  if (loading && !subscriptionData) {
     return (
       <div className={compact ? 'text-xs text-gray-500' : 'p-4 border rounded-lg'}>
         {!compact && <h3 className="text-lg font-semibold">Device Subscription</h3>}
@@ -103,7 +107,6 @@ export const DeviceSubscriptionStatus = ({
           <div className="p-2 bg-red-50 border border-red-200 rounded text-xs">
             <span className="text-red-800">
               Error:
-              {' '}
               {displayError}
             </span>
           </div>
@@ -111,16 +114,14 @@ export const DeviceSubscriptionStatus = ({
 
         {showCancelConfirm && (
           <div className="p-3 bg-red-50 border border-red-200 rounded">
-            <p className="text-red-800 text-xs font-medium mb-2">
-              Cancel your subscription?
-            </p>
+            <p className="text-red-800 text-xs font-medium mb-2">Cancel your subscription?</p>
             <p className="text-red-700 text-xs mb-3">
               This action cannot be undone. You'll lose access to premium features.
             </p>
             <div className="flex gap-2">
               <button
                 onClick={handleCancelConfirm}
-                disabled={canceling}
+                disabled={isBusy}
                 className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
                 type="button"
               >
@@ -142,9 +143,7 @@ export const DeviceSubscriptionStatus = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
-                <span className="text-orange-800 font-medium">
-                  ✅ Subscription Canceled
-                </span>
+                <span className="text-orange-800 font-medium">✅ Subscription Canceled</span>
               </div>
               <button
                 onClick={clearCancellationSuccess}
@@ -155,9 +154,7 @@ export const DeviceSubscriptionStatus = ({
                 ✕
               </button>
             </div>
-            <p className="text-orange-700 mt-1">
-              Your subscription has been canceled successfully.
-            </p>
+            <p className="text-orange-700 mt-1">Your subscription has been canceled successfully.</p>
           </div>
         )}
 
@@ -169,9 +166,7 @@ export const DeviceSubscriptionStatus = ({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                        <span className="text-green-800 font-medium">
-                          ✅ Subscription Activated!
-                        </span>
+                        <span className="text-green-800 font-medium">✅ Subscription Activated!</span>
                       </div>
                       <button
                         onClick={handleRefresh}
@@ -182,29 +177,27 @@ export const DeviceSubscriptionStatus = ({
                         ↻
                       </button>
                     </div>
-                    <p className="text-green-700 mt-1">
-                      Your R1 device subscription is now active.
-                    </p>
+                    <p className="text-green-700 mt-1">Your R1 device subscription is now active.</p>
                   </div>
                 )
               : (
                   <SubscriptionStatusCard
                     hasActiveSubscription={hasActiveSubscription}
                     subscription={subscriptionData?.subscription}
-                    isPolling={activating}
+                    isBusy={isBusy}
+                    busyState={busyState}
                     onRefreshAction={handleRefresh}
                     onCancelAction={hasActiveSubscription ? handleCancelClick : undefined}
-                    canceling={canceling}
                     compact={true}
                   />
                 )}
           </>
         )}
 
-        {!hasActiveSubscription && !shouldShowOptimisticSuccess && !activating && !showCancelConfirm && (
+        {!hasActiveSubscription && !shouldShowOptimisticSuccess && !isBusy && !showCancelConfirm && (
           <ActivateButton
             onActivateAction={handleActivate}
-            activating={activating}
+            activating={isBusy}
             compact={true}
           />
         )}
@@ -213,7 +206,6 @@ export const DeviceSubscriptionStatus = ({
           <div className="p-2 bg-red-50 border border-red-200 rounded text-xs">
             <span className="text-red-800">
               Error:
-              {' '}
               {subscriptionData.error}
             </span>
           </div>
@@ -222,7 +214,6 @@ export const DeviceSubscriptionStatus = ({
     );
   }
 
-  // Full-size version follows the same pattern...
   return (
     <div className="p-4 border rounded-lg">
       <h3 className="text-lg font-semibold mb-3">Device Subscription</h3>
@@ -330,10 +321,10 @@ export const DeviceSubscriptionStatus = ({
                   <SubscriptionStatusCard
                     hasActiveSubscription={hasActiveSubscription}
                     subscription={subscriptionData?.subscription}
-                    isPolling={activating}
+                    isBusy={activating}
                     onRefreshAction={handleRefresh}
                     onCancelAction={hasActiveSubscription ? handleCancelClick : undefined}
-                    canceling={canceling}
+                    busyState={busyState}
                     compact={false}
                   />
                 )}

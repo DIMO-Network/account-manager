@@ -6,11 +6,12 @@ export const useCheckoutSuccess = () => {
   const router = useRouter();
 
   const sessionId = searchParams.get('session_id');
+  const subscriptionId = searchParams.get('subscription_id');
   const subscriptionStatus = searchParams.get('subscription');
   const serialFromUrl = searchParams.get('serial');
 
   const isReturningFromSuccessfulCheckout = Boolean(
-    sessionId
+    (sessionId || subscriptionId)
     && subscriptionStatus === 'success'
     && serialFromUrl,
   );
@@ -19,7 +20,7 @@ export const useCheckoutSuccess = () => {
   const persistedSerialRef = useRef<string | null>(serialFromUrl);
   const [manuallyCleared, setManuallyCleared] = useState(false);
 
-  // Update refs if we see success (no setState in useEffect)
+  // Update refs if we see success
   if (isReturningFromSuccessfulCheckout) {
     hasSeenSuccessRef.current = true;
     persistedSerialRef.current = serialFromUrl;
@@ -34,6 +35,7 @@ export const useCheckoutSuccess = () => {
     const timer = setTimeout(() => {
       const url = new URL(window.location.href);
       url.searchParams.delete('session_id');
+      url.searchParams.delete('subscription_id');
       url.searchParams.delete('subscription');
       url.searchParams.delete('serial');
       router.replace(url.pathname + url.search);
@@ -45,7 +47,9 @@ export const useCheckoutSuccess = () => {
   return {
     showSuccessState: hasSeenSuccessRef.current && !manuallyCleared,
     sessionId,
+    subscriptionId,
     serialFromCheckout: persistedSerialRef.current,
     clearSuccessState: () => setManuallyCleared(true),
+    shouldTriggerRefresh: isReturningFromSuccessfulCheckout,
   };
 };

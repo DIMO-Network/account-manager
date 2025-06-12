@@ -22,20 +22,26 @@ export const useSubscriptionActions = () => {
         try {
           const result = await createCheckoutAction(
             serialNumber,
-            userEmail,
             'price_1RUVNj4dLDxx1E1eF1HR4mRZ',
           );
 
-          if (result.success && result.data.url) {
+          // Check if the result has a 'data' property (success case)
+          if ('data' in result && result.data?.url) {
+            // Always redirect to either success page or checkout
             window.location.href = result.data.url;
             resolve({ success: true });
+          } else if ('error' in result) {
+            // Handle error case
+            setError(result.error || 'Failed to create subscription');
+            resolve({ success: false });
           } else {
-            setError(result.error || 'Failed to create checkout session');
+            // Handle unexpected case where data exists but no URL
+            setError('No redirect URL provided');
             resolve({ success: false });
           }
         } catch (err) {
-          console.error('Error creating checkout session:', err);
-          setError(err instanceof Error ? err.message : 'Failed to create checkout session');
+          console.error('Error activating subscription:', err);
+          setError(err instanceof Error ? err.message : 'Failed to activate subscription');
           resolve({ success: false });
         }
       });
@@ -53,7 +59,9 @@ export const useSubscriptionActions = () => {
           if (result.success) {
             resolve({ success: true });
           } else {
-            setError(result.error || 'Failed to cancel subscription');
+            // Check if result has error property and use it
+            const errorMessage = 'error' in result ? result.error : 'Failed to cancel subscription';
+            setError(errorMessage || 'Failed to cancel subscription');
             resolve({ success: false });
           }
         } catch (err) {
