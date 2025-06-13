@@ -1,9 +1,9 @@
 'use client';
 
-import { DimoAuthWrapper } from '@/components/auth/DimoAuthWrapper';
 import { useDimoAuthState } from '@dimo-network/login-with-dimo';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { DimoAuthWrapper } from '@/components/auth/DimoAuthWrapper';
 
 function DimoCallback() {
   const router = useRouter();

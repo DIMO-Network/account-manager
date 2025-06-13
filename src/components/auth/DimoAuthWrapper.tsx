@@ -1,8 +1,8 @@
 'use client';
 
-import { initializeDimo } from '@/libs/DimoConfig';
 import { DimoAuthProvider } from '@dimo-network/login-with-dimo';
 import { useEffect, useState } from 'react';
+import { initializeDimo } from '@/libs/DimoConfig';
 
 type DimoAuthWrapperProps = {
   children: React.ReactNode;
