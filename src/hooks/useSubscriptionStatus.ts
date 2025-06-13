@@ -1,6 +1,5 @@
 import type { SubscriptionData } from '@/types/subscription';
 import { useCallback, useEffect, useState, useTransition } from 'react';
-import { checkSubscriptionAction } from '@/app/actions/subscriptionActions';
 
 export const useSubscriptionStatus = (serialNumber: string) => {
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
@@ -8,37 +7,23 @@ export const useSubscriptionStatus = (serialNumber: string) => {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const checkStatus = useCallback(async (forceRefresh = false) => {
+  const checkStatus = useCallback(async () => {
     startTransition(async () => {
       try {
         setError(null);
 
-        if (forceRefresh) {
-          const result = await checkSubscriptionAction(serialNumber);
+        const url = `/api/subscriptions/check?serial=${serialNumber}`;
+        const response = await fetch(url);
 
-          if (result.success && result.data) {
-            setSubscriptionData(result.data);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-            if (result.data.error) {
-              setError(result.data.error);
-            }
-          } else {
-            setError(result.error ?? 'Unknown error occurred');
-          }
-        } else {
-          const url = `/api/subscriptions/check?serial=${serialNumber}`;
-          const response = await fetch(url);
+        const data: SubscriptionData = await response.json();
+        setSubscriptionData(data);
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data: SubscriptionData = await response.json();
-          setSubscriptionData(data);
-
-          if (data.error) {
-            setError(data.error);
-          }
+        if (data.error) {
+          setError(data.error);
         }
       } catch (fetchError) {
         console.error('Error checking subscription:', fetchError);
