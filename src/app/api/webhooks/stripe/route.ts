@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const event = stripe.webhooks.constructEvent(
+    const event = stripe().webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!,
@@ -58,7 +58,7 @@ async function handleCheckoutCompleted(session: any) {
     return;
   }
 
-  const subscription = await stripe.subscriptions.retrieve(session.subscription);
+  const subscription = await stripe().subscriptions.retrieve(session.subscription);
 
   await db.insert(deviceSubscriptionSchema).values({
     serialNumber,
@@ -110,7 +110,7 @@ async function handleSubscriptionDeleted(subscription: any) {
 }
 
 async function handlePaymentSucceeded(invoice: any) {
-  const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+  const subscription = await stripe().subscriptions.retrieve(invoice.subscription);
   const serialNumber = subscription.metadata?.serial_number;
   if (!serialNumber) {
     return;
@@ -126,7 +126,7 @@ async function handlePaymentSucceeded(invoice: any) {
 }
 
 async function handlePaymentFailed(invoice: any) {
-  const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+  const subscription = await stripe().subscriptions.retrieve(invoice.subscription);
   const serialNumber = subscription.metadata?.serial_number;
   if (!serialNumber) {
     return;

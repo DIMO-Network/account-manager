@@ -27,7 +27,7 @@ export async function getOrCreateStripeCustomer(): Promise<{
     if (existingCustomerId) {
       // Verify the customer still exists in Stripe
       try {
-        await stripe.customers.retrieve(existingCustomerId);
+        await stripe().customers.retrieve(existingCustomerId);
         return { success: true, customerId: existingCustomerId };
       } catch (error) {
         console.warn('Stored customer ID not found in Stripe, will create new one:', error);
@@ -35,7 +35,7 @@ export async function getOrCreateStripeCustomer(): Promise<{
     }
 
     // Search for existing customer by email
-    const existingCustomers = await stripe.customers.search({
+    const existingCustomers = await stripe().customers.search({
       query: `email:'${email}'`,
       limit: 1,
     });
@@ -47,7 +47,7 @@ export async function getOrCreateStripeCustomer(): Promise<{
       customerId = existingCustomers.data[0]!.id;
     } else {
       // Create new customer
-      const customer = await stripe.customers.create({
+      const customer = await stripe().customers.create({
         email,
         name: user.fullName || undefined,
         metadata: {

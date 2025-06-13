@@ -18,7 +18,7 @@ async function createDirectSubscription(
   serialNumber: string,
 ): Promise<ActionResult<{ subscriptionId: string; url: string; type: 'direct_subscription' }> | null> {
   try {
-    const subscription = await stripe.subscriptions.create({
+    const subscription = await stripe().subscriptions.create({
       customer: customerId,
       items: [{ price: priceId }],
       payment_behavior: 'allow_incomplete',
@@ -53,19 +53,19 @@ async function createDirectSubscription(
       const paymentIntent = invoice?.payment_intent;
 
       if (paymentIntent?.status === 'requires_action' || paymentIntent?.status === 'requires_payment_method') {
-        await stripe.subscriptions.cancel(subscription.id);
+        await stripe().subscriptions.cancel(subscription.id);
         return null;
       }
 
       // Try manual payment
       if (invoice?.id) {
         try {
-          const paidInvoice = await stripe.invoices.pay(invoice.id, {
+          const paidInvoice = await stripe().invoices.pay(invoice.id, {
             payment_method: paymentMethodId,
           });
 
           if (paidInvoice.status === 'paid') {
-            const updatedSub = await stripe.subscriptions.retrieve(subscription.id);
+            const updatedSub = await stripe().subscriptions.retrieve(subscription.id);
             if (updatedSub.status === 'active') {
               revalidatePath('/dashboard');
               revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
@@ -85,7 +85,7 @@ async function createDirectSubscription(
         }
       }
 
-      await stripe.subscriptions.cancel(subscription.id);
+      await stripe().subscriptions.cancel(subscription.id);
       return null;
     }
 
@@ -127,7 +127,7 @@ async function createCheckoutSession(
     sessionParams.payment_intent_data = { setup_future_usage: 'off_session' };
   }
 
-  const session = await stripe.checkout.sessions.create(sessionParams);
+  const session = await stripe().checkout.sessions.create(sessionParams);
 
   return {
     success: true,
@@ -156,13 +156,13 @@ export async function createCheckoutAction(
     const customerId = customerResult.customerId;
 
     // Use Stripe's actual PaymentMethod list response
-    const paymentMethods = await stripe.paymentMethods.list({
+    const paymentMethods = await stripe().paymentMethods.list({
       customer: customerId,
       type: 'card',
     });
 
     // Use Stripe's Customer type directly
-    const customer = await stripe.customers.retrieve(customerId);
+    const customer = await stripe().customers.retrieve(customerId);
     let hasDefaultPaymentMethod: string | undefined;
 
     if (customer && !customer.deleted) {

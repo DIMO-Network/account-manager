@@ -14,7 +14,7 @@ export class SubscriptionService {
   static async checkDeviceSubscription(serialNumber: string): Promise<SubscriptionData> {
     try {
       // Always check Stripe first for the most up-to-date status
-      const stripeSearch = await stripe.subscriptions.search({
+      const stripeSearch = await stripe().subscriptions.search({
         query: `metadata['serial_number']:'${serialNumber}'`,
         limit: 10,
       });
@@ -106,7 +106,7 @@ export class SubscriptionService {
     error?: string;
   }> {
     try {
-      const canceledSubscription = await stripe.subscriptions.cancel(subscriptionId);
+      const canceledSubscription = await stripe().subscriptions.cancel(subscriptionId);
 
       // Update local database to reflect cancellation
       if (canceledSubscription.metadata?.serial_number) {

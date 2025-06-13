@@ -26,14 +26,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch payment methods from Stripe using their official API
-    const paymentMethods = await stripe.paymentMethods.list({
+    const paymentMethods = await stripe().paymentMethods.list({
       customer: customerId,
       type: 'card',
       limit: 100, // Get all payment methods
     });
 
     // Fetch customer's default payment method
-    const customer = await stripe.customers.retrieve(customerId);
+    const customer = await stripe().customers.retrieve(customerId);
     let defaultPaymentMethodId: string | null = null;
 
     // Type guard to check if customer is not deleted
@@ -82,7 +82,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Detach payment method from customer using Stripe's official API
-    await stripe.paymentMethods.detach(paymentMethodId);
+    await stripe().paymentMethods.detach(paymentMethodId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -115,7 +115,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Update customer's default payment method using Stripe's official API
-    await stripe.customers.update(customerId, {
+    await stripe().customers.update(customerId, {
       invoice_settings: {
         default_payment_method: paymentMethodId,
       },
