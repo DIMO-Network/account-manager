@@ -1,44 +1,60 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-export const useCancellationSuccess = () => {
-  const cancellationInitiatedRef = useRef(false);
-  const cancellationSerialRef = useRef<string | null>(null);
-  const [manuallyCleared, setManuallyCleared] = useState(false);
+type CancellationState = {
+  isActive: boolean;
+  serialNumber: string | null;
+  timestamp: number | null;
+};
 
-  const showCancellationSuccess = cancellationInitiatedRef.current
-    && !manuallyCleared;
+export const useCancellationSuccess = (autoHideMs = 5000) => {
+  const [cancellationState, setCancellationState] = useState<CancellationState>({
+    isActive: false,
+    serialNumber: null,
+    timestamp: null,
+  });
 
+  const [isManuallyCleared, setIsManuallyCleared] = useState(false);
+
+  // Auto-hide the success message after the specified time
   useEffect(() => {
-    if (!showCancellationSuccess) {
+    if (!cancellationState.isActive || !cancellationState.timestamp) {
       return;
     }
 
     const timer = setTimeout(() => {
-      setManuallyCleared(true);
-    }, 5000);
+      setIsManuallyCleared(true);
+    }, autoHideMs);
 
     return () => clearTimeout(timer);
-  }, [showCancellationSuccess]);
+  }, [cancellationState.isActive, cancellationState.timestamp, autoHideMs]);
+
+  const showCancellationSuccess = cancellationState.isActive && !isManuallyCleared;
 
   const initiateCancellation = useCallback((serialNumber: string) => {
-    cancellationInitiatedRef.current = true;
-    cancellationSerialRef.current = serialNumber;
-    setManuallyCleared(false);
+    setCancellationState({
+      isActive: true,
+      serialNumber,
+      timestamp: Date.now(),
+    });
+    setIsManuallyCleared(false);
   }, []);
 
   const clearCancellationSuccess = useCallback(() => {
-    setManuallyCleared(true);
+    setIsManuallyCleared(true);
   }, []);
 
   const resetCancellationState = useCallback(() => {
-    cancellationInitiatedRef.current = false;
-    cancellationSerialRef.current = null;
-    setManuallyCleared(false);
+    setCancellationState({
+      isActive: false,
+      serialNumber: null,
+      timestamp: null,
+    });
+    setIsManuallyCleared(false);
   }, []);
 
   return {
     showCancellationSuccess,
-    canceledSerial: cancellationSerialRef.current,
+    canceledSerial: cancellationState.serialNumber,
     initiateCancellation,
     clearCancellationSuccess,
     resetCancellationState,
