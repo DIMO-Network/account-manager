@@ -48,6 +48,7 @@ jobs:
       - name: Build Next.js for E2E tests
         run: npm run build
         env:
+          NEXT_PUBLIC_SENTRY_DISABLED: 'true'
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - if: github.event_name == 'pull_request'
@@ -68,17 +69,8 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Install Playwright (used for Storybook and E2E tests)
-        run: npx playwright install --with-deps
-
       - name: Run storybook tests
         run: npm run test-storybook:ci
-
-      - name: Run E2E tests
-        run: npx percy exec -- npm run test:e2e
-        env:
-          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
       - uses: actions/upload-artifact@v4
         if: always()

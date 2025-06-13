@@ -2,7 +2,6 @@ import antfu from '@antfu/eslint-config';
 import nextPlugin from '@next/eslint-plugin-next';
 import jestDom from 'eslint-plugin-jest-dom';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
-import playwright from 'eslint-plugin-playwright';
 
 export default antfu(
   {
@@ -53,7 +52,6 @@ export default antfu(
       '**/*.spec.ts',
       '**/*.e2e.ts',
     ],
-    ...playwright.configs['flat/recommended'],
   },
   // --- Custom Rule Overrides ---
   {
