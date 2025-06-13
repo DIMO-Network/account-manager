@@ -1,4 +1,4 @@
-import { boolean, integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 
 // This file defines the structure of your database tables using the Drizzle ORM.
 
@@ -9,16 +9,6 @@ import { boolean, integer, pgTable, serial, text, timestamp } from 'drizzle-orm/
 // The generated migration file will reflect your schema changes.
 // The migration is automatically applied during the next database interaction,
 // so there's no need to run it manually or restart the Next.js server.
-
-export const counterSchema = pgTable('counter', {
-  id: serial('id').primaryKey(),
-  count: integer('count').default(0),
-  updatedAt: timestamp('updated_at', { mode: 'date' })
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
-});
 
 export const deviceSubscriptionSchema = pgTable('device_subscriptions', {
   id: serial('id').primaryKey(),
