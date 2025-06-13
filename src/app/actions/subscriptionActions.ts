@@ -7,9 +7,9 @@ import { stripe } from '@/libs/Stripe';
 import { getBaseUrl } from '@/utils/Helpers';
 import { SubscriptionService } from '@/utils/SubscriptionService';
 
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+type ActionResult<T>
+  = | { success: true; data: T }
+    | { success: false; error: string };
 
 async function createDirectSubscription(
   customerId: string,
