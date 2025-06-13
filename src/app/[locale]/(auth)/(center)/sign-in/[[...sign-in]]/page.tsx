@@ -34,7 +34,7 @@ export default async function SignInPage(props: ISignInPageProps) {
           </div>
         )}
       >
-        <SignInContent locale={locale} />
+        <SignInContent />
       </Suspense>
     </DimoAuthWrapper>
   );

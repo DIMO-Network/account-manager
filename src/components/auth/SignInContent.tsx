@@ -3,11 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { DimoSignIn } from './DimoSignIn';
 
-type SignInContentProps = {
-  locale: string;
-};
-
-export const SignInContent = ({}: SignInContentProps) => {
+export const SignInContent = () => {
   const searchParams = useSearchParams();
 
   const error = searchParams.get('error');

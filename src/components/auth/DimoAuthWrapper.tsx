@@ -12,8 +12,16 @@ export const DimoAuthWrapper = ({ children }: DimoAuthWrapperProps) => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    initializeDimo();
-    setIsInitialized(true);
+    const initialize = async () => {
+      try {
+        initializeDimo();
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize DIMO:', error);
+      }
+    };
+
+    initialize();
   }, []);
 
   if (!isInitialized) {
