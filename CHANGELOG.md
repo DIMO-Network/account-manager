@@ -5,6 +5,18 @@
 
 * fix ESLint errors in Auth components ([d1a6984](https://github.com/jaggedbytes/by-road/commit/d1a698416d0ff00de2787f18582eebc5719355ec))
 * remove checkSubscriptionAction import ([510c4c4](https://github.com/jaggedbytes/by-road/commit/510c4c4a4b3d2a4ffff421a34f89e541203a4997))
+* resolve CI build issues ([03bf00d](https://github.com/jaggedbytes/by-road/commit/03bf00dbf69e45e067fab2ee993b429bb2b9b845))
+* resolve CI build issues ([5a6a49b](https://github.com/jaggedbytes/by-road/commit/5a6a49b6080cab13ead9cfe6895259508e4c3364))
+* sort imports to fix ESLint errors ([e8a42d4](https://github.com/jaggedbytes/by-road/commit/e8a42d4276412d5ff9f264eb6b16ec7efe97dd08))
+* **stripe:** use lazy init to prevent build time errors ([645b5bc](https://github.com/jaggedbytes/by-road/commit/645b5bc26b2a78ca0e2ad66e3791955ad701bd5a))
+
+## [1.0.1](https://github.com/jaggedbytes/by-road/compare/v1.0.0...v1.0.1) (2025-06-13)
+
+
+### Bug Fixes
+
+* fix ESLint errors in Auth components ([d1a6984](https://github.com/jaggedbytes/by-road/commit/d1a698416d0ff00de2787f18582eebc5719355ec))
+* remove checkSubscriptionAction import ([510c4c4](https://github.com/jaggedbytes/by-road/commit/510c4c4a4b3d2a4ffff421a34f89e541203a4997))
 * resolve CI build issues ([5a6a49b](https://github.com/jaggedbytes/by-road/commit/5a6a49b6080cab13ead9cfe6895259508e4c3364))
 * sort imports to fix ESLint errors ([e8a42d4](https://github.com/jaggedbytes/by-road/commit/e8a42d4276412d5ff9f264eb6b16ec7efe97dd08))
 * **stripe:** use lazy init to prevent build time errors ([645b5bc](https://github.com/jaggedbytes/by-road/commit/645b5bc26b2a78ca0e2ad66e3791955ad701bd5a))
