@@ -48,8 +48,8 @@ A Next.js web application for managing device subscriptions and connected vehicl
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/jaggedbytes/by-road.git
-cd by-road
+git clone https://github.com/DIMO-Network/account-manager.git
+cd account-manager
 npm install
 ```
 
@@ -71,7 +71,7 @@ STRIPE_SECRET_KEY=your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 
 # Database
-DATABASE_URL=postgresql://postgres:password@localhost:5432/byroad
+DATABASE_URL=postgresql://postgres:password@localhost:5432/account-manager
 
 # Next.js
 NEXT_TELEMETRY_DISABLED=1
@@ -163,7 +163,7 @@ npm run build
 npm start
 ```
 
-The application is configured to work with various hosting platforms including Vercel, Netlify, and traditional hosting providers.
+The application is configured to work with various hosting platforms including Railway, Sevalla, Vercel, and traditional hosting providers.
 
 ### 🤝 Contributing
 1. Fork the repository
