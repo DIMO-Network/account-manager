@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/DIMO-Network/account-manager/compare/v1.2.0...v1.2.1) (2025-06-18)
+
+
+### Bug Fixes
+
+* remove payment_intent_data from subscription checkout sessions ([#13](https://github.com/DIMO-Network/account-manager/issues/13)) ([3c7e046](https://github.com/DIMO-Network/account-manager/commit/3c7e04655e9137573f9164b299730265aa7827a5))
+
 # [1.2.0](https://github.com/DIMO-Network/account-manager/compare/v1.1.0...v1.2.0) (2025-06-18)
 
 
