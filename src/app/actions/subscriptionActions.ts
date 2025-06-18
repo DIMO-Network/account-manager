@@ -123,10 +123,6 @@ async function createCheckoutSession(
     billing_address_collection: isNewCustomer ? 'required' : 'auto',
   };
 
-  if (isNewCustomer) {
-    sessionParams.payment_intent_data = { setup_future_usage: 'off_session' };
-  }
-
   const session = await stripe().checkout.sessions.create(sessionParams);
 
   return {
