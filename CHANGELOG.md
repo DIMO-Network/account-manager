@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/DIMO-Network/account-manager/compare/v1.1.0...v1.2.0) (2025-06-18)
+
+
+### Features
+
+* implement server-side DIMO OAuth flow with redirect mode ([#11](https://github.com/DIMO-Network/account-manager/issues/11)) ([a54de54](https://github.com/DIMO-Network/account-manager/commit/a54de5426efcb65d9acccb81edab2c8f8d6d12a1))
+
 # [1.1.0](https://github.com/jaggedbytes/by-road/compare/v1.0.0...v1.1.0) (2025-06-16)
 
 
