@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/DIMO-Network/account-manager/compare/v1.2.1...v1.2.2) (2025-06-18)
+
+
+### Bug Fixes
+
+* use correct base URL in DIMO authentication callback ([0fdc579](https://github.com/DIMO-Network/account-manager/commit/0fdc579ec917a41f0cb04a02a76289b912180ef0))
+
 ## [1.2.1](https://github.com/DIMO-Network/account-manager/compare/v1.2.0...v1.2.1) (2025-06-18)
 
 
