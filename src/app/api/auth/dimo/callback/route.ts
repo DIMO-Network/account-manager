@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { getBaseUrl } from '@/utils/Helpers';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -10,12 +11,12 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     console.error('DIMO OAuth error:', error);
-    return NextResponse.redirect(new URL('/sign-in?error=dimo_failed', request.url));
+    return NextResponse.redirect(new URL('/sign-in?error=dimo_failed', getBaseUrl()));
   }
 
   if (!token || !email) {
     console.error('Missing required parameters:', { hasToken: !!token, email });
-    return NextResponse.redirect(new URL('/sign-in?error=missing_token_or_email', request.url));
+    return NextResponse.redirect(new URL('/sign-in?error=missing_token_or_email', getBaseUrl()));
   }
 
   try {
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Register/update user with backend
-    const registerResponse = await fetch(`${request.nextUrl.origin}/api/auth/dimo/register`, {
+    const registerResponse = await fetch(`${getBaseUrl()}/api/auth/dimo/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -72,13 +73,13 @@ export async function GET(request: NextRequest) {
 
     // Create a secure redirect URL with the sign-in token
     if (result.signInToken) {
-      const redirectUrl = new URL('/sign-in', request.url);
+      const redirectUrl = new URL('/sign-in', getBaseUrl());
       redirectUrl.searchParams.set('token', result.signInToken);
       redirectUrl.searchParams.set('action', 'auto-signin');
       return NextResponse.redirect(redirectUrl);
     } else {
       // Fallback to manual sign-in
-      const redirectUrl = new URL('/sign-in', request.url);
+      const redirectUrl = new URL('/sign-in', getBaseUrl());
       redirectUrl.searchParams.set('email', userEmail);
       redirectUrl.searchParams.set('message', result.isExistingUser ? 'dimo_updated' : 'dimo_registered');
       return NextResponse.redirect(redirectUrl);
@@ -86,6 +87,6 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('DIMO callback error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.redirect(new URL(`/sign-in?error=auth_failed&details=${encodeURIComponent(errorMessage)}`, request.url));
+    return NextResponse.redirect(new URL(`/sign-in?error=auth_failed&details=${encodeURIComponent(errorMessage)}`, getBaseUrl()));
   }
 }
