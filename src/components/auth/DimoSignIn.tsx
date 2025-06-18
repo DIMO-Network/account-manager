@@ -1,92 +1,114 @@
 'use client';
 
 import { useSignIn, useUser } from '@clerk/nextjs';
-import { LoginWithDimo, useDimoAuthState } from '@dimo-network/login-with-dimo';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { LoginWithDimo } from '@dimo-network/login-with-dimo';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 export const DimoSignIn = () => {
   const { signIn, setActive, isLoaded } = useSignIn();
   const { isSignedIn } = useUser();
-  const { email, walletAddress, getValidJWT } = useDimoAuthState();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasProcessedTokenRef = useRef<string | null>(null);
 
-  const handleDimoSuccess = async (authData: any) => {
-    console.warn('DIMO Success - authData:', authData);
+  // Handle auto sign-in from callback
+  useEffect(() => {
+    const handleAutoSignIn = async () => {
+      const token = searchParams.get('token');
+      const action = searchParams.get('action');
 
-    if (isSignedIn) {
-      router.push('/dashboard');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Get current DIMO auth state
-      const dimoEmail = email;
-      const dimoWallet = walletAddress;
-      const dimoToken = getValidJWT();
-
-      if (!dimoEmail || !dimoToken) {
-        throw new Error('DIMO authentication incomplete - missing email or token');
+      // Skip if no token/action, or if we've already processed this token
+      if (!token || action !== 'auto-signin' || hasProcessedTokenRef.current === token) {
+        return;
       }
 
-      // Sync user with backend
-      const response = await fetch('/api/auth/dimo/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: dimoEmail,
-          walletAddress: dimoWallet,
-          dimoToken,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || `Server error: ${response.status}`);
+      // Skip if user is already signed in
+      if (isSignedIn) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('token');
+        url.searchParams.delete('action');
+        url.searchParams.delete('timestamp');
+        window.history.replaceState({}, '', url.pathname + url.search);
+        router.push('/dashboard');
+        return;
       }
 
-      // Use the sign-in token to authenticate with Clerk
+      // Skip if Clerk is not loaded yet
       if (!isLoaded || !signIn) {
-        throw new Error('Clerk not ready');
+        return;
       }
 
-      if (result.signInToken) {
-        console.warn('Signing in with token...');
+      // Mark this token as being processed
+      hasProcessedTokenRef.current = token;
+      setIsLoading(true);
+      setError(null);
 
+      try {
         const signInAttempt = await signIn.create({
           strategy: 'ticket',
-          ticket: result.signInToken,
+          ticket: token,
         });
 
         if (signInAttempt.status === 'complete') {
           await setActive({ session: signInAttempt.createdSessionId });
+
+          // Clean up the URL
+          const url = new URL(window.location.href);
+          url.searchParams.delete('token');
+          url.searchParams.delete('action');
+          url.searchParams.delete('timestamp');
+          window.history.replaceState({}, '', url.pathname + url.search);
           router.push('/dashboard');
         } else {
           throw new Error('Sign-in incomplete');
         }
-      } else {
-        throw new Error('No sign-in token received');
-      }
-    } catch (error) {
-      console.error('DIMO sign-in process failed:', error);
-      setError(error instanceof Error ? error.message : 'Sign-in failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      } catch (error) {
+        console.error('Auto sign-in failed:', error);
 
-  const handleDimoError = (error: Error) => {
-    console.error('DIMO auth failed:', error);
-    setError('DIMO authentication failed. Please try again.');
-  };
+        // Check if the error is because user is already signed in
+        if (error instanceof Error && error.message.includes('already signed in')) {
+          router.push('/dashboard');
+        } else {
+          setError(error instanceof Error ? error.message : 'Sign-in failed');
+          // Reset the processed token on error so it can be retried
+          hasProcessedTokenRef.current = null;
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Add a small delay to ensure React has finished all updates
+    const timeoutId = setTimeout(handleAutoSignIn, 100);
+    return () => clearTimeout(timeoutId);
+  }, [searchParams, isLoaded, signIn, setActive, router, isSignedIn]);
+
+  // Redirect if already signed in (without token params)
+  useEffect(() => {
+    const hasTokenParams = searchParams.get('token') && searchParams.get('action');
+    if (isSignedIn && !hasTokenParams) {
+      router.push('/dashboard');
+    }
+  }, [isSignedIn, router, searchParams]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <h3 className="text-lg font-medium text-gray-900 mt-4">
+            Signing you in...
+          </h3>
+          <p className="text-gray-600">
+            Please wait while we complete your authentication.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -105,24 +127,11 @@ export const DimoSignIn = () => {
         </p>
       </div>
 
-      <div className={isLoading ? 'opacity-50 pointer-events-none' : ''}>
-        <LoginWithDimo
-          mode="popup"
-          onSuccess={handleDimoSuccess}
-          onError={handleDimoError}
-          permissionTemplateId="1"
-          authenticatedLabel="Access Dashboard"
-          unAuthenticatedLabel="Sign in with DIMO"
-          utm="utm_campaign=by_road_signin"
-        />
-      </div>
-
-      {isLoading && (
-        <div className="text-center text-sm text-gray-600 flex items-center justify-center gap-2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-          Signing you in...
-        </div>
-      )}
+      <LoginWithDimo
+        mode="redirect"
+        permissionTemplateId="1"
+        utm="utm_campaign=by_road_signin"
+      />
     </div>
   );
 };
