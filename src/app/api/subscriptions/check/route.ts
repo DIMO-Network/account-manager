@@ -4,7 +4,7 @@ import { SubscriptionService } from '@/utils/SubscriptionService';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const connectionId = searchParams.get('connectionId');
+  const connectionId = searchParams.get('connection_id');
 
   if (!connectionId) {
     return NextResponse.json(

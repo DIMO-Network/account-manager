@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
           device_type: 'R1',
         },
       },
-      success_url: `${getBaseUrl()}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}&connection_id=${connectionId}`, // Changed parameter name
+      success_url: `${getBaseUrl()}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}&connection_id=${connectionId}`,
       cancel_url: `${getBaseUrl()}/dashboard?subscription=cancelled`,
     });
 

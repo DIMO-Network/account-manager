@@ -27,9 +27,9 @@ async function createDirectSubscription(
       payment_behavior: 'allow_incomplete',
       default_payment_method: paymentMethodId,
       metadata: {
-        connectionId,
+        connection_id: connectionId,
         device_type: 'R1',
-        vehicleTokenId,
+        vehicle_token_id: vehicleTokenId,
       },
       expand: ['latest_invoice', 'latest_invoice.payment_intent'],
     });
@@ -46,7 +46,7 @@ async function createDirectSubscription(
         success: true,
         data: {
           subscriptionId: subscription.id,
-          url: `${getBaseUrl()}/dashboard?subscription=success&subscription_id=${subscription.id}&connectionId=${connectionId}`,
+          url: `${getBaseUrl()}/dashboard?subscription=success&subscription_id=${subscription.id}&connection_id=${connectionId}`,
           type: 'direct_subscription',
         },
       };
@@ -78,8 +78,7 @@ async function createDirectSubscription(
                 success: true,
                 data: {
                   subscriptionId: subscription.id,
-                  // ✅ Use connectionId in success URL
-                  url: `${getBaseUrl()}/dashboard?subscription=success&subscription_id=${subscription.id}&connectionId=${connectionId}`,
+                  url: `${getBaseUrl()}/dashboard?subscription=success&subscription_id=${subscription.id}&connection_id=${connectionId}`,
                   type: 'direct_subscription',
                 },
               };
@@ -114,19 +113,19 @@ async function createCheckoutSession(
     line_items: [{ price: priceId, quantity: 1 }],
     mode: 'subscription',
     metadata: {
-      connectionId,
+      connection_id: connectionId,
       device_type: 'R1',
       customer_type: isNewCustomer ? 'new' : 'returning',
-      vehicleTokenId,
+      vehichle_token_id: vehicleTokenId,
     },
     subscription_data: {
       metadata: {
-        connectionId,
+        connection_id: connectionId,
         device_type: 'R1',
-        vehicleTokenId,
+        vehichle_token_id: vehicleTokenId,
       },
     },
-    success_url: `${getBaseUrl()}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}&connectionId=${connectionId}`,
+    success_url: `${getBaseUrl()}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}&connection_id=${connectionId}`,
     cancel_url: `${getBaseUrl()}/dashboard?subscription=cancelled`,
     billing_address_collection: isNewCustomer ? 'required' : 'auto',
   };

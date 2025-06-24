@@ -12,7 +12,7 @@ export const useSubscriptionStatus = (connectionId: string) => {
       try {
         setError(null);
 
-        const url = `/api/subscriptions/check?connectionId=${connectionId}`;
+        const url = `/api/subscriptions/check?connection_id=${connectionId}`;
         const response = await fetch(url);
 
         if (!response.ok) {
