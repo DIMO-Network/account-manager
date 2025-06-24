@@ -15,7 +15,7 @@ export type StripeSubscription = Stripe.Subscription;
 
 export type LocalSubscription = {
   id: number;
-  serialNumber: string;
+  connectionId: string;
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
   subscriptionStatus: string | null;

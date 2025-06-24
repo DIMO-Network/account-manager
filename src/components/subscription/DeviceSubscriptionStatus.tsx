@@ -28,7 +28,7 @@ export const DeviceSubscriptionStatus = ({
   const { activating, canceling, error: actionError, activateSubscription, cancelSubscription } = useSubscriptionActions();
 
   const { showSuccessState, connectionIdFromCheckout, clearSuccessState } = useCheckoutSuccess();
-  const { showCancellationSuccess, canceledSerial, initiateCancellation, clearCancellationSuccess } = useCancellationSuccess();
+  const { showCancellationSuccess, canceledConnectionId, initiateCancellation, clearCancellationSuccess } = useCancellationSuccess();
 
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
@@ -37,7 +37,7 @@ export const DeviceSubscriptionStatus = ({
       if (showSuccessState && connectionIdFromCheckout === connectionId) {
         clearSuccessState();
       }
-      if (showCancellationSuccess && canceledSerial === connectionId) {
+      if (showCancellationSuccess && canceledConnectionId === connectionId) {
         clearCancellationSuccess();
       }
     }
@@ -48,7 +48,7 @@ export const DeviceSubscriptionStatus = ({
     connectionId,
     clearSuccessState,
     showCancellationSuccess,
-    canceledSerial,
+    canceledConnectionId,
     clearCancellationSuccess,
   ]);
 
@@ -98,7 +98,7 @@ export const DeviceSubscriptionStatus = ({
     && !hasActiveSubscription;
 
   const shouldShowCancellationSuccess = showCancellationSuccess
-    && canceledSerial === connectionId
+    && canceledConnectionId === connectionId
     && !hasActiveSubscription
     && !canceling;
 

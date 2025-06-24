@@ -4,17 +4,17 @@ import { SubscriptionService } from '@/utils/SubscriptionService';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const serialNumber = searchParams.get('serial');
+  const connectionId = searchParams.get('connectionId');
 
-  if (!serialNumber) {
+  if (!connectionId) {
     return NextResponse.json(
-      { error: 'Serial number is required' },
+      { error: 'connectionId is required' },
       { status: 400 },
     );
   }
 
   try {
-    const result = await SubscriptionService.checkDeviceSubscription(serialNumber);
+    const result = await SubscriptionService.checkDeviceSubscription(connectionId);
     return NextResponse.json(result);
   } catch {
     return NextResponse.json(

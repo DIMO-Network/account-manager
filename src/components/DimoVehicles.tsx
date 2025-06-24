@@ -122,7 +122,7 @@ export const DimoVehicles = () => {
               </div>
             </button>
 
-            {vehicle.aftermarketDevice?.serial && (
+            {vehicle.aftermarketDevice?.tokenDID && (
               <div className="border-t pt-4">
                 <DeviceSubscriptionStatus
                   vehicleTokenId={vehicle.aftermarketDevice.tokenId}

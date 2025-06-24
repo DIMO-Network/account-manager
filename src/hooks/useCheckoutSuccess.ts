@@ -8,7 +8,7 @@ export const useCheckoutSuccess = () => {
   const sessionId = searchParams.get('session_id');
   const subscriptionId = searchParams.get('subscription_id');
   const subscriptionStatus = searchParams.get('subscription');
-  const connectionIdFromUrl = searchParams.get('connectionId');
+  const connectionIdFromUrl = searchParams.get('connection_id');
 
   const isReturningFromSuccessfulCheckout = Boolean(
     (sessionId || subscriptionId)
@@ -37,7 +37,7 @@ export const useCheckoutSuccess = () => {
       url.searchParams.delete('session_id');
       url.searchParams.delete('subscription_id');
       url.searchParams.delete('subscription');
-      url.searchParams.delete('connectionId');
+      url.searchParams.delete('connection_id');
       router.replace(url.pathname + url.search);
     }, 5000);
 

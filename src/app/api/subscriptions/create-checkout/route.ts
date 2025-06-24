@@ -6,9 +6,9 @@ import { getBaseUrl } from '@/utils/Helpers';
 
 export async function POST(request: NextRequest) {
   try {
-    const { serialNumber, priceId } = await request.json();
+    const { connectionId, priceId } = await request.json();
 
-    if (!serialNumber || !priceId) {
+    if (!connectionId || !priceId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 },
@@ -37,16 +37,16 @@ export async function POST(request: NextRequest) {
       ],
       mode: 'subscription',
       metadata: {
-        serial_number: serialNumber,
+        connection_id: connectionId,
         device_type: 'R1',
       },
       subscription_data: {
         metadata: {
-          serial_number: serialNumber,
+          connection_id: connectionId,
           device_type: 'R1',
         },
       },
-      success_url: `${getBaseUrl()}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}&serial=${serialNumber}`,
+      success_url: `${getBaseUrl()}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}&connection_id=${connectionId}`, // Changed parameter name
       cancel_url: `${getBaseUrl()}/dashboard?subscription=cancelled`,
     });
 

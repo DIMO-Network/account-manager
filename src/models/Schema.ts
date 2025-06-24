@@ -12,7 +12,7 @@ import { boolean, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const deviceSubscriptionSchema = pgTable('device_subscriptions', {
   id: serial('id').primaryKey(),
-  serialNumber: text('serial_number').notNull().unique(),
+  connectionId: text('connection_id').notNull().unique(),
   stripeCustomerId: text('stripe_customer_id'),
   stripeSubscriptionId: text('stripe_subscription_id'),
   subscriptionStatus: text('subscription_status'), // active, inactive, canceled, etc.

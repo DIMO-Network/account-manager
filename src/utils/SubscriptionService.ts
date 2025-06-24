@@ -11,11 +11,11 @@ export class SubscriptionService {
     return subscription.status === 'active' || subscription.status === 'trialing';
   }
 
-  static async checkDeviceSubscription(serialNumber: string): Promise<SubscriptionData> {
+  static async checkDeviceSubscription(connectionId: string): Promise<SubscriptionData> {
     try {
       // Always check Stripe first for the most up-to-date status
       const stripeSearch = await stripe().subscriptions.search({
-        query: `metadata['serial_number']:'${serialNumber}'`,
+        query: `metadata['connection_id']:'${connectionId}'`,
         limit: 10,
       });
 
@@ -35,8 +35,8 @@ export class SubscriptionService {
       const subscription = activeSubscriptions[0] || null;
 
       // Update local database with the latest subscription (first in the list)
-      const latestSubscription = stripeSearch.data[0]!; // We know it exists because we checked length above
-      await this.updateLocalSubscription(serialNumber, latestSubscription);
+      const latestSubscription = stripeSearch.data[0]!;
+      await this.updateLocalSubscription(connectionId, latestSubscription);
 
       return {
         hasActiveSubscription,
@@ -54,7 +54,7 @@ export class SubscriptionService {
 
       // Fallback to local database only if Stripe fails
       const localSubscription = await db.query.deviceSubscriptionSchema.findFirst({
-        where: eq(deviceSubscriptionSchema.serialNumber, serialNumber),
+        where: eq(deviceSubscriptionSchema.connectionId, connectionId),
       }) as LocalSubscription | undefined;
 
       // Format local subscription to match the expected return type
@@ -75,22 +75,21 @@ export class SubscriptionService {
     }
   }
 
-  // Update this method to handle status changes
   private static async updateLocalSubscription(
-    serialNumber: string,
+    connectionId: string,
     stripeSubscription: Stripe.Subscription,
   ): Promise<void> {
     const isActive = this.isActiveSubscription(stripeSubscription);
 
     await db.insert(deviceSubscriptionSchema).values({
-      serialNumber,
+      connectionId,
       stripeCustomerId: stripeSubscription.customer as string,
       stripeSubscriptionId: stripeSubscription.id,
       subscriptionStatus: stripeSubscription.status,
       planType: stripeSubscription.metadata?.plan_type || 'basic',
       isActive,
     }).onConflictDoUpdate({
-      target: deviceSubscriptionSchema.serialNumber,
+      target: deviceSubscriptionSchema.connectionId,
       set: {
         stripeCustomerId: stripeSubscription.customer as string,
         stripeSubscriptionId: stripeSubscription.id,
@@ -109,14 +108,14 @@ export class SubscriptionService {
       const canceledSubscription = await stripe().subscriptions.cancel(subscriptionId);
 
       // Update local database to reflect cancellation
-      if (canceledSubscription.metadata?.serial_number) {
+      if (canceledSubscription.metadata?.connection_id) {
         await db.update(deviceSubscriptionSchema)
           .set({
             subscriptionStatus: 'canceled',
             isActive: false,
             updatedAt: new Date(),
           })
-          .where(eq(deviceSubscriptionSchema.serialNumber, canceledSubscription.metadata.serial_number));
+          .where(eq(deviceSubscriptionSchema.connectionId, canceledSubscription.metadata.connection_id));
       }
 
       return { success: true };

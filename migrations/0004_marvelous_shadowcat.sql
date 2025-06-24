@@ -1,0 +1,2 @@
+ALTER TABLE "device_subscriptions" ADD COLUMN "connection_id" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "device_subscriptions" ADD CONSTRAINT "device_subscriptions_connection_id_unique" UNIQUE("connection_id");
