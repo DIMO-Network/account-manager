@@ -37,13 +37,13 @@ export async function POST(request: NextRequest) {
       ],
       mode: 'subscription',
       metadata: {
-        connection_id: connectionId,
-        device_type: 'R1',
+        connectionId,
+        connectionType: 'R1',
       },
       subscription_data: {
         metadata: {
-          connection_id: connectionId,
-          device_type: 'R1',
+          connectionId,
+          connectionType: 'R1',
         },
       },
       success_url: `${getBaseUrl()}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}&connection_id=${connectionId}`,

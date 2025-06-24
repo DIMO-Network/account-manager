@@ -15,7 +15,7 @@ export class SubscriptionService {
     try {
       // Always check Stripe first for the most up-to-date status
       const stripeSearch = await stripe().subscriptions.search({
-        query: `metadata['connection_id']:'${connectionId}'`,
+        query: `metadata['connectionId']:'${connectionId}'`,
         limit: 10,
       });
 

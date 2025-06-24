@@ -27,9 +27,9 @@ async function createDirectSubscription(
       payment_behavior: 'allow_incomplete',
       default_payment_method: paymentMethodId,
       metadata: {
-        connection_id: connectionId,
-        device_type: 'R1',
-        vehicle_token_id: vehicleTokenId,
+        connectionId,
+        connectionType: 'R1',
+        vehicleTokenId,
       },
       expand: ['latest_invoice', 'latest_invoice.payment_intent'],
     });
@@ -113,16 +113,16 @@ async function createCheckoutSession(
     line_items: [{ price: priceId, quantity: 1 }],
     mode: 'subscription',
     metadata: {
-      connection_id: connectionId,
-      device_type: 'R1',
-      customer_type: isNewCustomer ? 'new' : 'returning',
-      vehichle_token_id: vehicleTokenId,
+      connectionId,
+      connectionType: 'R1',
+      customerType: isNewCustomer ? 'new' : 'returning',
+      vehicleTokenId,
     },
     subscription_data: {
       metadata: {
-        connection_id: connectionId,
-        device_type: 'R1',
-        vehichle_token_id: vehicleTokenId,
+        connectionId,
+        connectionType: 'R1',
+        vehicleTokenId,
       },
     },
     success_url: `${getBaseUrl()}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}&connection_id=${connectionId}`,
