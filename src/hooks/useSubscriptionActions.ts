@@ -1,14 +1,26 @@
-import { useCallback, useState, useTransition } from 'react';
-import { cancelSubscriptionAction, createCheckoutAction } from '@/app/actions/subscriptionActions';
+import { useCallback, useEffect, useState, useTransition } from 'react';
+import {
+  cancelSubscriptionAction,
+  cancelSubscriptionActionV2,
+  createCheckoutAction,
+  createCheckoutActionV2,
+} from '@/app/actions/subscriptionActions';
+import { debugFeatureFlags, featureFlags } from '@/utils/FeatureFlags';
 
 export const useSubscriptionActions = () => {
   const [error, setError] = useState<string | null>(null);
   const [activating, startActivationTransition] = useTransition();
   const [canceling, startCancellationTransition] = useTransition();
 
+  useEffect(() => {
+    debugFeatureFlags();
+  }, []);
+
   const activateSubscription = useCallback(async (
-    serialNumber: string,
+    connectionId: string,
+    vehicleTokenId: number,
     userEmail?: string,
+    plan: 'monthly' | 'annual' = 'monthly',
   ) => {
     if (!userEmail) {
       setError('User email is required to activate subscription');
@@ -20,24 +32,36 @@ export const useSubscriptionActions = () => {
         setError(null);
 
         try {
-          const result = await createCheckoutAction(
-            serialNumber,
-            'price_1RUVNj4dLDxx1E1eF1HR4mRZ',
-          );
+          if (featureFlags.useBackendProxy) {
+            console.warn(`🚩 Using backend proxy: ${featureFlags.backendApiUrl}`);
 
-          // Check if the result has a 'data' property (success case)
-          if ('data' in result && result.data?.url) {
-            // Always redirect to either success page or checkout
-            window.location.href = result.data.url;
-            resolve({ success: true });
-          } else if ('error' in result) {
-            // Handle error case
-            setError(result.error || 'Failed to create subscription');
-            resolve({ success: false });
+            const result = await createCheckoutActionV2(connectionId, vehicleTokenId, plan);
+
+            if (result.success) {
+              // V2 format: result.data.checkout_url
+              window.location.href = result.data.checkout_url;
+              resolve({ success: true });
+            } else {
+              setError(result.error);
+              resolve({ success: false });
+            }
           } else {
-            // Handle unexpected case where data exists but no URL
-            setError('No redirect URL provided');
-            resolve({ success: false });
+            console.warn('🚩 Using direct Stripe');
+
+            const priceId = plan === 'annual'
+              ? 'price_1RY9qJ4dLDxx1E1eMcJGcKuT'
+              : 'price_1RUVNj4dLDxx1E1eF1HR4mRZ';
+
+            const result = await createCheckoutAction(connectionId, vehicleTokenId, priceId);
+
+            if (result.success) {
+              // V1 format: result.data.url
+              window.location.href = result.data.url;
+              resolve({ success: true });
+            } else {
+              setError(result.error);
+              resolve({ success: false });
+            }
           }
         } catch (err) {
           console.error('Error activating subscription:', err);
@@ -54,14 +78,14 @@ export const useSubscriptionActions = () => {
         setError(null);
 
         try {
-          const result = await cancelSubscriptionAction(subscriptionId);
+          const result = featureFlags.useBackendProxy
+            ? await cancelSubscriptionActionV2(subscriptionId)
+            : await cancelSubscriptionAction(subscriptionId);
 
           if (result.success) {
             resolve({ success: true });
           } else {
-            // Check if result has error property and use it
-            const errorMessage = 'error' in result ? result.error : 'Failed to cancel subscription';
-            setError(errorMessage || 'Failed to cancel subscription');
+            setError(result.error);
             resolve({ success: false });
           }
         } catch (err) {
@@ -79,5 +103,9 @@ export const useSubscriptionActions = () => {
     error,
     activateSubscription,
     cancelSubscription,
+    config: {
+      usingBackendProxy: featureFlags.useBackendProxy,
+      backendApiUrl: featureFlags.backendApiUrl,
+    },
   };
 };

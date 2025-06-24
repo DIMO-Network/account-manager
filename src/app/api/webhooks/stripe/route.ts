@@ -53,22 +53,22 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutCompleted(session: any) {
-  const serialNumber = session.metadata?.serial_number;
-  if (!serialNumber) {
+  const connectionId = session.metadata?.connection_id;
+  if (!connectionId) {
     return;
   }
 
   const subscription = await stripe().subscriptions.retrieve(session.subscription);
 
   await db.insert(deviceSubscriptionSchema).values({
-    serialNumber,
+    connectionId,
     stripeCustomerId: session.customer,
     stripeSubscriptionId: subscription.id,
     subscriptionStatus: subscription.status,
     planType: 'basic',
     isActive: subscription.status === 'active',
   }).onConflictDoUpdate({
-    target: deviceSubscriptionSchema.serialNumber,
+    target: deviceSubscriptionSchema.connectionId,
     set: {
       stripeCustomerId: session.customer,
       stripeSubscriptionId: subscription.id,
@@ -80,8 +80,8 @@ async function handleCheckoutCompleted(session: any) {
 }
 
 async function handleSubscriptionUpdated(subscription: any) {
-  const serialNumber = subscription.metadata?.serial_number;
-  if (!serialNumber) {
+  const connectionId = subscription.metadata?.connection_id;
+  if (!connectionId) {
     return;
   }
 
@@ -91,12 +91,12 @@ async function handleSubscriptionUpdated(subscription: any) {
       isActive: subscription.status === 'active',
       updatedAt: new Date(),
     })
-    .where(eq(deviceSubscriptionSchema.serialNumber, serialNumber));
+    .where(eq(deviceSubscriptionSchema.connectionId, connectionId));
 }
 
 async function handleSubscriptionDeleted(subscription: any) {
-  const serialNumber = subscription.metadata?.serial_number;
-  if (!serialNumber) {
+  const connectionId = subscription.metadata?.connection_id;
+  if (!connectionId) {
     return;
   }
 
@@ -106,13 +106,13 @@ async function handleSubscriptionDeleted(subscription: any) {
       isActive: false,
       updatedAt: new Date(),
     })
-    .where(eq(deviceSubscriptionSchema.serialNumber, serialNumber));
+    .where(eq(deviceSubscriptionSchema.connectionId, connectionId));
 }
 
 async function handlePaymentSucceeded(invoice: any) {
   const subscription = await stripe().subscriptions.retrieve(invoice.subscription);
-  const serialNumber = subscription.metadata?.serial_number;
-  if (!serialNumber) {
+  const connectionId = subscription.metadata?.connection_id;
+  if (!connectionId) {
     return;
   }
 
@@ -122,13 +122,13 @@ async function handlePaymentSucceeded(invoice: any) {
       isActive: true,
       updatedAt: new Date(),
     })
-    .where(eq(deviceSubscriptionSchema.serialNumber, serialNumber));
+    .where(eq(deviceSubscriptionSchema.connectionId, connectionId));
 }
 
 async function handlePaymentFailed(invoice: any) {
   const subscription = await stripe().subscriptions.retrieve(invoice.subscription);
-  const serialNumber = subscription.metadata?.serial_number;
-  if (!serialNumber) {
+  const connectionId = subscription.metadata?.connection_id;
+  if (!connectionId) {
     return;
   }
 
@@ -138,5 +138,5 @@ async function handlePaymentFailed(invoice: any) {
       isActive: false,
       updatedAt: new Date(),
     })
-    .where(eq(deviceSubscriptionSchema.serialNumber, serialNumber));
+    .where(eq(deviceSubscriptionSchema.connectionId, connectionId));
 }

@@ -1,9 +1,11 @@
 'use server';
 
 import type Stripe from 'stripe';
+import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
 import { stripe } from '@/libs/Stripe';
+import { featureFlags } from '@/utils/FeatureFlags';
 import { getBaseUrl } from '@/utils/Helpers';
 import { SubscriptionService } from '@/utils/SubscriptionService';
 
@@ -15,7 +17,8 @@ async function createDirectSubscription(
   customerId: string,
   paymentMethodId: string,
   priceId: string,
-  serialNumber: string,
+  connectionId: string,
+  vehicleTokenId: number,
 ): Promise<ActionResult<{ subscriptionId: string; url: string; type: 'direct_subscription' }> | null> {
   try {
     const subscription = await stripe().subscriptions.create({
@@ -24,8 +27,9 @@ async function createDirectSubscription(
       payment_behavior: 'allow_incomplete',
       default_payment_method: paymentMethodId,
       metadata: {
-        serial_number: serialNumber,
-        device_type: 'R1',
+        connectionId,
+        connectionType: 'R1',
+        vehicleTokenId,
       },
       expand: ['latest_invoice', 'latest_invoice.payment_intent'],
     });
@@ -42,7 +46,7 @@ async function createDirectSubscription(
         success: true,
         data: {
           subscriptionId: subscription.id,
-          url: `${getBaseUrl()}/dashboard?subscription=success&subscription_id=${subscription.id}&serial=${serialNumber}`,
+          url: `${getBaseUrl()}/dashboard?subscription=success&subscription_id=${subscription.id}&connection_id=${connectionId}`,
           type: 'direct_subscription',
         },
       };
@@ -74,7 +78,7 @@ async function createDirectSubscription(
                 success: true,
                 data: {
                   subscriptionId: subscription.id,
-                  url: `${getBaseUrl()}/dashboard?subscription=success&subscription_id=${subscription.id}&serial=${serialNumber}`,
+                  url: `${getBaseUrl()}/dashboard?subscription=success&subscription_id=${subscription.id}&connection_id=${connectionId}`,
                   type: 'direct_subscription',
                 },
               };
@@ -100,7 +104,8 @@ async function createCheckoutSession(
   customerId: string,
   isNewCustomer: boolean,
   priceId: string,
-  serialNumber: string,
+  connectionId: string,
+  vehicleTokenId: number,
 ): Promise<ActionResult<{ sessionId: string; url: string; type: 'checkout' }>> {
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     customer: customerId,
@@ -108,17 +113,19 @@ async function createCheckoutSession(
     line_items: [{ price: priceId, quantity: 1 }],
     mode: 'subscription',
     metadata: {
-      serial_number: serialNumber,
-      device_type: 'R1',
-      customer_type: isNewCustomer ? 'new' : 'returning',
+      connectionId,
+      connectionType: 'R1',
+      customerType: isNewCustomer ? 'new' : 'returning',
+      vehicleTokenId,
     },
     subscription_data: {
       metadata: {
-        serial_number: serialNumber,
-        device_type: 'R1',
+        connectionId,
+        connectionType: 'R1',
+        vehicleTokenId,
       },
     },
-    success_url: `${getBaseUrl()}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}&serial=${serialNumber}`,
+    success_url: `${getBaseUrl()}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}&connection_id=${connectionId}`,
     cancel_url: `${getBaseUrl()}/dashboard?subscription=cancelled`,
     billing_address_collection: isNewCustomer ? 'required' : 'auto',
   };
@@ -136,11 +143,12 @@ async function createCheckoutSession(
 }
 
 export async function createCheckoutAction(
-  serialNumber: string,
+  connectionId: string,
+  vehicleTokenId: number,
   priceId: string,
 ): Promise<ActionResult<{ subscriptionId?: string; sessionId?: string; url: string; type: 'direct_subscription' | 'checkout' }>> {
   try {
-    if (!serialNumber || !priceId) {
+    if (!connectionId || !vehicleTokenId || !priceId) {
       return { success: false, error: 'Missing required fields' };
     }
 
@@ -165,15 +173,14 @@ export async function createCheckoutAction(
       hasDefaultPaymentMethod = customer.invoice_settings?.default_payment_method as string | undefined;
     }
 
-    // [Payment method validation logic - same as before]
-
     // Try direct subscription
     if (hasDefaultPaymentMethod && paymentMethods.data.length > 0) {
       const directResult = await createDirectSubscription(
         customerId,
         hasDefaultPaymentMethod,
         priceId,
-        serialNumber,
+        connectionId,
+        vehicleTokenId,
       );
 
       if (directResult) {
@@ -183,11 +190,74 @@ export async function createCheckoutAction(
 
     // Fallback to checkout
     const isNewCustomer = paymentMethods.data.length === 0;
-    return await createCheckoutSession(customerId, isNewCustomer, priceId, serialNumber);
+    return await createCheckoutSession(
+      customerId,
+      isNewCustomer,
+      priceId,
+      connectionId,
+      vehicleTokenId,
+    );
   } catch (error) {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+export async function createCheckoutActionV2(
+  connectionId: string,
+  vehicleTokenId: number,
+  plan: 'monthly' | 'annual' = 'monthly',
+): Promise<ActionResult<{ checkout_url: string }>> {
+  try {
+    const user = await currentUser();
+    if (!user) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const dimoToken = user.privateMetadata?.dimoToken as string;
+    if (!dimoToken) {
+      return { success: false, error: 'DIMO authentication required' };
+    }
+
+    const backendUrl = `${featureFlags.backendApiUrl}/subscription/new-subscription-link`;
+
+    const backendResponse = await fetch(backendUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${dimoToken}`,
+      },
+      body: JSON.stringify({
+        plan,
+        connectionId,
+        connectionType: 'R1',
+        vehicleTokenId,
+      }),
+    });
+
+    if (!backendResponse.ok) {
+      const error = await backendResponse.json();
+      throw new Error(error.message || `Backend API error: ${backendResponse.status}`);
+    }
+
+    const result = await backendResponse.json();
+
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
+
+    return {
+      success: true,
+      data: {
+        checkout_url: result.checkout_url,
+      },
+    };
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create checkout session',
     };
   }
 }
@@ -207,6 +277,47 @@ export async function cancelSubscriptionAction(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+export async function cancelSubscriptionActionV2(
+  subscriptionId: string,
+): Promise<ActionResult<void>> {
+  try {
+    const user = await currentUser();
+    if (!user) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const dimoToken = user.privateMetadata?.dimoToken as string;
+    if (!dimoToken) {
+      return { success: false, error: 'DIMO authentication required' };
+    }
+
+    const backendUrl = `${featureFlags.backendApiUrl}/subscription/cancel/${subscriptionId}`;
+
+    // Call backend API to cancel subscription
+    const backendResponse = await fetch(backendUrl, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${dimoToken}`,
+      },
+    });
+
+    if (!backendResponse.ok) {
+      const error = await backendResponse.json();
+      throw new Error(error.message || 'Failed to cancel subscription');
+    }
+
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to cancel subscription',
     };
   }
 }

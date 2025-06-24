@@ -1,28 +1,37 @@
 'use server';
 
-type VehicleDetail = {
-  tokenId: string;
-  owner: string;
-  mintedAt: string;
-  definition: {
-    make: string;
-    model: string;
-    year: number;
-  };
-  aftermarketDevice?: {
-    tokenId: number;
-    serial: string;
-    owner: string;
-    pairedAt: string;
-    manufacturer: {
-      name: string;
-    };
-  };
-  syntheticDevice?: {
-    tokenId: number;
-    // Add other synthetic device fields as needed
-  } | null;
-};
+import type { GetVehicleQuery } from '@/generated/graphql';
+import { graphql } from '@/generated';
+
+const GET_VEHICLE_DETAILS = graphql(`
+  query GetVehicle($tokenId: Int!) {
+    vehicle(tokenId: $tokenId) {
+      tokenId
+      owner
+      mintedAt
+      definition {
+        make
+        model
+        year
+      }
+      aftermarketDevice {
+        tokenId
+        tokenDID
+        serial
+        owner
+        pairedAt
+        manufacturer {
+          name
+        }
+      }
+      syntheticDevice {
+        tokenId
+      }
+    }
+  }
+`);
+
+export type VehicleDetail = GetVehicleQuery['vehicle'];
 
 export async function getDimoVehicleDetails(tokenId: string): Promise<{
   success: boolean;
@@ -30,40 +39,13 @@ export async function getDimoVehicleDetails(tokenId: string): Promise<{
   error?: string;
 }> {
   try {
-    // Replace with your actual DIMO API endpoint and authentication
     const response = await fetch(`https://identity-api.dimo.zone/query`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Add your API key or auth headers here
       },
       body: JSON.stringify({
-        query: `
-          query GetVehicle($tokenId: Int!) {
-            vehicle(tokenId: $tokenId) {
-              tokenId
-              owner
-              mintedAt
-              definition {
-                make
-                model
-                year
-              }
-              aftermarketDevice {
-                tokenId
-                serial
-                owner
-                pairedAt
-                manufacturer {
-                  name
-                }
-              }
-              syntheticDevice {
-                tokenId
-              }
-            }
-          }
-        `,
+        query: GET_VEHICLE_DETAILS,
         variables: {
           tokenId: Number.parseInt(tokenId),
         },

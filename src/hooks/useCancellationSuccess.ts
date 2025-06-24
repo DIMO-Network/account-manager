@@ -2,14 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 
 type CancellationState = {
   isActive: boolean;
-  serialNumber: string | null;
+  connectionId: string | null;
   timestamp: number | null;
 };
 
 export const useCancellationSuccess = (autoHideMs = 5000) => {
   const [cancellationState, setCancellationState] = useState<CancellationState>({
     isActive: false,
-    serialNumber: null,
+    connectionId: null,
     timestamp: null,
   });
 
@@ -29,10 +29,10 @@ export const useCancellationSuccess = (autoHideMs = 5000) => {
 
   const showCancellationSuccess = cancellationState.isActive && !isManuallyCleared;
 
-  const initiateCancellation = useCallback((serialNumber: string) => {
+  const initiateCancellation = useCallback((connectionId: string) => {
     setCancellationState({
       isActive: true,
-      serialNumber,
+      connectionId,
       timestamp: Date.now(),
     });
     setIsManuallyCleared(false);
@@ -45,7 +45,7 @@ export const useCancellationSuccess = (autoHideMs = 5000) => {
   const resetCancellationState = useCallback(() => {
     setCancellationState({
       isActive: false,
-      serialNumber: null,
+      connectionId: null,
       timestamp: null,
     });
     setIsManuallyCleared(false);
@@ -53,7 +53,7 @@ export const useCancellationSuccess = (autoHideMs = 5000) => {
 
   return {
     showCancellationSuccess,
-    canceledSerial: cancellationState.serialNumber,
+    canceledConnectionId: cancellationState.connectionId,
     initiateCancellation,
     clearCancellationSuccess,
     resetCancellationState,

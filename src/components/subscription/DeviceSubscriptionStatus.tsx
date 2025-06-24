@@ -13,40 +13,42 @@ import { useSubscriptionActions } from '@/hooks/useSubscriptionActions';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 
 type SubscriptionStatusProps = {
-  serialNumber: string;
+  connectionId: string;
+  vehicleTokenId: number;
   userEmail?: string;
   compact?: boolean;
 };
 
 export const DeviceSubscriptionStatus = ({
-  serialNumber,
-  userEmail,
+  connectionId,
+  vehicleTokenId,
   compact = false,
 }: SubscriptionStatusProps) => {
-  const { subscriptionData, loading, error, checkStatus } = useSubscriptionStatus(serialNumber);
+  const { subscriptionData, loading, error, checkStatus } = useSubscriptionStatus(connectionId);
   const { activating, canceling, error: actionError, activateSubscription, cancelSubscription } = useSubscriptionActions();
-  const { showSuccessState, serialFromCheckout, clearSuccessState } = useCheckoutSuccess();
-  const { showCancellationSuccess, canceledSerial, initiateCancellation, clearCancellationSuccess } = useCancellationSuccess();
+
+  const { showSuccessState, connectionIdFromCheckout, clearSuccessState } = useCheckoutSuccess();
+  const { showCancellationSuccess, canceledConnectionId, initiateCancellation, clearCancellationSuccess } = useCancellationSuccess();
 
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   useEffect(() => {
     if (subscriptionData?.hasActiveSubscription) {
-      if (showSuccessState && serialFromCheckout === serialNumber) {
+      if (showSuccessState && connectionIdFromCheckout === connectionId) {
         clearSuccessState();
       }
-      if (showCancellationSuccess && canceledSerial === serialNumber) {
+      if (showCancellationSuccess && canceledConnectionId === connectionId) {
         clearCancellationSuccess();
       }
     }
   }, [
     subscriptionData?.hasActiveSubscription,
     showSuccessState,
-    serialFromCheckout,
-    serialNumber,
+    connectionIdFromCheckout,
+    connectionId,
     clearSuccessState,
     showCancellationSuccess,
-    canceledSerial,
+    canceledConnectionId,
     clearCancellationSuccess,
   ]);
 
@@ -54,9 +56,9 @@ export const DeviceSubscriptionStatus = ({
     checkStatus();
   }, [checkStatus]);
 
-  const handleActivate = useCallback(() => {
-    activateSubscription(serialNumber, userEmail);
-  }, [activateSubscription, serialNumber, userEmail]);
+  const handleActivate = useCallback((plan: 'monthly' | 'annual' = 'monthly') => {
+    activateSubscription(connectionId, vehicleTokenId, plan);
+  }, [activateSubscription, connectionId, vehicleTokenId]);
 
   const handleCancelClick = useCallback(() => {
     setShowCancelConfirm(true);
@@ -64,14 +66,14 @@ export const DeviceSubscriptionStatus = ({
 
   const handleCancelConfirm = useCallback(async () => {
     if (subscriptionData?.subscription?.id) {
-      initiateCancellation(serialNumber);
+      initiateCancellation(connectionId);
       await cancelSubscription(subscriptionData.subscription.id);
       setShowCancelConfirm(false);
       setTimeout(() => {
         checkStatus();
       }, 1000);
     }
-  }, [cancelSubscription, subscriptionData?.subscription?.id, checkStatus, serialNumber, initiateCancellation]);
+  }, [cancelSubscription, subscriptionData?.subscription?.id, checkStatus, connectionId, initiateCancellation]);
 
   const handleCancelCancel = useCallback(() => {
     setShowCancelConfirm(false);
@@ -80,7 +82,7 @@ export const DeviceSubscriptionStatus = ({
   if (loading && !subscriptionData) {
     return (
       <div className={compact ? 'text-xs text-gray-500' : 'p-4 border rounded-lg'}>
-        {!compact && <StatusHeader serialNumber={serialNumber} compact={compact} />}
+        {!compact && <StatusHeader connectionId={connectionId} compact={compact} />}
         <p>Checking subscription status...</p>
       </div>
     );
@@ -92,11 +94,11 @@ export const DeviceSubscriptionStatus = ({
   const hasActiveSubscription = subscriptionData?.hasActiveSubscription || false;
 
   const shouldShowOptimisticSuccess = showSuccessState
-    && serialFromCheckout === serialNumber
+    && connectionIdFromCheckout === connectionId
     && !hasActiveSubscription;
 
   const shouldShowCancellationSuccess = showCancellationSuccess
-    && canceledSerial === serialNumber
+    && canceledConnectionId === connectionId
     && !hasActiveSubscription
     && !canceling;
 
@@ -104,7 +106,7 @@ export const DeviceSubscriptionStatus = ({
 
   return (
     <div className={containerClasses}>
-      <StatusHeader serialNumber={serialNumber} compact={compact} />
+      <StatusHeader connectionId={connectionId} compact={compact} />
 
       <ErrorDisplay error={displayError} compact={compact} />
 
