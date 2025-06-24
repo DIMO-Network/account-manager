@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/DIMO-Network/account-manager/compare/v2.0.0...v2.0.1) (2025-06-24)
+
+
+### Bug Fixes
+
+* **migration:** handle existing data in 0004_marvelous_shadowcat ([a0516fd](https://github.com/DIMO-Network/account-manager/commit/a0516fdda0ce4b11420b4733d1f7f81f976077d2))
+
 # [2.0.0](https://github.com/DIMO-Network/account-manager/compare/v1.2.2...v2.0.0) (2025-06-24)
 
 
