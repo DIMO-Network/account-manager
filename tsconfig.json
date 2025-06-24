@@ -33,7 +33,7 @@
     "noFallthroughCasesInSwitch": true,
     "allowUnreachableCode": false,
     "useUnknownInCatchVariables": true,
-    "noImplicitOverride": true,
+    "noImplicitOverride": false,
 
     // ======================================================================
     // Interoperability
