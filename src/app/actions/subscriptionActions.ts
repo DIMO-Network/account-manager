@@ -18,7 +18,7 @@ async function createDirectSubscription(
   paymentMethodId: string,
   priceId: string,
   connectionId: string,
-  vehicleTokenId: string,
+  vehicleTokenId: number,
 ): Promise<ActionResult<{ subscriptionId: string; url: string; type: 'direct_subscription' }> | null> {
   try {
     const subscription = await stripe().subscriptions.create({
@@ -106,7 +106,7 @@ async function createCheckoutSession(
   isNewCustomer: boolean,
   priceId: string,
   connectionId: string,
-  vehicleTokenId: string,
+  vehicleTokenId: number,
 ): Promise<ActionResult<{ sessionId: string; url: string; type: 'checkout' }>> {
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     customer: customerId,
@@ -145,7 +145,7 @@ async function createCheckoutSession(
 
 export async function createCheckoutAction(
   connectionId: string,
-  vehicleTokenId: string,
+  vehicleTokenId: number,
   priceId: string,
 ): Promise<ActionResult<{ subscriptionId?: string; sessionId?: string; url: string; type: 'direct_subscription' | 'checkout' }>> {
   try {
@@ -208,7 +208,7 @@ export async function createCheckoutAction(
 
 export async function createCheckoutActionV2(
   connectionId: string,
-  vehicleTokenId: string,
+  vehicleTokenId: number,
   plan: 'monthly' | 'annual' = 'monthly',
 ): Promise<ActionResult<{ checkout_url: string }>> {
   try {
@@ -234,7 +234,7 @@ export async function createCheckoutActionV2(
         plan,
         connectionId,
         connectionType: 'R1',
-        vehicleTokenId: Number.parseInt(vehicleTokenId),
+        vehicleTokenId,
       }),
     });
 

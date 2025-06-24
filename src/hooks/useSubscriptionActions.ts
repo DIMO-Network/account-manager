@@ -18,7 +18,7 @@ export const useSubscriptionActions = () => {
 
   const activateSubscription = useCallback(async (
     connectionId: string,
-    vehicleTokenId: string,
+    vehicleTokenId: number,
     userEmail?: string,
     plan: 'monthly' | 'annual' = 'monthly',
   ) => {

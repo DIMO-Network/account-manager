@@ -3,28 +3,8 @@
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getDimoVehicles } from '@/app/actions/getDimoVehicles';
+import { getDimoVehicles, type Vehicle } from '@/app/actions/getDimoVehicles';
 import { DeviceSubscriptionStatus } from '@/components/subscription/DeviceSubscriptionStatus';
-
-type Vehicle = {
-  tokenId: string;
-  owner: string;
-  mintedAt: string;
-  definition: {
-    make: string;
-    model: string;
-    year: number;
-  };
-  aftermarketDevice?: {
-    tokenId: string;
-    serial: string;
-    owner: string;
-    pairedAt: string;
-    manufacturer: {
-      name: string;
-    };
-  };
-};
 
 export const DimoVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -57,7 +37,7 @@ export const DimoVehicles = () => {
     fetchVehicles();
   }, []);
 
-  const handleVehicleClick = (tokenId: string) => {
+  const handleVehicleClick = (tokenId: number) => {
     router.push(`/dashboard/vehicles/${tokenId}`);
   };
 
@@ -116,19 +96,21 @@ export const DimoVehicles = () => {
               onClick={() => handleVehicleClick(vehicle.tokenId)}
             >
               <h3 className="font-semibold text-lg">
-                {vehicle.definition.year}
+                {vehicle.definition?.year || 'Unknown'}
                 {' '}
-                {vehicle.definition.make}
+                {vehicle.definition?.make || 'Unknown'}
                 {' '}
-                {vehicle.definition.model}
+                {vehicle.definition?.model || 'Unknown'}
               </h3>
               <div className="text-sm text-gray-600 space-y-1 mt-2">
                 <p>
                   Token ID:
+                  {' '}
                   {vehicle.tokenId}
                 </p>
                 <p>
                   Connected:
+                  {' '}
                   {new Date(vehicle.mintedAt).toLocaleDateString()}
                 </p>
               </div>
@@ -140,11 +122,11 @@ export const DimoVehicles = () => {
               </div>
             </button>
 
-            {/* Subscription Status - Non-clickable */}
             {vehicle.aftermarketDevice?.serial && (
               <div className="border-t pt-4">
                 <DeviceSubscriptionStatus
-                  serialNumber={vehicle.aftermarketDevice.serial}
+                  vehicleTokenId={vehicle.aftermarketDevice.tokenId}
+                  connectionId={vehicle.aftermarketDevice.tokenDID}
                   userEmail={user?.primaryEmailAddress?.emailAddress}
                   compact={true}
                 />

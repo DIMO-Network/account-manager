@@ -39,14 +39,15 @@ export default async function VehicleDetailPage(props: VehicleDetailPageProps) {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">
-          {vehicle.definition.year}
+          {vehicle.definition?.year || 'Unknown'}
           {' '}
-          {vehicle.definition.make}
+          {vehicle.definition?.make || 'Unknown'}
           {' '}
-          {vehicle.definition.model}
+          {vehicle.definition?.model || 'Unknown'}
         </h1>
         <p className="text-gray-600">
           Token ID:
+          {' '}
           {vehicle.tokenId}
         </p>
       </div>
@@ -58,15 +59,15 @@ export default async function VehicleDetailPage(props: VehicleDetailPageProps) {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Make:</span>
-              <span>{vehicle.definition.make}</span>
+              <span>{vehicle.definition?.make || 'Unknown'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Model:</span>
-              <span>{vehicle.definition.model}</span>
+              <span>{vehicle.definition?.model || 'Unknown'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Year:</span>
-              <span>{vehicle.definition.year}</span>
+              <span>{vehicle.definition?.year || 'Unknown'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Connected:</span>
@@ -92,7 +93,7 @@ export default async function VehicleDetailPage(props: VehicleDetailPageProps) {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Manufacturer:</span>
-                      <span>{vehicle.aftermarketDevice.manufacturer.name}</span>
+                      <span>{vehicle.aftermarketDevice.manufacturer?.name || 'Unknown'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Paired:</span>
@@ -103,10 +104,10 @@ export default async function VehicleDetailPage(props: VehicleDetailPageProps) {
                     </div>
                   </div>
 
-                  {/* Subscription Status Component */}
                   <div className="pt-3 border-t border-gray-200">
                     <DeviceSubscriptionStatus
-                      serialNumber={vehicle.aftermarketDevice.serial}
+                      vehicleTokenId={vehicle.tokenId}
+                      connectionId={vehicle.aftermarketDevice.tokenDID}
                       userEmail={user?.primaryEmailAddress?.emailAddress}
                     />
                   </div>
@@ -122,7 +123,6 @@ export default async function VehicleDetailPage(props: VehicleDetailPageProps) {
               )}
         </div>
 
-        {/* Synthetic Device */}
         <div className="bg-white border rounded-lg p-4">
           <h2 className="text-lg font-semibold mb-3">Synthetic Device</h2>
           {vehicle.syntheticDevice

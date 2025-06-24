@@ -14,7 +14,7 @@ import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 
 type SubscriptionStatusProps = {
   connectionId: string;
-  vehicleTokenId: string;
+  vehicleTokenId: number;
   userEmail?: string;
   compact?: boolean;
 };
