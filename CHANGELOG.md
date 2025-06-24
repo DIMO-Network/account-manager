@@ -1,3 +1,17 @@
+# [2.0.0](https://github.com/DIMO-Network/account-manager/compare/v1.2.2...v2.0.0) (2025-06-24)
+
+
+* Proxy Stripe call through Backend API for checkout sessions ([#16](https://github.com/DIMO-Network/account-manager/issues/16)) ([00f0dcc](https://github.com/DIMO-Network/account-manager/commit/00f0dcc7a377bad0d647c8f89efbe4f421813255))
+
+
+### BREAKING CHANGES
+
+* API endpoints and component props now use connectionId instead of serialNumber
+
+* fix: use snake_case connection_id parameter consistently in success URLs
+
+* refactor: use camelCase for Stripe metadata properties
+
 ## [1.2.2](https://github.com/DIMO-Network/account-manager/compare/v1.2.1...v1.2.2) (2025-06-18)
 
 
