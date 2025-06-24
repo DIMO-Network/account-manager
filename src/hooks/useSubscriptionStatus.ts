@@ -1,7 +1,7 @@
 import type { SubscriptionData } from '@/types/subscription';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 
-export const useSubscriptionStatus = (serialNumber: string) => {
+export const useSubscriptionStatus = (connectionId: string) => {
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -12,7 +12,7 @@ export const useSubscriptionStatus = (serialNumber: string) => {
       try {
         setError(null);
 
-        const url = `/api/subscriptions/check?serial=${serialNumber}`;
+        const url = `/api/subscriptions/check?connectionId=${connectionId}`;
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -30,7 +30,7 @@ export const useSubscriptionStatus = (serialNumber: string) => {
         setError(fetchError instanceof Error ? fetchError.message : 'Failed to check subscription');
       }
     });
-  }, [serialNumber]);
+  }, [connectionId]);
 
   useEffect(() => {
     const loadInitialData = async () => {

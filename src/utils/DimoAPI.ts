@@ -38,6 +38,7 @@ export class DimoAPI {
             }
             aftermarketDevice {
               tokenId
+              tokenDID
               serial
               owner
               pairedAt
