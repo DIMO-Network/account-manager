@@ -4,7 +4,7 @@ import * as schema from '@/models/Schema';
 import { Env } from './Env';
 
 if (!Env.DATABASE_URL) {
-  throw new Error('DATABASE_URL environment variable is required');
+  throw new Error('DATABASE_URL environment variable is required at runtime');
 }
 
 const client = new Client({
