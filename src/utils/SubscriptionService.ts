@@ -1,9 +1,9 @@
 import type Stripe from 'stripe';
-import type { LocalSubscription, SubscriptionData } from '@/types/subscription';
+import type { SubscriptionData } from '@/types/subscription';
 import { eq } from 'drizzle-orm';
 import { db } from '@/libs/DB';
 import { stripe } from '@/libs/Stripe';
-import { deviceSubscriptionSchema } from '@/models/Schema';
+import { dataSourcesSchema, subscriptionsSchema } from '@/models/Schema';
 
 export class SubscriptionService {
   // Type guard for active subscriptions
@@ -13,91 +13,82 @@ export class SubscriptionService {
 
   static async checkDeviceSubscription(connectionId: string): Promise<SubscriptionData> {
     try {
-      // Always check Stripe first for the most up-to-date status
-      const stripeSearch = await stripe().subscriptions.search({
-        query: `metadata['connectionId']:'${connectionId}'`,
-        limit: 10,
-      });
+      // First check local database (DIMO backend tables)
+      const localResult = await db
+        .select({
+          // Data source fields
+          connectionId: dataSourcesSchema.connectionId,
+          connectionStatus: dataSourcesSchema.connectionStatus,
+          vehicleTokenId: dataSourcesSchema.vehicleTokenId,
+          trialEndDate: dataSourcesSchema.trialEndDate,
+          // Subscription fields
+          subscriptionId: subscriptionsSchema.id,
+          stripeSubscriptionId: subscriptionsSchema.stripeId,
+          status: subscriptionsSchema.status,
+          currency: subscriptionsSchema.currency,
+          startedAt: subscriptionsSchema.startedAt,
+          endedAt: subscriptionsSchema.endedAt,
+        })
+        .from(dataSourcesSchema)
+        .leftJoin(subscriptionsSchema, eq(dataSourcesSchema.subscriptionId, subscriptionsSchema.id))
+        .where(eq(dataSourcesSchema.connectionId, connectionId))
+        .limit(1);
 
-      // Check if we found any subscriptions
-      if (stripeSearch.data.length === 0) {
+      const localSubscription = localResult[0];
+
+      if (!localSubscription) {
         return {
           hasActiveSubscription: false,
           subscription: null,
-          source: 'stripe',
+          source: 'local',
         };
       }
 
-      // Filter for truly active subscriptions
-      const activeSubscriptions = stripeSearch.data.filter(this.isActiveSubscription);
+      // Check if the subscription is active locally
+      const isLocallyActive = localSubscription.status === 'active' || localSubscription.status === 'trialing';
 
-      const hasActiveSubscription = activeSubscriptions.length > 0;
-      const subscription = activeSubscriptions[0] || null;
+      // If we have a Stripe subscription ID, verify with Stripe for real-time status
+      if (localSubscription.stripeSubscriptionId && isLocallyActive) {
+        try {
+          const stripeSubscription = await stripe().subscriptions.retrieve(localSubscription.stripeSubscriptionId);
+          const isStripeActive = this.isActiveSubscription(stripeSubscription);
 
-      // Update local database with the latest subscription (first in the list)
-      const latestSubscription = stripeSearch.data[0]!;
-      await this.updateLocalSubscription(connectionId, latestSubscription);
+          return {
+            hasActiveSubscription: isStripeActive,
+            subscription: isStripeActive
+              ? {
+                  id: stripeSubscription.id,
+                  status: stripeSubscription.status,
+                  planType: stripeSubscription.metadata?.plan_type || 'basic',
+                }
+              : null,
+            source: 'stripe',
+          };
+        } catch (stripeError) {
+          console.warn('Stripe verification failed, using local data:', stripeError);
+        }
+      }
 
       return {
-        hasActiveSubscription,
-        subscription: subscription
+        hasActiveSubscription: isLocallyActive,
+        subscription: isLocallyActive
           ? {
-              id: subscription.id,
-              status: subscription.status,
-              planType: subscription.metadata?.plan_type || 'basic',
+              id: localSubscription.stripeSubscriptionId || `local_${localSubscription.subscriptionId}`,
+              status: localSubscription.status || 'unknown',
+              planType: 'basic', // Store this in the backend?
             }
           : null,
-        source: 'stripe',
+        source: 'local',
       };
     } catch (error) {
       console.error('Error checking device subscription:', error);
-
-      // Fallback to local database only if Stripe fails
-      const localSubscription = await db.query.deviceSubscriptionSchema.findFirst({
-        where: eq(deviceSubscriptionSchema.connectionId, connectionId),
-      }) as LocalSubscription | undefined;
-
-      // Format local subscription to match the expected return type
-      const formattedSubscription = localSubscription && localSubscription.isActive
-        ? {
-            id: localSubscription.stripeSubscriptionId || `local_${localSubscription.id}`,
-            status: localSubscription.subscriptionStatus || 'unknown',
-            planType: localSubscription.planType || 'basic',
-          }
-        : null;
-
       return {
-        hasActiveSubscription: localSubscription?.isActive || false,
-        subscription: formattedSubscription,
+        hasActiveSubscription: false,
+        subscription: null,
         source: 'local',
         error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
-  }
-
-  private static async updateLocalSubscription(
-    connectionId: string,
-    stripeSubscription: Stripe.Subscription,
-  ): Promise<void> {
-    const isActive = this.isActiveSubscription(stripeSubscription);
-
-    await db.insert(deviceSubscriptionSchema).values({
-      connectionId,
-      stripeCustomerId: stripeSubscription.customer as string,
-      stripeSubscriptionId: stripeSubscription.id,
-      subscriptionStatus: stripeSubscription.status,
-      planType: stripeSubscription.metadata?.plan_type || 'basic',
-      isActive,
-    }).onConflictDoUpdate({
-      target: deviceSubscriptionSchema.connectionId,
-      set: {
-        stripeCustomerId: stripeSubscription.customer as string,
-        stripeSubscriptionId: stripeSubscription.id,
-        subscriptionStatus: stripeSubscription.status,
-        isActive,
-        updatedAt: new Date(),
-      },
-    });
   }
 
   static async cancelSubscription(subscriptionId: string): Promise<{
@@ -105,18 +96,8 @@ export class SubscriptionService {
     error?: string;
   }> {
     try {
-      const canceledSubscription = await stripe().subscriptions.cancel(subscriptionId);
-
-      // Update local database to reflect cancellation
-      if (canceledSubscription.metadata?.connection_id) {
-        await db.update(deviceSubscriptionSchema)
-          .set({
-            subscriptionStatus: 'canceled',
-            isActive: false,
-            updatedAt: new Date(),
-          })
-          .where(eq(deviceSubscriptionSchema.connectionId, canceledSubscription.metadata.connection_id));
-      }
+    // Only cancel in Stripe - let the DIMO backend handle database updates via webhooks
+      await stripe().subscriptions.cancel(subscriptionId);
 
       return { success: true };
     } catch (error) {
