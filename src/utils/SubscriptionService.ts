@@ -1,7 +1,7 @@
 import type Stripe from 'stripe';
 import type { SubscriptionData } from '@/types/subscription';
 import { eq } from 'drizzle-orm';
-import { db } from '@/libs/DB';
+import { getDB } from '@/libs/DB';
 import { stripe } from '@/libs/Stripe';
 import { dataSourcesSchema, subscriptionsSchema } from '@/models/Schema';
 
@@ -13,6 +13,7 @@ export class SubscriptionService {
 
   static async checkDeviceSubscription(connectionId: string): Promise<SubscriptionData> {
     try {
+      const db = await getDB();
       // First check local database (DIMO backend tables)
       const localResult = await db
         .select({
@@ -106,6 +107,24 @@ export class SubscriptionService {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
+    }
+  }
+
+  static async getSubscriptionDetails(connectionId: string) {
+    try {
+      const db = await getDB();
+
+      const result = await db
+        .select()
+        .from(dataSourcesSchema)
+        .leftJoin(subscriptionsSchema, eq(dataSourcesSchema.subscriptionId, subscriptionsSchema.id))
+        .where(eq(dataSourcesSchema.connectionId, connectionId))
+        .limit(1);
+
+      return result[0] || null;
+    } catch (error) {
+      console.error('Error getting subscription details:', error);
+      return null;
     }
   }
 }
