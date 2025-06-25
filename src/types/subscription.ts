@@ -7,7 +7,7 @@ export type SubscriptionData = {
     status: string;
     planType: string;
   } | null;
-  source: 'stripe' | 'local';
+  source: 'stripe' | 'local' | 'backend';
   error?: string;
 };
 
