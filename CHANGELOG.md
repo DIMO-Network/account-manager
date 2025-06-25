@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/DIMO-Network/account-manager/compare/v2.0.1...v2.1.0) (2025-06-25)
+
+
+### Features
+
+* implement feature flag for subscription status checks ([#18](https://github.com/DIMO-Network/account-manager/issues/18)) ([16be93b](https://github.com/DIMO-Network/account-manager/commit/16be93b6dca8e5333b431ce11f99dc2d3fcfc9b1))
+
 ## [2.0.1](https://github.com/DIMO-Network/account-manager/compare/v2.0.0...v2.0.1) (2025-06-24)
 
 
