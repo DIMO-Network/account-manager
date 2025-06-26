@@ -129,7 +129,6 @@ export const DimoSignIn = () => {
 
       <LoginWithDimo
         mode="redirect"
-        permissionTemplateId="1"
         utm="utm_campaign=account_manager_signin"
       />
     </div>
