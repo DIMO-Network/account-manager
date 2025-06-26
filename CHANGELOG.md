@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/DIMO-Network/account-manager/compare/v2.1.0...v2.2.0) (2025-06-26)
+
+
+### Features
+
+* skip vehicle sharing in DIMO authentication ([#19](https://github.com/DIMO-Network/account-manager/issues/19)) ([e44171c](https://github.com/DIMO-Network/account-manager/commit/e44171c646491b80274a042ae746b2243a0e52df))
+
 # [2.1.0](https://github.com/DIMO-Network/account-manager/compare/v2.0.1...v2.1.0) (2025-06-25)
 
 
