@@ -22,7 +22,7 @@ const MenuItemWrapper: FC<PropsWithChildren<{
   handleFunctionClick: () => void;
 }>> = ({ link, disabled, external, onClick, handleFunctionClick, children }) => {
   if (typeof link === 'function') {
-    return <button onClick={handleFunctionClick} className="w-full text-left">{children}</button>;
+    return <button onClick={handleFunctionClick} className="w-full text-left" type="button">{children}</button>;
   }
   return (
     <Link

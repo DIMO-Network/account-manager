@@ -9,11 +9,13 @@ type FullScreenMenuProps = {
   bottomMenu?: MenuItemConfig[];
 };
 
+const EMPTY_ARRAY: MenuItemConfig[] = [];
+
 export const FullScreenMenu: FC<FullScreenMenuProps> = ({
   isOpen,
   onClose,
   mainMenu,
-  bottomMenu = [],
+  bottomMenu = EMPTY_ARRAY,
 }) => {
   if (!isOpen) {
     return null;
@@ -28,6 +30,7 @@ export const FullScreenMenu: FC<FullScreenMenuProps> = ({
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
             aria-label="Close menu"
+            type="button"
           >
             <svg
               className="w-6 h-6 text-gray-700"

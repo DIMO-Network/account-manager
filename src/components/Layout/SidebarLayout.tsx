@@ -13,10 +13,12 @@ type SidebarLayoutProps = {
   rightNav?: ReactNode;
 };
 
+const EMPTY_ARRAY: MenuItemConfig[] = [];
+
 export const SidebarLayout: FC<SidebarLayoutProps> = ({
   children,
   mainMenu,
-  bottomMenu = [],
+  bottomMenu = EMPTY_ARRAY,
   rightNav,
 }) => {
   const [isFullScreenMenuOpen, setIsFullScreenMenuOpen] = useState(false);

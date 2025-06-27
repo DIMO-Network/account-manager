@@ -10,7 +10,9 @@ type MenuProps = {
   onMenuItemClick?: () => void;
 };
 
-export const Menu: FC<MenuProps> = ({ mainMenu, bottomMenu = [], onMenuItemClick }) => {
+const EMPTY_ARRAY: MenuItemConfig[] = [];
+
+export const Menu: FC<MenuProps> = ({ mainMenu, bottomMenu = EMPTY_ARRAY, onMenuItemClick }) => {
   const pathname = usePathname();
 
   const getIsHighlighted = (item: MenuItemConfig) => {
