@@ -37,6 +37,8 @@
     "@logtail/pino": "^0.5.4",
     "@sentry/nextjs": "^9.30.0",
     "@t3-oss/env-nextjs": "^0.13.8",
+    "@types/classnames": "^2.3.0",
+    "classnames": "^2.5.1",
     "drizzle-orm": "^0.44.2",
     "graphql": "^16.11.0",
     "next": "^15.3.4",
