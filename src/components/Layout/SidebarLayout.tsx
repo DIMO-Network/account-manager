@@ -3,7 +3,6 @@
 import type { ReactNode } from 'react';
 import type { MenuItemConfig } from '@/types/menu';
 import { type FC, useState } from 'react';
-import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { FullScreenMenu, Menu, MenuButton } from '@/components/Menu';
 
 type SidebarLayoutProps = {
@@ -26,11 +25,20 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
   return (
     <div className="flex flex-row py-6 pl-6 bg-gray-50 min-h-screen items-stretch">
       {/* Sidebar */}
-      <div className="hidden md:flex md:mr-6 md:w-64 md:flex-shrink-0 md:rounded-xl md:bg-white md:shadow-sm">
-        <Menu
-          mainMenu={mainMenu}
-          bottomMenu={bottomMenu}
-        />
+      <div className="hidden md:flex md:mr-6 md:w-64 md:flex-shrink-0 md:rounded-xl md:bg-white md:shadow-sm md:flex-col">
+        <div className="flex-1">
+          <Menu
+            mainMenu={mainMenu}
+            bottomMenu={bottomMenu}
+          />
+        </div>
+
+        {/* Bottom section with sign in/out and locale switcher */}
+        {rightNav && (
+          <div className="p-4 border-t border-gray-200">
+            {rightNav}
+          </div>
+        )}
       </div>
 
       {/* Main Content */}
@@ -44,9 +52,9 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
             />
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Show locale switcher in header on mobile */}
+          <div className="flex items-center gap-4 md:hidden">
             {rightNav}
-            <LocaleSwitcher />
           </div>
         </div>
 
