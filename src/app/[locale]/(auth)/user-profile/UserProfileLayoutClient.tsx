@@ -5,7 +5,7 @@ import { CreditCardIcon, HomeIcon, LogoutIcon, UserIcon } from '@/components/Ico
 import { SidebarLayout } from '@/components/Layout/SidebarLayout';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 
-type DashboardLayoutClientProps = {
+type UserProfileLayoutClientProps = {
   children: React.ReactNode;
   translations: {
     dashboard_link: string;
@@ -15,7 +15,7 @@ type DashboardLayoutClientProps = {
   };
 };
 
-export function DashboardLayoutClient({ children, translations }: DashboardLayoutClientProps) {
+export function UserProfileLayoutClient({ children, translations }: UserProfileLayoutClientProps) {
   const mainMenu = [
     {
       label: translations.dashboard_link,
