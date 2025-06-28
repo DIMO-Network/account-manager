@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/DIMO-Network/account-manager/compare/v2.2.0...v2.3.0) (2025-06-28)
+
+
+### Features
+
+* move navigation into side column ([#20](https://github.com/DIMO-Network/account-manager/issues/20)) ([76af09a](https://github.com/DIMO-Network/account-manager/commit/76af09ad96b3f740a65b3845bc91f9608e67637d))
+
 # [2.2.0](https://github.com/DIMO-Network/account-manager/compare/v2.1.0...v2.2.0) (2025-06-26)
 
 
