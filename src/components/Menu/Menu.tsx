@@ -16,7 +16,14 @@ export const Menu: FC<MenuProps> = ({ mainMenu, bottomMenu = EMPTY_ARRAY, onMenu
   const pathname = usePathname();
 
   const getIsHighlighted = (item: MenuItemConfig) => {
-    return typeof item.link === 'string' && pathname.startsWith(item.link);
+    if (typeof item.link !== 'string') {
+      return false;
+    }
+
+    const currentPath = pathname.replace(/\/$/, '');
+    const itemPath = item.link.replace(/\/$/, '');
+
+    return currentPath === itemPath;
   };
 
   return (

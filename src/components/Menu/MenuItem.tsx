@@ -59,12 +59,12 @@ export const MenuItem: FC<MenuItemProps> = ({
         'flex flex-row gap-3 items-center text-gray-700 h-10 text-base rounded-lg px-3 transition-colors',
         {
           'text-gray-400 cursor-not-allowed': disabled,
-          'bg-blue-100 text-blue-700': isHighlighted,
+          'bg-red-900 text-white': isHighlighted,
           'hover:bg-gray-100': !disabled && !isHighlighted,
         },
       )}
     >
-      {Icon && <Icon className={iconClassName} />}
+      {Icon && <Icon className={classNames(iconClassName, { 'text-white': isHighlighted })} />}
       <MenuItemWrapper
         link={link}
         disabled={disabled}
