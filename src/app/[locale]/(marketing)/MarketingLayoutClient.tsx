@@ -23,7 +23,7 @@ export function MarketingLayoutClient({ children, translations }: MarketingLayou
     },
   ];
 
-  const rightNav = (
+  const bottomNav = (
     <div className="flex flex-col gap-3">
       <Link
         href="/sign-in/"
@@ -38,7 +38,7 @@ export function MarketingLayoutClient({ children, translations }: MarketingLayou
   return (
     <SidebarLayout
       mainMenu={mainMenu}
-      rightNav={rightNav}
+      bottomNav={bottomNav}
     >
       <div className="py-5 text-xl [&_p]:my-6">{children}</div>
     </SidebarLayout>

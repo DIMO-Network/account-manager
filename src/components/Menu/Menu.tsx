@@ -6,13 +6,10 @@ import { MenuItem } from './MenuItem';
 
 type MenuProps = {
   mainMenu: MenuItemConfig[];
-  bottomMenu?: MenuItemConfig[];
   onMenuItemClick?: () => void;
 };
 
-const EMPTY_ARRAY: MenuItemConfig[] = [];
-
-export const Menu: FC<MenuProps> = ({ mainMenu, bottomMenu = EMPTY_ARRAY, onMenuItemClick }) => {
+export const Menu: FC<MenuProps> = ({ mainMenu, onMenuItemClick }) => {
   const pathname = usePathname();
 
   const getIsHighlighted = (item: MenuItemConfig) => {
@@ -44,19 +41,6 @@ export const Menu: FC<MenuProps> = ({ mainMenu, bottomMenu = EMPTY_ARRAY, onMenu
           />
         ))}
       </ul>
-
-      {bottomMenu.length > 0 && (
-        <ul className="flex flex-col gap-4 justify-center">
-          {bottomMenu.map(item => (
-            <MenuItem
-              key={typeof item.link === 'string' ? item.link : item.label}
-              {...item}
-              isHighlighted={getIsHighlighted(item)}
-              onClick={onMenuItemClick}
-            />
-          ))}
-        </ul>
-      )}
     </div>
   );
 };

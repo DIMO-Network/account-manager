@@ -7,18 +7,14 @@ type FullScreenMenuProps = {
   isOpen: boolean;
   onClose: () => void;
   mainMenu: MenuItemConfig[];
-  bottomMenu?: MenuItemConfig[];
-  rightNav?: ReactNode;
+  bottomNav?: ReactNode;
 };
-
-const EMPTY_ARRAY: MenuItemConfig[] = [];
 
 export const FullScreenMenu: FC<FullScreenMenuProps> = ({
   isOpen,
   onClose,
   mainMenu,
-  bottomMenu = EMPTY_ARRAY,
-  rightNav,
+  bottomNav,
 }) => {
   if (!isOpen) {
     return null;
@@ -55,15 +51,14 @@ export const FullScreenMenu: FC<FullScreenMenuProps> = ({
         <div className="flex-1 overflow-y-auto">
           <Menu
             mainMenu={mainMenu}
-            bottomMenu={bottomMenu}
             onMenuItemClick={onClose}
           />
         </div>
 
         {/* Bottom section with sign in/out and locale switcher */}
-        {rightNav && (
+        {bottomNav && (
           <div className={`${SPACING.md} border-t ${COLORS.border.default}`}>
-            {rightNav}
+            {bottomNav}
           </div>
         )}
       </div>

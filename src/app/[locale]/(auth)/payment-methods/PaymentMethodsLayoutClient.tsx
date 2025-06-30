@@ -37,7 +37,7 @@ export function PaymentMethodsLayoutClient({ children, translations }: PaymentMe
     },
   ];
 
-  const rightNav = (
+  const bottomNav = (
     <div className="flex flex-col gap-3">
       <SignOutButton>
         <button className="flex items-center gap-2 px-3 py-2 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors w-full" type="button">
@@ -52,7 +52,7 @@ export function PaymentMethodsLayoutClient({ children, translations }: PaymentMe
   return (
     <SidebarLayout
       mainMenu={mainMenu}
-      rightNav={rightNav}
+      bottomNav={bottomNav}
     >
       {children}
     </SidebarLayout>

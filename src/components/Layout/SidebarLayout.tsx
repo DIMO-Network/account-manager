@@ -9,17 +9,13 @@ import { COLORS, SPACING } from '@/utils/designSystem';
 type SidebarLayoutProps = {
   children: ReactNode;
   mainMenu: MenuItemConfig[];
-  bottomMenu?: MenuItemConfig[];
-  rightNav?: ReactNode;
+  bottomNav?: ReactNode;
 };
-
-const EMPTY_ARRAY: MenuItemConfig[] = [];
 
 export const SidebarLayout: FC<SidebarLayoutProps> = ({
   children,
   mainMenu,
-  bottomMenu = EMPTY_ARRAY,
-  rightNav,
+  bottomNav,
 }) => {
   const [isFullScreenMenuOpen, setIsFullScreenMenuOpen] = useState(false);
 
@@ -35,14 +31,13 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
         <div className="flex-1">
           <Menu
             mainMenu={mainMenu}
-            bottomMenu={bottomMenu}
           />
         </div>
 
         {/* Bottom section with sign in/out and locale switcher */}
-        {rightNav && (
+        {bottomNav && (
           <div className={`p-4 border-t ${COLORS.border.default}`}>
-            {rightNav}
+            {bottomNav}
           </div>
         )}
       </div>
@@ -69,8 +64,7 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
           isOpen={isFullScreenMenuOpen}
           onClose={() => setIsFullScreenMenuOpen(false)}
           mainMenu={mainMenu}
-          bottomMenu={bottomMenu}
-          rightNav={rightNav}
+          bottomNav={bottomNav}
         />
 
         {/* Page Content */}
