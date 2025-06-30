@@ -1,0 +1,71 @@
+@theme {
+  --color-surface-default: #141012;
+  --color-surface-sunken: #0a0508;
+  --color-surface-raised: #201c1e;
+  --color-cta-default: #322d2f;
+  --color-cta-disabled: #818181;
+  --color-border-disabled: #bababa;
+  --color-text-secondary: #bababa;
+  --color-feedback-success: #0d7038;
+  --color-feedback-error: #8e3231;
+
+  --color-grey-50: #f5f6f6;
+  --color-grey-100: #e4e8e9;
+  --color-grey-200: #ccd4d5;
+  --color-grey-300: #a9b5b7;
+  --color-grey-400: #7e8f92;
+  --color-grey-500: #637377;
+  --color-grey-600: #556166;
+  --color-grey-700: #495256;
+  --color-grey-800: #40484a;
+  --color-grey-900: #393e40;
+  --color-grey-950: #232729;
+
+  --color-dark-grey-50: #f4f6f7;
+  --color-dark-grey-100: #e3e8ea;
+  --color-dark-grey-200: #c9d2d8;
+  --color-dark-grey-300: #a4b3bc;
+  --color-dark-grey-400: #778c99;
+  --color-dark-grey-500: #5c707e;
+  --color-dark-grey-600: #4f5f6b;
+  --color-dark-grey-700: #444f5a;
+  --color-dark-grey-800: #3d454d;
+  --color-dark-grey-900: #363c43;
+  --color-dark-grey-950: #24292f;
+
+  --color-dark-50: #f7f8f8;
+  --color-dark-100: #edeef1;
+  --color-dark-200: #d8dbdf;
+  --color-dark-300: #b5bac4;
+  --color-dark-400: #8d94a3;
+  --color-dark-500: #6f7788;
+  --color-dark-600: #596070;
+  --color-dark-700: #494f5b;
+  --color-dark-800: #3f434d;
+  --color-dark-900: #373b43;
+  --color-dark-950: #131417;
+
+  --color-primary-50: #f1fcfa;
+  --color-primary-100: #d0f7f2;
+  --color-primary-200: #b7f2eb;
+  --color-primary-300: #6aded5;
+  --color-primary-400: #3bc6be;
+  --color-primary-500: #22aaa5;
+  --color-primary-600: #198886;
+  --color-primary-700: #186d6d;
+  --color-primary-800: #185657;
+  --color-primary-900: #184849;
+  --color-primary-950: #08292b;
+
+  --color-red-50: #fff1f1;
+  --color-red-100: #ffe1e1;
+  --color-red-200: #ffc8c8;
+  --color-red-300: #ffa1a1;
+  --color-red-400: #fe6b6b;
+  --color-red-500: #f85454;
+  --color-red-600: #e51d1d;
+  --color-red-700: #c01515;
+  --color-red-800: #9f1515;
+  --color-red-900: #841818;
+  --color-red-950: #480707;
+}
