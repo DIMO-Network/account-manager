@@ -8,14 +8,12 @@ import { COLORS, SPACING } from '@/utils/designSystem';
 
 type SidebarLayoutProps = {
   children: ReactNode;
-  mainMenu: MenuItemConfig[];
-  bottomNav?: ReactNode;
+  menuItems: MenuItemConfig[];
 };
 
 export const SidebarLayout: FC<SidebarLayoutProps> = ({
   children,
-  mainMenu,
-  bottomNav,
+  menuItems,
 }) => {
   const [isFullScreenMenuOpen, setIsFullScreenMenuOpen] = useState(false);
 
@@ -23,23 +21,17 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
     <div className={`flex flex-col md:flex-row min-h-screen ${COLORS.background.primary}`}>
       {/* Sidebar */}
       <div className={`
-        hidden md:flex md:mr-6 md:w-64 md:flex-shrink-0 md:rounded-xl md:shadow-sm md:flex-col
+        hidden md:flex md:w-64 md:flex-shrink-0 md:rounded-xl md:shadow-sm md:flex-col
+        ml-6 my-6
+        h-auto
         ${COLORS.background.secondary}
-        border-r ${COLORS.border.default}
       `}
       >
         <div className="flex-1">
           <Menu
-            mainMenu={mainMenu}
+            menuItems={menuItems}
           />
         </div>
-
-        {/* Bottom section with sign in/out and locale switcher */}
-        {bottomNav && (
-          <div className={`p-4 border-t ${COLORS.border.default}`}>
-            {bottomNav}
-          </div>
-        )}
       </div>
 
       {/* Main Content */}
@@ -63,8 +55,7 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
         <FullScreenMenu
           isOpen={isFullScreenMenuOpen}
           onClose={() => setIsFullScreenMenuOpen(false)}
-          mainMenu={mainMenu}
-          bottomNav={bottomNav}
+          menuItems={menuItems}
         />
 
         {/* Page Content */}

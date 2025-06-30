@@ -1,10 +1,10 @@
-import type { PropsWithChildren } from 'react';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import classNames from 'classnames';
 import Link from 'next/link';
+import { MenuActionButton } from './MenuActionButton';
 
 type MenuItemProps = {
-  link: string | (() => void);
+  link?: string | (() => void);
   disabled?: boolean;
   external?: boolean;
   iconClassName?: string;
@@ -12,28 +12,8 @@ type MenuItemProps = {
   icon?: FC<{ className?: string }>;
   isHighlighted?: boolean;
   onClick?: () => void;
-};
-
-const MenuItemWrapper: FC<PropsWithChildren<{
-  link: string | (() => void);
-  disabled: boolean;
-  external: boolean;
-  onClick?: () => void;
-  handleFunctionClick: () => void;
-}>> = ({ link, disabled, external, onClick, handleFunctionClick, children }) => {
-  if (typeof link === 'function') {
-    return <button onClick={handleFunctionClick} className="w-full text-left" type="button">{children}</button>;
-  }
-  return (
-    <Link
-      href={disabled ? '#' : link}
-      target={external ? '_blank' : '_self'}
-      onClick={onClick}
-      className="w-full block"
-    >
-      {children}
-    </Link>
-  );
+  component?: ReactNode;
+  action?: () => void;
 };
 
 export const MenuItem: FC<MenuItemProps> = ({
@@ -45,6 +25,8 @@ export const MenuItem: FC<MenuItemProps> = ({
   label,
   isHighlighted = false,
   onClick,
+  component,
+  action,
 }) => {
   const handleFunctionClick = () => {
     if (typeof link === 'function') {
@@ -53,28 +35,38 @@ export const MenuItem: FC<MenuItemProps> = ({
     onClick?.();
   };
 
+  if (component) {
+    return <li>{component}</li>;
+  }
+
+  if (link && typeof link === 'string') {
+    return (
+      <li>
+        <Link
+          href={disabled ? '#' : link}
+          target={external ? '_blank' : '_self'}
+          onClick={onClick}
+          className="block"
+        >
+          <MenuActionButton disabled={disabled} active={isHighlighted}>
+            {Icon && <Icon className={classNames(iconClassName, { 'text-white': isHighlighted })} />}
+            {label}
+          </MenuActionButton>
+        </Link>
+      </li>
+    );
+  }
+
   return (
-    <li
-      className={classNames(
-        'flex flex-row gap-3 items-center h-10 text-base rounded-lg px-3 transition-colors font-medium',
-        {
-          'text-gray-400 cursor-not-allowed': disabled,
-          'bg-red-900 text-white font-bold': isHighlighted,
-          'hover:bg-gray-100': !disabled && !isHighlighted,
-          'text-white': isHighlighted,
-        },
-      )}
-    >
-      {Icon && <Icon className={classNames(iconClassName, { 'text-white': isHighlighted })} />}
-      <MenuItemWrapper
-        link={link}
+    <li>
+      <MenuActionButton
+        onClick={action || handleFunctionClick}
         disabled={disabled}
-        external={external}
-        onClick={onClick}
-        handleFunctionClick={handleFunctionClick}
+        active={isHighlighted}
       >
+        {Icon && <Icon className={classNames(iconClassName, { 'text-white': isHighlighted })} />}
         {label}
-      </MenuItemWrapper>
+      </MenuActionButton>
     </li>
   );
 };

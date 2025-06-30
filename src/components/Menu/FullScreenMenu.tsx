@@ -1,4 +1,4 @@
-import type { FC, ReactNode } from 'react';
+import type { FC } from 'react';
 import type { MenuItemConfig } from '@/types/menu';
 import { COLORS, SPACING } from '@/utils/designSystem';
 import { Menu } from './Menu';
@@ -6,15 +6,13 @@ import { Menu } from './Menu';
 type FullScreenMenuProps = {
   isOpen: boolean;
   onClose: () => void;
-  mainMenu: MenuItemConfig[];
-  bottomNav?: ReactNode;
+  menuItems: MenuItemConfig[];
 };
 
 export const FullScreenMenu: FC<FullScreenMenuProps> = ({
   isOpen,
   onClose,
-  mainMenu,
-  bottomNav,
+  menuItems,
 }) => {
   if (!isOpen) {
     return null;
@@ -50,17 +48,10 @@ export const FullScreenMenu: FC<FullScreenMenuProps> = ({
 
         <div className="flex-1 overflow-y-auto">
           <Menu
-            mainMenu={mainMenu}
+            menuItems={menuItems}
             onMenuItemClick={onClose}
           />
         </div>
-
-        {/* Bottom section with sign in/out and locale switcher */}
-        {bottomNav && (
-          <div className={`${SPACING.md} border-t ${COLORS.border.default}`}>
-            {bottomNav}
-          </div>
-        )}
       </div>
     </div>
   );
