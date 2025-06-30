@@ -1,19 +1,19 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { type AuthNavigationTranslations, createAuthNavigation, createMarketingNavigation, type MarketingNavigationTranslations, SidebarLayout } from './index';
+import { type AuthNavigationTranslations, createAuthNavigation, createPublicNavigation, type PublicNavigationTranslations, SidebarLayout } from './index';
 
 type LayoutWrapperProps = {
   children: ReactNode;
-  layoutType: 'auth' | 'marketing';
-  translations: AuthNavigationTranslations | MarketingNavigationTranslations;
+  layoutType: 'auth' | 'public';
+  translations: AuthNavigationTranslations | PublicNavigationTranslations;
   className?: string;
 };
 
 export function LayoutWrapper({ children, layoutType, translations, className }: LayoutWrapperProps) {
   const menuItems = layoutType === 'auth'
     ? createAuthNavigation(translations as AuthNavigationTranslations)
-    : createMarketingNavigation(translations as MarketingNavigationTranslations);
+    : createPublicNavigation(translations as PublicNavigationTranslations);
 
   return (
     <SidebarLayout menuItems={menuItems}>

@@ -2,7 +2,7 @@ export { LayoutWrapper } from './LayoutWrapper';
 export {
   type AuthNavigationTranslations,
   createAuthNavigation,
-  createMarketingNavigation,
-  type MarketingNavigationTranslations,
+  createPublicNavigation,
+  type PublicNavigationTranslations,
 } from './NavigationConfig';
 export { SidebarLayout } from './SidebarLayout';

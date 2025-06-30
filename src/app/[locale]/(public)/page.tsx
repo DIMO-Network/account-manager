@@ -1,4 +1,5 @@
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
+import { PublicLayoutClient } from './PublicLayoutClient';
 
 type IIndexProps = {
   params: Promise<{ locale: string }>;
@@ -19,13 +20,18 @@ export async function generateMetadata(props: IIndexProps) {
 
 export default async function Index(props: IIndexProps) {
   const { locale } = await props.params;
-  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'RootLayout' });
 
   return (
-    <>
+    <PublicLayoutClient
+      translations={{
+        home_link: t('home_link'),
+        sign_in_link: t('sign_in_link'),
+      }}
+    >
       <h1>
         Please sign in to continue 👋
       </h1>
-    </>
+    </PublicLayoutClient>
   );
 };

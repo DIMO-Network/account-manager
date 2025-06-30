@@ -11,7 +11,7 @@ export type AuthNavigationTranslations = {
   sign_out: string;
 };
 
-export type MarketingNavigationTranslations = {
+export type PublicNavigationTranslations = {
   home_link: string;
   sign_in_link: string;
 };
@@ -61,7 +61,7 @@ export const createAuthNavigation = (translations: AuthNavigationTranslations): 
   },
 ];
 
-export const createMarketingNavigation = (translations: MarketingNavigationTranslations): MenuItemConfig[] => [
+export const createPublicNavigation = (translations: PublicNavigationTranslations): MenuItemConfig[] => [
   // Main menu items
   {
     label: translations.home_link,
