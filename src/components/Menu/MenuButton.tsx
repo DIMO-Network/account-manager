@@ -8,13 +8,13 @@ type MenuButtonProps = {
 export const MenuButton: FC<MenuButtonProps> = ({ onClick, className = '' }) => {
   return (
     <button
-      className={`bg-white rounded-lg p-3 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow ${className}`}
+      className={`rounded-lg p-3 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow ${className}`}
       onClick={onClick}
       aria-label="Toggle menu"
       type="button"
     >
       <svg
-        className="w-6 h-6 text-gray-700"
+        className="w-6 h-6"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"

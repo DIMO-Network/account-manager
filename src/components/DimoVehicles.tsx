@@ -87,11 +87,11 @@ export const DimoVehicles = () => {
         {vehicles.map(vehicle => (
           <div
             key={vehicle.tokenId}
-            className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
           >
             {/* Vehicle Header - Clickable */}
             <button
-              className="cursor-pointer hover:bg-gray-50 -m-4 p-4 rounded-lg mb-4"
+              className="cursor-pointer hover:bg-red-50 -m-4 p-4 rounded-lg mb-4"
               type="button"
               onClick={() => handleVehicleClick(vehicle.tokenId)}
             >

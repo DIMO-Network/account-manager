@@ -54,7 +54,7 @@ export default async function VehicleDetailPage(props: VehicleDetailPageProps) {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Basic Information */}
-        <div className="bg-white border rounded-lg p-4">
+        <div className="border rounded-lg p-4">
           <h2 className="text-lg font-semibold mb-3">Vehicle Information</h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
@@ -77,7 +77,7 @@ export default async function VehicleDetailPage(props: VehicleDetailPageProps) {
         </div>
 
         {/* Aftermarket Device with Subscription Status */}
-        <div className="bg-white border rounded-lg p-4">
+        <div className="border rounded-lg p-4">
           <h2 className="text-lg font-semibold mb-3">Device Connection</h2>
           {vehicle.aftermarketDevice
             ? (
@@ -123,7 +123,7 @@ export default async function VehicleDetailPage(props: VehicleDetailPageProps) {
               )}
         </div>
 
-        <div className="bg-white border rounded-lg p-4">
+        <div className="border rounded-lg p-4">
           <h2 className="text-lg font-semibold mb-3">Synthetic Device</h2>
           {vehicle.syntheticDevice
             ? (
@@ -135,7 +135,7 @@ export default async function VehicleDetailPage(props: VehicleDetailPageProps) {
                 </div>
               )
             : (
-                <div className="p-3 bg-gray-50 border border-gray-200 rounded">
+                <div className="p-3 border border-gray-200 rounded">
                   <p className="text-gray-600 text-sm">No synthetic device</p>
                 </div>
               )}

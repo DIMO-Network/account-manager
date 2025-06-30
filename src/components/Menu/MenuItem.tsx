@@ -56,11 +56,12 @@ export const MenuItem: FC<MenuItemProps> = ({
   return (
     <li
       className={classNames(
-        'flex flex-row gap-3 items-center text-gray-700 h-10 text-base rounded-lg px-3 transition-colors',
+        'flex flex-row gap-3 items-center h-10 text-base rounded-lg px-3 transition-colors font-medium',
         {
           'text-gray-400 cursor-not-allowed': disabled,
-          'bg-red-900 text-white': isHighlighted,
+          'bg-red-900 text-white font-bold': isHighlighted,
           'hover:bg-gray-100': !disabled && !isHighlighted,
+          'text-white': isHighlighted,
         },
       )}
     >

@@ -74,7 +74,7 @@ export const PaymentMethodCard = ({
   // Handle different payment method types
   if (paymentMethod.type !== 'card' || !paymentMethod.card) {
     return (
-      <div className="border rounded-lg p-4 bg-gray-50">
+      <div className="border rounded-lg p-4">
         <div className="text-gray-600">
           Unsupported payment method type:
           {' '}
@@ -87,7 +87,7 @@ export const PaymentMethodCard = ({
   const card = paymentMethod.card;
 
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-sm">
+    <div className="border rounded-lg p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <span className="text-2xl">{getBrandIcon(card.brand)}</span>
@@ -164,7 +164,7 @@ export const PaymentMethodCard = ({
                       <button
                         onClick={() => setShowConfirmRemove(false)}
                         disabled={isLoading}
-                        className="px-2 py-1 text-xs bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                        className="px-2 py-1 text-xs bg-gray-300 rounded hover:bg-gray-400"
                         type="button"
                       >
                         Cancel

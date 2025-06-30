@@ -27,7 +27,7 @@ export function MarketingLayoutClient({ children, translations }: MarketingLayou
     <div className="flex flex-col gap-3">
       <Link
         href="/sign-in/"
-        className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors w-full"
+        className="flex items-center gap-2 px-3 py-2 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors w-full"
       >
         {translations.sign_in_link}
       </Link>

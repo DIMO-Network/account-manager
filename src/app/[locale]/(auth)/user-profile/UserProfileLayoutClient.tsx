@@ -40,7 +40,7 @@ export function UserProfileLayoutClient({ children, translations }: UserProfileL
   const rightNav = (
     <div className="flex flex-col gap-3">
       <SignOutButton>
-        <button className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors w-full" type="button">
+        <button className="flex items-center gap-2 px-3 py-2 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors w-full" type="button">
           <LogoutIcon className="h-5 w-5" />
           {translations.sign_out}
         </button>

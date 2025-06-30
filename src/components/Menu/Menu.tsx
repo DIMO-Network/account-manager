@@ -30,7 +30,7 @@ export const Menu: FC<MenuProps> = ({ mainMenu, bottomMenu = EMPTY_ARRAY, onMenu
     <div className="w-full px-4 py-6 flex flex-col gap-4 justify-between">
       <ul className="flex flex-col gap-4 justify-center">
         <div className="flex flex-row justify-between items-center mb-6">
-          <h1 className="text-xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-white">
             {AppConfig.name}
           </h1>
         </div>

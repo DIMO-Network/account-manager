@@ -1,5 +1,7 @@
 'use client';
 
+import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+
 type SubscriptionStatusCardProps = {
   hasActiveSubscription: boolean;
   subscription?: any;
@@ -20,16 +22,16 @@ export const SubscriptionStatusCard = ({
   compact = false,
 }: SubscriptionStatusCardProps) => {
   const cardClasses = compact
-    ? 'flex items-center justify-between p-2 border rounded text-xs'
-    : 'p-3 border rounded';
+    ? `flex items-center justify-between ${SPACING.xs} border rounded text-xs`
+    : `${SPACING.sm} border rounded`;
 
   if (hasActiveSubscription) {
     return (
-      <div className={`${cardClasses} bg-green-50 border-green-200`}>
-        <div className="flex items-center justify-between w-full">
+      <div className={`${cardClasses} ${COLORS.background.secondary} border ${COLORS.feedback.success}`}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-3">
           <div className="flex items-center">
-            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-            <span className="text-green-800 font-medium">
+            <div className="w-2 h-2 bg-feedback-success rounded-full mr-2"></div>
+            <span className="text-feedback-success font-medium">
               Active
               {subscription?.planType && ` (${subscription.planType})`}
             </span>
@@ -37,7 +39,7 @@ export const SubscriptionStatusCard = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onRefreshAction}
-              className={`${compact ? 'text-xs' : 'text-sm'} text-blue-600 hover:text-blue-800`}
+              className={`${RESPONSIVE.touch} ${compact ? 'text-xs' : 'text-sm'} text-primary-500 hover:text-primary-600 transition-colors`}
               type="button"
               title="Refresh status"
               disabled={isBusy}
@@ -48,7 +50,13 @@ export const SubscriptionStatusCard = ({
               <button
                 onClick={onCancelAction}
                 disabled={isBusy}
-                className={`${compact ? 'text-xs px-2 py-1' : 'text-sm px-3 py-1'} text-red-600 hover:text-red-800 hover:bg-red-50 border border-red-300 rounded transition-colors disabled:opacity-50`}
+                className={`
+                  ${RESPONSIVE.touch}
+                  ${compact ? 'text-xs px-2 py-1' : 'text-sm px-3 py-1'}
+                  text-feedback-error hover:text-feedback-error hover:bg-surface-sunken
+                  border border-feedback-error rounded transition-colors
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
                 type="button"
                 title="Cancel subscription"
               >
@@ -75,14 +83,14 @@ export const SubscriptionStatusCard = ({
     };
 
     return (
-      <div className={`${cardClasses} bg-blue-50 border-blue-200`}>
-        <div className="flex items-center justify-between w-full">
+      <div className={`${cardClasses} ${COLORS.background.secondary} border border-primary-500`}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-3">
           <div className="flex items-center">
-            <div className="animate-spin rounded-full h-3 w-3 border border-blue-500 border-t-transparent mr-2"></div>
+            <div className="animate-spin rounded-full h-3 w-3 border border-primary-500 border-t-transparent mr-2"></div>
             <div>
-              <span className="text-blue-800 font-medium">{messages[busyState]}</span>
+              <span className="text-primary-500 font-medium">{messages[busyState]}</span>
               {!compact && (
-                <p className={`${compact ? 'text-xs' : 'text-sm'} text-blue-700 mt-1`}>
+                <p className={`${compact ? 'text-xs' : 'text-sm'} text-grey-400 mt-1`}>
                   {descriptions[busyState]}
                 </p>
               )}
@@ -90,7 +98,7 @@ export const SubscriptionStatusCard = ({
           </div>
           <button
             onClick={onRefreshAction}
-            className={`${compact ? 'text-xs' : 'text-sm'} text-blue-600 hover:text-blue-800`}
+            className={`${RESPONSIVE.touch} ${compact ? 'text-xs' : 'text-sm'} text-primary-500 hover:text-primary-600 transition-colors`}
             type="button"
             title="Check now"
           >
@@ -102,10 +110,10 @@ export const SubscriptionStatusCard = ({
   }
 
   return (
-    <div className={`${cardClasses} bg-yellow-50 border-yellow-200`}>
+    <div className={`${cardClasses} ${COLORS.background.secondary} border border-yellow-500`}>
       <div className="flex items-center">
         <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
-        <span className="text-yellow-800 font-medium">No Active Subscription</span>
+        <span className="text-yellow-500 font-medium">No Active Subscription</span>
       </div>
     </div>
   );
