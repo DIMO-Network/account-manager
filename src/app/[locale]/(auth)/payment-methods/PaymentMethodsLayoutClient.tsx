@@ -1,7 +1,7 @@
 'use client';
 
 import { SignOutButton } from '@clerk/nextjs';
-import { CreditCardIcon, HomeIcon, LogoutIcon, UserIcon } from '@/components/Icons';
+import { HomeIcon, LogoutIcon, SettingsIcon, WalletIcon } from '@/components/Icons';
 import { SidebarLayout } from '@/components/Layout/SidebarLayout';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 
@@ -25,13 +25,13 @@ export function PaymentMethodsLayoutClient({ children, translations }: PaymentMe
     },
     {
       label: translations.payment_methods_link,
-      icon: CreditCardIcon,
+      icon: WalletIcon,
       iconClassName: 'h-5 w-5',
       link: '/payment-methods/',
     },
     {
       label: translations.user_profile_link,
-      icon: UserIcon,
+      icon: SettingsIcon,
       iconClassName: 'h-5 w-5',
       link: '/user-profile/',
     },
