@@ -19,20 +19,16 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
   const [isFullScreenMenuOpen, setIsFullScreenMenuOpen] = useState(false);
 
   return (
-    <div className={`flex flex-col md:flex-row min-h-screen ${COLORS.background.primary}`}>
+    <div className="flex flex-col md:flex-row min-h-screen">
       {/* Sidebar */}
-      <div className={`
-        hidden md:flex md:w-64 md:flex-shrink-0 md:rounded-xl md:shadow-sm md:flex-col
-        ml-6 my-6
-        h-auto
-        ${COLORS.background.secondary}
-      `}
+      <div
+        className={`
+          hidden md:flex 
+          h-screen sticky top-0
+          p-6
+        `}
       >
-        <div className="flex-1">
-          <Menu
-            menuItems={menuItems}
-          />
-        </div>
+        <Menu menuItems={menuItems} />
       </div>
 
       {/* Main Content */}
@@ -40,16 +36,17 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
         {/* Mobile Header */}
         <div className={`
           md:hidden
-          ${COLORS.background.primary}
-          border-b ${COLORS.border.default}
-          ${SPACING.sm}
-          flex items-center justify-between
+          ${SPACING.sm} ${COLORS.background.primary}
+          flex items-center sticky top-0 z-10
         `}
         >
           <MenuButton
             onClick={() => setIsFullScreenMenuOpen(true)}
-            className="mr-4"
+            className="w-10 h-10 mr-4 flex-shrink-0"
           />
+          <div className="flex-1">
+            <Header />
+          </div>
         </div>
 
         {/* Full Screen Menu for Mobile */}
@@ -59,11 +56,9 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
           menuItems={menuItems}
         />
 
-        {/* Header */}
-        <div className={`
-          ${SPACING.sm}
-          ${COLORS.background.primary}
-        `}
+        {/* Desktop Header */}
+        <div
+          className="hidden md:block sticky top-0 z-10 py-6 pr-4"
         >
           <Header />
         </div>
@@ -71,8 +66,7 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
         {/* Page Content */}
         <main className={`
           flex-1
-          ${SPACING.md}
-          overflow-y-auto overflow-x-auto
+          overflow-y-auto overflow-x-auto p-6
         `}
         >
           {children}

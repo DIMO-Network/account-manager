@@ -5,7 +5,7 @@ import { enUS, frFR } from '@clerk/localizations';
 const localePrefix: LocalePrefixMode = 'as-needed';
 
 export const AppConfig = {
-  name: 'DIMO Subscriptions',
+  name: 'DIMO',
   locales: ['en', 'fr'],
   defaultLocale: 'en',
   localePrefix,

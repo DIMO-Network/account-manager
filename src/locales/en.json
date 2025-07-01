@@ -31,7 +31,7 @@
   "DashboardLayout": {
     "dashboard_link": "Dashboard",
     "payment_methods_link": "Payment Methods",
-    "user_profile_link": "Manage your account",
+    "user_profile_link": "Account",
     "sign_out": "Sign out"
   },
   "VehicleDetail": {
