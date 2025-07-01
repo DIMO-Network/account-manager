@@ -16,6 +16,7 @@ export default async function DashboardLayout(props: {
     <DashboardLayoutClient
       translations={{
         dashboard_link: t('dashboard_link'),
+        subscriptions_link: t('subscriptions_link'),
         payment_methods_link: t('payment_methods_link'),
         user_profile_link: t('user_profile_link'),
         sign_out: t('sign_out'),

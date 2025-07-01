@@ -30,6 +30,7 @@
   },
   "DashboardLayout": {
     "dashboard_link": "Dashboard",
+    "subscriptions_link": "Subscriptions",
     "payment_methods_link": "Payment Methods",
     "user_profile_link": "Account",
     "sign_out": "Sign out"

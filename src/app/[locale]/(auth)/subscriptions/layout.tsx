@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { UserProfileLayoutClient } from './UserProfileLayoutClient';
+import { DashboardLayoutClient } from '../dashboard/DashboardLayoutClient';
 
-export default async function UserProfileLayout(props: {
+export default async function SubscriptionsLayout(props: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
@@ -13,7 +13,7 @@ export default async function UserProfileLayout(props: {
   });
 
   return (
-    <UserProfileLayoutClient
+    <DashboardLayoutClient
       translations={{
         dashboard_link: t('dashboard_link'),
         subscriptions_link: t('subscriptions_link'),
@@ -23,6 +23,6 @@ export default async function UserProfileLayout(props: {
       }}
     >
       {props.children}
-    </UserProfileLayoutClient>
+    </DashboardLayoutClient>
   );
 }
