@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/DIMO-Network/account-manager/compare/v2.3.0...v2.4.0) (2025-07-01)
+
+
+### Features
+
+* implement responsive design ([#21](https://github.com/DIMO-Network/account-manager/issues/21)) ([79de841](https://github.com/DIMO-Network/account-manager/commit/79de841a5437473db2d380b3049a4eb98813646c))
+
 # [2.3.0](https://github.com/DIMO-Network/account-manager/compare/v2.2.0...v2.3.0) (2025-06-28)
 
 
