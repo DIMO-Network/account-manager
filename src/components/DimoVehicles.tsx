@@ -1,9 +1,10 @@
 'use client';
 
+import type { Vehicle } from '@/app/actions/getDimoVehicles';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getDimoVehicles, type Vehicle } from '@/app/actions/getDimoVehicles';
+import { getDimoVehicles } from '@/app/actions/getDimoVehicles';
 import { DeviceSubscriptionStatus } from '@/components/subscription/DeviceSubscriptionStatus';
 
 export const DimoVehicles = () => {

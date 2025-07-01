@@ -1,6 +1,7 @@
 'use client';
 
-import { type AuthNavigationTranslations, LayoutWrapper } from '@/components/Layout';
+import type { AuthNavigationTranslations } from '@/components/Layout';
+import { LayoutWrapper } from '@/components/Layout';
 
 type DashboardLayoutClientProps = {
   children: React.ReactNode;

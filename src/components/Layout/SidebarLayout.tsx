@@ -1,8 +1,8 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import type { MenuItemConfig } from '@/types/menu';
-import { type FC, useState } from 'react';
+import { useState } from 'react';
 import { FullScreenMenu, Menu, MenuButton } from '@/components/Menu';
 import { COLORS, SPACING } from '@/utils/designSystem';
 import { Header } from './Header';

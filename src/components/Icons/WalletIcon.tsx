@@ -1,5 +1,6 @@
+import type { FC } from 'react';
 import type { IconProps } from './index';
-import React, { type FC } from 'react';
+import React from 'react';
 
 export const WalletIcon: FC<IconProps> = ({ className = '' }) => {
   return (

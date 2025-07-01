@@ -1,7 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { type AuthNavigationTranslations, createAuthNavigation, createPublicNavigation, type PublicNavigationTranslations, SidebarLayout } from './index';
+import type { AuthNavigationTranslations, PublicNavigationTranslations } from './index';
+import { createAuthNavigation, createPublicNavigation, SidebarLayout } from './index';
 
 type LayoutWrapperProps = {
   children: ReactNode;

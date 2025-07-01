@@ -1,6 +1,7 @@
 'use client';
 
-import { LayoutWrapper, type PublicNavigationTranslations } from '@/components/Layout';
+import type { PublicNavigationTranslations } from '@/components/Layout';
+import { LayoutWrapper } from '@/components/Layout';
 
 type PublicLayoutClientProps = {
   children: React.ReactNode;
