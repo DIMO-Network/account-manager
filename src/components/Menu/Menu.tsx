@@ -2,17 +2,15 @@ import type { FC } from 'react';
 import type { MenuItemConfig } from '@/types/menu';
 import { usePathname } from 'next/navigation';
 import { AppConfig } from '@/utils/AppConfig';
+import { COLORS } from '@/utils/designSystem';
 import { MenuItem } from './MenuItem';
 
 type MenuProps = {
-  mainMenu: MenuItemConfig[];
-  bottomMenu?: MenuItemConfig[];
+  menuItems: MenuItemConfig[];
   onMenuItemClick?: () => void;
 };
 
-const EMPTY_ARRAY: MenuItemConfig[] = [];
-
-export const Menu: FC<MenuProps> = ({ mainMenu, bottomMenu = EMPTY_ARRAY, onMenuItemClick }) => {
+export const Menu: FC<MenuProps> = ({ menuItems, onMenuItemClick }) => {
   const pathname = usePathname();
 
   const getIsHighlighted = (item: MenuItemConfig) => {
@@ -26,16 +24,18 @@ export const Menu: FC<MenuProps> = ({ mainMenu, bottomMenu = EMPTY_ARRAY, onMenu
     return currentPath === itemPath;
   };
 
-  return (
-    <div className="w-full px-4 py-6 flex flex-col gap-4 justify-between">
-      <ul className="flex flex-col gap-4 justify-center">
-        <div className="flex flex-row justify-between items-center mb-6">
-          <h1 className="text-xl font-bold text-gray-900">
-            {AppConfig.name}
-          </h1>
-        </div>
+  const mainMenuItems = menuItems.filter(item => !item.section || item.section === 'main');
+  const bottomMenuItems = menuItems.filter(item => item.section === 'bottom');
 
-        {mainMenu.map(item => (
+  return (
+    <div className={`flex flex-col gap-4 md:rounded-xl px-4 py-6 h-full w-64 ${COLORS.background.secondary}`}>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-white">
+          {AppConfig.name}
+        </h1>
+      </div>
+      <ul className="flex flex-col gap-4 justify-center">
+        {mainMenuItems.map(item => (
           <MenuItem
             key={typeof item.link === 'string' ? item.link : item.label}
             {...item}
@@ -45,9 +45,10 @@ export const Menu: FC<MenuProps> = ({ mainMenu, bottomMenu = EMPTY_ARRAY, onMenu
         ))}
       </ul>
 
-      {bottomMenu.length > 0 && (
-        <ul className="flex flex-col gap-4 justify-center">
-          {bottomMenu.map(item => (
+      {/* Bottom section */}
+      {bottomMenuItems.length > 0 && (
+        <ul className="flex flex-col gap-3 mt-auto justify-center">
+          {bottomMenuItems.map(item => (
             <MenuItem
               key={typeof item.link === 'string' ? item.link : item.label}
               {...item}

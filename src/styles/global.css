@@ -1,1 +1,13 @@
+@import './theme.css';
+@layer theme, base, clerk, components, utilities; /* Ensure Clerk is compatible with Tailwind CSS v4 */
+
 @import 'tailwindcss';
+
+@layer base {
+  html,
+  body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+  }
+}

@@ -7,7 +7,7 @@ type StatusHeaderProps = {
 
 export const StatusHeader = ({ connectionId, compact = false }: StatusHeaderProps) => {
   if (compact) {
-    return <h4 className="text-sm font-medium text-gray-900">Subscription Status</h4>;
+    return <h4 className="text-sm font-medium">Subscription Status</h4>;
   }
 
   return (

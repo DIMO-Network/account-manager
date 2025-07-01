@@ -4,57 +4,48 @@ import type { ReactNode } from 'react';
 import type { MenuItemConfig } from '@/types/menu';
 import { type FC, useState } from 'react';
 import { FullScreenMenu, Menu, MenuButton } from '@/components/Menu';
+import { COLORS, SPACING } from '@/utils/designSystem';
+import { Header } from './Header';
 
 type SidebarLayoutProps = {
   children: ReactNode;
-  mainMenu: MenuItemConfig[];
-  bottomMenu?: MenuItemConfig[];
-  rightNav?: ReactNode;
+  menuItems: MenuItemConfig[];
 };
-
-const EMPTY_ARRAY: MenuItemConfig[] = [];
 
 export const SidebarLayout: FC<SidebarLayoutProps> = ({
   children,
-  mainMenu,
-  bottomMenu = EMPTY_ARRAY,
-  rightNav,
+  menuItems,
 }) => {
   const [isFullScreenMenuOpen, setIsFullScreenMenuOpen] = useState(false);
 
   return (
-    <div className="flex flex-row py-6 pl-6 bg-gray-50 min-h-screen items-stretch">
+    <div className="flex flex-col md:flex-row min-h-screen">
       {/* Sidebar */}
-      <div className="hidden md:flex md:mr-6 md:w-64 md:flex-shrink-0 md:rounded-xl md:bg-white md:shadow-sm md:flex-col">
-        <div className="flex-1">
-          <Menu
-            mainMenu={mainMenu}
-            bottomMenu={bottomMenu}
-          />
-        </div>
-
-        {/* Bottom section with sign in/out and locale switcher */}
-        {rightNav && (
-          <div className="p-4 border-t border-gray-200">
-            {rightNav}
-          </div>
-        )}
+      <div
+        className={`
+          hidden md:flex 
+          h-screen sticky top-0
+          p-6
+        `}
+      >
+        <Menu menuItems={menuItems} />
       </div>
 
       {/* Main Content */}
       <div className="flex flex-col flex-1">
-        {/* Header */}
-        <div className="flex flex-row items-center justify-between pr-6 mb-6">
-          <div className="md:hidden">
-            <MenuButton
-              onClick={() => setIsFullScreenMenuOpen(true)}
-              className="mr-4"
-            />
-          </div>
-
-          {/* Show locale switcher in header on mobile */}
-          <div className="flex items-center gap-4 md:hidden">
-            {rightNav}
+        {/* Mobile Header */}
+        <div className={`
+          md:hidden
+          ${SPACING.sm} ${COLORS.background.primary}
+          flex items-center sticky top-0 z-10
+        `}
+        >
+          <MenuButton
+            onClick={() => setIsFullScreenMenuOpen(true)}
+            className="w-10 h-10 mr-4 flex-shrink-0"
+          />
+          <div className="flex-1">
+            <Header />
           </div>
         </div>
 
@@ -62,12 +53,22 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
         <FullScreenMenu
           isOpen={isFullScreenMenuOpen}
           onClose={() => setIsFullScreenMenuOpen(false)}
-          mainMenu={mainMenu}
-          bottomMenu={bottomMenu}
+          menuItems={menuItems}
         />
 
+        {/* Desktop Header */}
+        <div
+          className="hidden md:block sticky top-0 z-10 py-6 pr-4"
+        >
+          <Header />
+        </div>
+
         {/* Page Content */}
-        <main className="overflow-y-auto overflow-x-auto py-6 pr-6 w-full flex-1">
+        <main className={`
+          flex-1
+          overflow-y-auto overflow-x-auto p-6
+        `}
+        >
           {children}
         </main>
       </div>
