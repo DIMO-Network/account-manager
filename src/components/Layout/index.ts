@@ -1,3 +1,4 @@
+export { Header } from './Header';
 export { LayoutWrapper } from './LayoutWrapper';
 export {
   type AuthNavigationTranslations,

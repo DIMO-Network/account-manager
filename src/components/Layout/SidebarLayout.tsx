@@ -5,6 +5,7 @@ import type { MenuItemConfig } from '@/types/menu';
 import { type FC, useState } from 'react';
 import { FullScreenMenu, Menu, MenuButton } from '@/components/Menu';
 import { COLORS, SPACING } from '@/utils/designSystem';
+import { Header } from './Header';
 
 type SidebarLayoutProps = {
   children: ReactNode;
@@ -57,6 +58,15 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
           onClose={() => setIsFullScreenMenuOpen(false)}
           menuItems={menuItems}
         />
+
+        {/* Header */}
+        <div className={`
+          ${SPACING.sm}
+          ${COLORS.background.primary}
+        `}
+        >
+          <Header />
+        </div>
 
         {/* Page Content */}
         <main className={`
