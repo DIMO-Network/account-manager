@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/DIMO-Network/account-manager/compare/v2.4.0...v2.4.1) (2025-07-01)
+
+
+### Bug Fixes
+
+* update imports to use top-level type-only style per ESLint ([335c255](https://github.com/DIMO-Network/account-manager/commit/335c2551efc786ef7f17cde297c75d9a33869c64))
+
 # [2.4.0](https://github.com/DIMO-Network/account-manager/compare/v2.3.0...v2.4.0) (2025-07-01)
 
 
