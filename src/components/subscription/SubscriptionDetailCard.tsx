@@ -1,11 +1,11 @@
 import React from 'react';
-import { useVehicleDetails } from '@/hooks/useVehicleDetails';
 
 type SubscriptionDetailCardProps = {
   subscription: any;
+  vehicleInfo?: any;
 };
 
-export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ subscription }) => {
+export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ subscription, vehicleInfo }) => {
   const metadata = subscription?.metadata || {};
   const connectionId = metadata.connectionId || 'N/A';
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
@@ -14,8 +14,6 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
   const renewsOn = subscription?.current_period_end
     ? new Date(subscription.current_period_end * 1000).toLocaleDateString()
     : 'N/A';
-
-  const { vehicleInfo, vehicleLoading, vehicleError } = useVehicleDetails(vehicleTokenId);
 
   return (
     <div className="p-4 bg-surface-raised rounded-2xl flex flex-col justify-between">
@@ -36,15 +34,16 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
             </tr>
             <tr>
               <td className="font-light text-xs leading-5 pb-1">
-                {vehicleLoading && 'Loading vehicle...'}
-                {vehicleError && <span className="text-red-500">{vehicleError}</span>}
-                {!vehicleLoading && !vehicleError && vehicleInfo && (
-                  <>
-                    <div>{vehicleInfo.year && vehicleInfo.make && vehicleInfo.model ? `${vehicleInfo.year} ${vehicleInfo.make} ${vehicleInfo.model}` : 'N/A'}</div>
-                    <div className="text-xs text-gray-400">{vehicleInfo.dcn || vehicleInfo.name || 'N/A'}</div>
-                  </>
-                )}
-                {!vehicleLoading && !vehicleError && !vehicleInfo && vehicleTokenId}
+                {vehicleInfo
+                  ? (
+                      <>
+                        <div>{vehicleInfo.definition?.year && vehicleInfo.definition?.make && vehicleInfo.definition?.model ? `${vehicleInfo.definition.year} ${vehicleInfo.definition.make} ${vehicleInfo.definition.model}` : 'N/A'}</div>
+                        <div className="text-xs text-gray-400">{vehicleInfo.dcn?.name || vehicleInfo.name || 'N/A'}</div>
+                      </>
+                    )
+                  : (
+                      vehicleTokenId
+                    )}
               </td>
             </tr>
             <tr>

@@ -1,45 +1,33 @@
-'use client';
-import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { notFound } from 'next/navigation';
+import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import SubscriptionDetailCard from '@/components/subscription/SubscriptionDetailCard';
+import { stripe } from '@/libs/Stripe';
 
-export default function SubscriptionDetailPage() {
-  const params = useParams();
-  const subscriptionId = params?.subscriptionId as string;
-  const [subscription, setSubscription] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default async function SubscriptionDetailPage({ params }: { params: { subscriptionId: string } }) {
+  const { subscriptionId } = await params;
 
-  useEffect(() => {
-    if (!subscriptionId) {
-      return;
-    }
+  if (!subscriptionId) {
+    notFound();
+  }
 
-    const fetchSubscription = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/subscriptions/${subscriptionId}`);
-        const data = await res.json();
-        if (data.error) {
-          setError(data.error);
-        } else {
-          setSubscription(data);
-        }
-      } catch {
-        setError('Failed to fetch subscription details');
-      } finally {
-        setLoading(false);
-      }
-    };
+  let subscription = null;
+  try {
+    subscription = await stripe().subscriptions.retrieve(subscriptionId);
+  } catch {
+    notFound();
+  }
 
-    fetchSubscription();
-  }, [subscriptionId]);
+  // Get vehicleTokenId from subscription metadata
+  const vehicleTokenId = subscription?.metadata?.vehicleTokenId;
+  let vehicleInfo = null;
+  if (vehicleTokenId) {
+    const { vehicle } = await getDimoVehicleDetails(vehicleTokenId);
+    vehicleInfo = vehicle;
+  }
 
   return (
     <div className="py-5">
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      {subscription && <SubscriptionDetailCard subscription={subscription} />}
+      <SubscriptionDetailCard subscription={subscription} vehicleInfo={vehicleInfo} />
     </div>
   );
 }
