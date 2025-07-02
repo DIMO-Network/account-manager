@@ -1,108 +1,24 @@
 'use client';
 
-import type Stripe from 'stripe';
-import type { PaymentMethodsResponse } from '@/types/paymentMethod';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
+import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
 import { PaymentMethodCard } from './PaymentMethodCard';
 
 export const PaymentMethodsList = () => {
   const { customerId, loading: customerLoading, error: customerError } = useStripeCustomer();
-  const [paymentMethods, setPaymentMethods] = useState<Stripe.PaymentMethod[]>([]);
-  const [defaultPaymentMethodId, setDefaultPaymentMethodId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const {
+    paymentMethods,
+    defaultPaymentMethodId,
+    loading,
+    error,
+    fetchPaymentMethods,
+    setDefaultPaymentMethodId,
+    setPaymentMethods,
+    setError,
+  } = usePaymentMethods(customerId);
   const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchPaymentMethods = useCallback(async () => {
-    if (!customerId) {
-      return;
-    }
-
-    try {
-      setError(null);
-      setLoading(true);
-
-      const response = await fetch(`/api/payment-methods?customer_id=${customerId}`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch payment methods');
-      }
-
-      const data: PaymentMethodsResponse = await response.json();
-      setPaymentMethods(data.paymentMethods);
-      setDefaultPaymentMethodId(data.defaultPaymentMethodId || null);
-    } catch (err) {
-      console.error('Error fetching payment methods:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch payment methods');
-    } finally {
-      setLoading(false);
-    }
-  }, [customerId]);
-
-  useEffect(() => {
-    if (customerId) {
-      fetchPaymentMethods();
-    }
-  }, [fetchPaymentMethods, customerId]);
-
-  const handleSetDefault = async (paymentMethodId: string) => {
-    if (!customerId) {
-      return;
-    }
-
-    setActionLoading(true);
-    try {
-      const response = await fetch('/api/payment-methods', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentMethodId, customerId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to set default payment method');
-      }
-
-      setDefaultPaymentMethodId(paymentMethodId);
-    } catch (err) {
-      console.error('Error setting default payment method:', err);
-      setError(err instanceof Error ? err.message : 'Failed to set default payment method');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleRemove = async (paymentMethodId: string) => {
-    setActionLoading(true);
-    try {
-      const response = await fetch('/api/payment-methods', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentMethodId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to remove payment method');
-      }
-
-      // Remove from local state
-      setPaymentMethods(prev => prev.filter(pm => pm.id !== paymentMethodId));
-
-      // If this was the default, clear default
-      if (defaultPaymentMethodId === paymentMethodId) {
-        setDefaultPaymentMethodId(null);
-      }
-    } catch (err) {
-      console.error('Error removing payment method:', err);
-      setError(err instanceof Error ? err.message : 'Failed to remove payment method');
-    } finally {
-      setActionLoading(false);
-    }
-  };
 
   // Show loading state while getting customer
   if (customerLoading) {
@@ -191,6 +107,62 @@ export const PaymentMethodsList = () => {
   // Group payment methods by type (though we're only showing cards for now)
   const cardPaymentMethods = paymentMethods.filter(pm => pm.type === 'card');
   const otherPaymentMethods = paymentMethods.filter(pm => pm.type !== 'card');
+
+  const handleSetDefault = async (paymentMethodId: string) => {
+    if (!customerId) {
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const response = await fetch('/api/payment-methods', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentMethodId, customerId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to set default payment method');
+      }
+
+      setDefaultPaymentMethodId(paymentMethodId);
+    } catch (err) {
+      console.error('Error setting default payment method:', err);
+      setError(err instanceof Error ? err.message : 'Failed to set default payment method');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRemove = async (paymentMethodId: string) => {
+    setActionLoading(true);
+    try {
+      const response = await fetch('/api/payment-methods', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentMethodId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to remove payment method');
+      }
+
+      // Remove from local state
+      setPaymentMethods(prev => prev.filter(pm => pm.id !== paymentMethodId));
+
+      // If this was the default, clear default
+      if (defaultPaymentMethodId === paymentMethodId) {
+        setDefaultPaymentMethodId(null);
+      }
+    } catch (err) {
+      console.error('Error removing payment method:', err);
+      setError(err instanceof Error ? err.message : 'Failed to remove payment method');
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
