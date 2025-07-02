@@ -1,4 +1,7 @@
+import type Stripe from 'stripe';
 import { getTranslations } from 'next-intl/server';
+import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
+import { stripe } from '@/libs/Stripe';
 import { SubscriptionsClient } from './SubscriptionsClient';
 
 export async function generateMetadata(props: {
@@ -16,5 +19,12 @@ export async function generateMetadata(props: {
 }
 
 export default async function SubscriptionsPage() {
-  return <SubscriptionsClient />;
+  const customerResult = await getOrCreateStripeCustomer();
+  let subscriptions: Stripe.Subscription[] = [];
+  if (customerResult.success && customerResult.customerId) {
+    const customerId = customerResult.customerId;
+    const subs = await stripe().subscriptions.list({ customer: customerId });
+    subscriptions = subs.data as Stripe.Subscription[];
+  }
+  return <SubscriptionsClient subscriptions={subscriptions} />;
 }
