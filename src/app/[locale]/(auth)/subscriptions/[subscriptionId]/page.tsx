@@ -19,7 +19,7 @@ export default async function SubscriptionDetailPage({ params }: { params: { sub
 
   // Get vehicleTokenId from subscription metadata
   const vehicleTokenId = subscription?.metadata?.vehicleTokenId;
-  let vehicleInfo = null;
+  let vehicleInfo;
   if (vehicleTokenId) {
     const { vehicle } = await getDimoVehicleDetails(vehicleTokenId);
     vehicleInfo = vehicle;

@@ -1,9 +1,11 @@
+import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
+import type { StripeSubscription } from '@/types/subscription';
 import { useTranslations } from 'next-intl';
 import React from 'react';
 
 type SubscriptionDetailCardProps = {
-  subscription: any;
-  vehicleInfo?: any;
+  subscription: StripeSubscription;
+  vehicleInfo?: VehicleDetail;
 };
 
 export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ subscription, vehicleInfo }) => {
@@ -12,6 +14,11 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
   const connectionId = metadata.connectionId || 'N/A';
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
   const interval = subscription?.items?.data?.[0]?.price?.recurring?.interval;
+  const priceCents = subscription?.items?.data?.[0]?.price?.unit_amount;
+  let priceFormatted = '';
+  if (typeof priceCents === 'number') {
+    priceFormatted = ` ($${(priceCents / 100).toFixed(2)})`;
+  }
 
   let type = 'N/A';
   if (interval === 'month') {
@@ -19,8 +26,8 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
   } else if (interval === 'year') {
     type = t('annually');
   }
-  const renewsOn = subscription?.current_period_end
-    ? new Date(subscription.current_period_end * 1000).toLocaleDateString()
+  const renewsOn = subscription?.items?.data?.[0]?.current_period_end
+    ? new Date(subscription.items.data[0].current_period_end * 1000).toLocaleDateString()
     : 'N/A';
 
   return (
@@ -62,7 +69,10 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
               <td className="font-medium text-base leading-5 pt-4 pb-2">Type</td>
             </tr>
             <tr>
-              <td className="font-light text-xs leading-5 pb-3 border-b border-gray-700">{type}</td>
+              <td className="font-light text-xs leading-5 pb-3 border-b border-gray-700">
+                {type}
+                {priceFormatted}
+              </td>
             </tr>
             {/* Renews on */}
             <tr>
