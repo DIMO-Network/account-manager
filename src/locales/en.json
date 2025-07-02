@@ -43,5 +43,8 @@
     "meta_description": "Manage your saved payment methods and billing information.",
     "title": "Payment Methods",
     "description": "Manage your saved payment methods for subscriptions and billing."
+  },
+  "Subscriptions": {
+    "meta_title": "Subscriptions"
   }
 }

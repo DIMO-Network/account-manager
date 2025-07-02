@@ -1,12 +1,20 @@
-import React from 'react';
+import { getTranslations } from 'next-intl/server';
+import { SubscriptionsClient } from './SubscriptionsClient';
 
-const SubscriptionsPage = () => {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Subscriptions</h1>
-      <p>This is the Subscriptions page.</p>
-    </div>
-  );
-};
+export async function generateMetadata(props: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await props.params;
+  const t = await getTranslations({
+    locale,
+    namespace: 'Subscriptions',
+  });
 
-export default SubscriptionsPage;
+  return {
+    title: t('meta_title'),
+  };
+}
+
+export default async function SubscriptionsPage() {
+  return <SubscriptionsClient />;
+}

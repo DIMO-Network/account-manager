@@ -21,6 +21,7 @@ const isAuthPage = createRouteMatcher([
 const isProtectedApiRoute = createRouteMatcher([
   '/api/stripe/customer',
   '/api/payment-methods',
+  '/api/subscriptions',
   '/api/subscriptions/(.*)',
 ]);
 

@@ -1,8 +1,6 @@
 {
   "RootLayout": {
     "home_link": "Accueil",
-    "about_link": "A propos",
-    "portfolio_link": "Portfolio",
     "sign_in_link": "Se connecter",
     "sign_up_link": "S'inscrire"
   },
@@ -41,5 +39,8 @@
     "meta_description": "Manage your saved payment methods and billing information.",
     "title": "Payment Methods",
     "description": "Manage your saved payment methods for subscriptions and billing."
+  },
+  "Subscriptions": {
+    "meta_title": "Subscriptions"
   }
 }
