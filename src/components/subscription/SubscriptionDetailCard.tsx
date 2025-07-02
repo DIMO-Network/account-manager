@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React from 'react';
 
 type SubscriptionDetailCardProps = {
@@ -6,11 +7,18 @@ type SubscriptionDetailCardProps = {
 };
 
 export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ subscription, vehicleInfo }) => {
+  const t = useTranslations('Subscriptions.interval');
   const metadata = subscription?.metadata || {};
   const connectionId = metadata.connectionId || 'N/A';
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
-  // Placeholder for type (annual/monthly)
-  const type = 'Annual or Monthly';
+  const interval = subscription?.items?.data?.[0]?.price?.recurring?.interval;
+
+  let type = 'N/A';
+  if (interval === 'month') {
+    type = t('monthly');
+  } else if (interval === 'year') {
+    type = t('annually');
+  }
   const renewsOn = subscription?.current_period_end
     ? new Date(subscription.current_period_end * 1000).toLocaleDateString()
     : 'N/A';

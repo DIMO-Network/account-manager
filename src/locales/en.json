@@ -45,6 +45,10 @@
     "description": "Manage your saved payment methods for subscriptions and billing."
   },
   "Subscriptions": {
-    "meta_title": "Subscriptions"
+    "meta_title": "Subscriptions",
+    "interval": {
+      "monthly": "Monthly",
+      "annually": "Annually"
+    }
   }
 }
