@@ -4,9 +4,9 @@ import { stripe } from '@/libs/Stripe';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { subscriptionId: string } },
+  { params }: { params: Promise<{ subscriptionId: string }> },
 ) {
-  const { subscriptionId } = params;
+  const { subscriptionId } = await params;
 
   if (!subscriptionId) {
     return NextResponse.json({ error: 'No subscriptionId provided' }, { status: 400 });
