@@ -3,7 +3,7 @@ import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import SubscriptionDetailCard from '@/components/subscription/SubscriptionDetailCard';
 import { stripe } from '@/libs/Stripe';
 
-export default async function SubscriptionDetailPage({ params }: { params: { subscriptionId: string } }) {
+export default async function SubscriptionDetailPage({ params }: { params: Promise<{ subscriptionId: string }> }) {
   const { subscriptionId } = await params;
 
   if (!subscriptionId) {
