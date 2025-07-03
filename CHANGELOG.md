@@ -1,3 +1,10 @@
+# [2.7.0](https://github.com/DIMO-Network/account-manager/compare/v2.6.0...v2.7.0) (2025-07-03)
+
+
+### Features
+
+* use existing payment method for future subscriptions ([#26](https://github.com/DIMO-Network/account-manager/issues/26)) ([3d92ea9](https://github.com/DIMO-Network/account-manager/commit/3d92ea97623cf5416a459a80c37507ac636d1855))
+
 # [2.6.0](https://github.com/DIMO-Network/account-manager/compare/v2.5.0...v2.6.0) (2025-07-03)
 
 
