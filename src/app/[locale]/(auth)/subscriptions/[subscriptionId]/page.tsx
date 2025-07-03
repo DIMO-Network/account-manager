@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import SubscriptionDetailCard from '@/components/subscription/SubscriptionDetailCard';
 import { stripe } from '@/libs/Stripe';
+import { PaymentMethodSection } from '../page';
 
 export default async function SubscriptionDetailPage({ params }: { params: Promise<{ subscriptionId: string }> }) {
   const { subscriptionId } = await params;
@@ -26,8 +27,11 @@ export default async function SubscriptionDetailPage({ params }: { params: Promi
   }
 
   return (
-    <div className="py-5">
-      <SubscriptionDetailCard subscription={subscription} vehicleInfo={vehicleInfo} />
+    <div className="flex flex-col lg:flex-row gap-6 py-5">
+      <div className="w-full lg:w-3/4">
+        <SubscriptionDetailCard subscription={subscription} vehicleInfo={vehicleInfo} />
+      </div>
+      <PaymentMethodSection />
     </div>
   );
 }
