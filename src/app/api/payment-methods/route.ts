@@ -130,3 +130,45 @@ export async function PATCH(request: NextRequest) {
     );
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 },
+      );
+    }
+
+    const { customerId, cardId, name, exp_month, exp_year, address_city, address_country, address_line1, address_line2, address_state, address_zip } = await request.json();
+
+    if (!customerId || !cardId) {
+      return NextResponse.json(
+        { error: 'Customer ID and Card ID are required' },
+        { status: 400 },
+      );
+    }
+
+    // Update the card using Stripe's API
+    const updatedCard = await stripe().customers.updateSource(customerId, cardId, {
+      name,
+      exp_month,
+      exp_year,
+      address_city,
+      address_country,
+      address_line1,
+      address_line2,
+      address_state,
+      address_zip,
+    });
+
+    return NextResponse.json({ success: true, card: updatedCard });
+  } catch (error) {
+    console.error('Error updating card:', error);
+    return NextResponse.json(
+      { error: 'Failed to update card' },
+      { status: 500 },
+    );
+  }
+}

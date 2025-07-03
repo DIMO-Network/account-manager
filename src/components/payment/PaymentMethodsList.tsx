@@ -1,10 +1,11 @@
 'use client';
 
-import { DefaultPaymentMethodCard } from '@/components/payment/DefaultPaymentMethodCard';
+import { PaymentMethodCard } from '@/components/payment/PaymentMethodCard';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
-import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { WalletIcon } from '../Icons';
 
 export const PaymentMethodsList = () => {
   const { customerId, loading: customerLoading, error: customerError } = useStripeCustomer();
@@ -100,13 +101,34 @@ export const PaymentMethodsList = () => {
     );
   }
 
-  // Find the default payment method
-  const defaultPaymentMethod = paymentMethods.find(pm => pm.id === defaultPaymentMethodId);
-
   return (
     <div className="space-y-6">
-      {defaultPaymentMethod && <DefaultPaymentMethodCard paymentMethod={defaultPaymentMethod} />}
-      <PaymentMethodsNote />
+      <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2">
+        <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+        <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Payment Method</h1>
+      </div>
+      {paymentMethods.map(pm => (
+        <PaymentMethodCard
+          key={pm.id}
+          paymentMethod={pm}
+          isDefault={pm.id === defaultPaymentMethodId}
+          onSetDefaultAction={async () => {
+            await fetchPaymentMethods();
+          }}
+          onRemoveAction={async () => {
+            await fetchPaymentMethods();
+          }}
+          isLoading={false}
+          onEditAction={() => {
+            // This function is no longer needed as editCardId is removed
+            // setEditCardId(pm.id);
+          }}
+        />
+      ))}
+      {/* TODO: Render EditCardModal here, passing cardToEdit and onClose */}
+      <div className={`flex flex-col ${BORDER_RADIUS.lg} bg-surface-raised ${SPACING.xs} lg:block`}>
+        <PaymentMethodsNote />
+      </div>
     </div>
   );
 };

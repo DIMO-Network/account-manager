@@ -2,6 +2,8 @@
 
 import type Stripe from 'stripe';
 import { useState } from 'react';
+import { WalletIcon } from '@/components/Icons';
+import { BORDER_RADIUS, COLORS, SPACING } from '@/utils/designSystem';
 
 type PaymentMethodCardProps = {
   paymentMethod: Stripe.PaymentMethod;
@@ -9,6 +11,7 @@ type PaymentMethodCardProps = {
   onSetDefaultAction: (paymentMethodId: string) => Promise<void>;
   onRemoveAction: (paymentMethodId: string) => Promise<void>;
   isLoading: boolean;
+  onEditAction?: () => void;
 };
 
 export const PaymentMethodCard = ({
@@ -17,23 +20,9 @@ export const PaymentMethodCard = ({
   onSetDefaultAction,
   onRemoveAction,
   isLoading,
+  onEditAction,
 }: PaymentMethodCardProps) => {
   const [showConfirmRemove, setShowConfirmRemove] = useState(false);
-
-  const getBrandIcon = (brand: string) => {
-    switch (brand.toLowerCase()) {
-      case 'visa':
-        return '💳';
-      case 'mastercard':
-        return '💳';
-      case 'amex':
-        return '💳';
-      case 'discover':
-        return '💳';
-      default:
-        return '💳';
-    }
-  };
 
   const formatCardBrand = (brand: string) => {
     switch (brand.toLowerCase()) {
@@ -69,15 +58,15 @@ export const PaymentMethodCard = ({
     }
   };
 
-  const canRemove = !isDefault; // Can't remove default payment method
-
   // Handle different payment method types
   if (paymentMethod.type !== 'card' || !paymentMethod.card) {
     return (
-      <div className="border rounded-lg p-4">
+      <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs} mb-4`}>
+        <div className="mb-4">
+          <WalletIcon className="w-4 h-4" />
+        </div>
         <div className="text-gray-600">
           Unsupported payment method type:
-          {' '}
           {paymentMethod.type}
         </div>
       </div>
@@ -87,46 +76,37 @@ export const PaymentMethodCard = ({
   const card = paymentMethod.card;
 
   return (
-    <div className="border rounded-lg p-4 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <span className="text-2xl">{getBrandIcon(card.brand)}</span>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="font-medium text-gray-900">
-                {formatCardBrand(card.brand)}
-                {' '}
-                ••••
-                {card.last4}
-              </span>
-              {isDefault && (
-                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full font-medium">
-                  Default
-                </span>
-              )}
-            </div>
-            <div className="text-sm text-gray-600">
-              Expires
-              {' '}
-              {String(card.exp_month).padStart(2, '0')}
-              /
-              {card.exp_year}
-            </div>
-            <div className="text-xs text-gray-500 capitalize">
-              {card.funding}
-              {' '}
-              card
-              {card.country && ` • ${card.country}`}
-            </div>
-            {paymentMethod.billing_details?.name && (
-              <div className="text-xs text-gray-500">
-                {paymentMethod.billing_details.name}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
+    <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs} mb-4`}>
+      <div className="flex flex-col mt-4">
+        <span className="font-medium text-white">
+          {formatCardBrand(card.brand)}
+          {' '}
+          ••••
+          {card.last4}
+        </span>
+        <span className="text-xs text-grey-400">
+          Expires
+          {' '}
+          {String(card.exp_month).padStart(2, '0')}
+          /
+          {card.exp_year}
+        </span>
+        {paymentMethod.billing_details?.name && (
+          <span className="text-xs text-grey-500">
+            {paymentMethod.billing_details.name}
+          </span>
+        )}
+        <div className="flex flex-row gap-2 mt-2">
+          {onEditAction && (
+            <button
+              onClick={onEditAction}
+              disabled={isLoading}
+              className="inline-flex flex-row items-center justify-center w-full gap-2 mt-6 rounded-full bg-surface-raised px-4 font-medium h-10 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors disabled:opacity-50"
+              type="button"
+            >
+              Edit
+            </button>
+          )}
           {!isDefault && (
             <button
               onClick={handleSetDefault}
@@ -137,8 +117,7 @@ export const PaymentMethodCard = ({
               Set as Default
             </button>
           )}
-
-          {canRemove && (
+          {!isDefault && (
             <>
               {!showConfirmRemove
                 ? (
@@ -175,28 +154,6 @@ export const PaymentMethodCard = ({
           )}
         </div>
       </div>
-
-      <div className="text-xs text-gray-500 mt-2">
-        Added
-        {' '}
-        {new Date(paymentMethod.created * 1000).toLocaleDateString()}
-      </div>
-
-      {/* Show additional card details if available */}
-      {card.checks && (
-        <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
-          {card.checks.cvc_check && (
-            <span className={`px-2 py-1 rounded ${
-              card.checks.cvc_check === 'pass' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-            }`}
-            >
-              CVC:
-              {' '}
-              {card.checks.cvc_check}
-            </span>
-          )}
-        </div>
-      )}
     </div>
   );
 };
