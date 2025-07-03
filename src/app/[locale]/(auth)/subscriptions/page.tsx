@@ -1,13 +1,9 @@
 import type Stripe from 'stripe';
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
 import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
-import { WalletIcon } from '@/components/Icons';
-import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
 import { stripe } from '@/libs/Stripe';
-import { BORDER_RADIUS, COLORS, SPACING } from '@/utils/designSystem';
-import { PaymentMethodClient } from './PaymentMethodClient';
+import { PaymentMethodSection } from './PaymentMethodSection';
 import { SubscriptionsClient } from './SubscriptionsClient';
 
 type EnhancedSubscription = Stripe.Subscription & {
@@ -116,30 +112,6 @@ export default async function SubscriptionsPage() {
         <SubscriptionsClient subscriptions={subscriptions} />
       </div>
       <PaymentMethodSection />
-    </div>
-  );
-}
-
-export function PaymentMethodSection() {
-  return (
-    <div className="hidden lg:flex flex-col lg:w-1/4 gap-4">
-      <div className={`hidden lg:flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs}`}>
-        <div className="mb-4">
-          <WalletIcon className="w-4 h-4" />
-        </div>
-        <PaymentMethodClient />
-        <div className="mt-6 flex justify-center">
-          <Link
-            href="/payment-methods"
-            className="inline-flex flex-row items-center justify-center gap-2 rounded-full bg-surface-raised px-4 font-medium w-full h-10"
-          >
-            Edit
-          </Link>
-        </div>
-      </div>
-      <div className={`hidden lg:flex flex-col ${BORDER_RADIUS.lg} bg-surface-raised ${SPACING.xs}`}>
-        <PaymentMethodsNote />
-      </div>
     </div>
   );
 }
