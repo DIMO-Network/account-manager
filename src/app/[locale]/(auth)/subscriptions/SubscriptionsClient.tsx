@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CarIcon, ChevronRightIcon, ConnectionIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
+import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
 
 type SubscriptionsClientProps = {
   subscriptions: any[];
@@ -29,45 +30,10 @@ export function SubscriptionsClient({ subscriptions }: SubscriptionsClientProps)
                 {sub.vehicleDisplay}
               </div>
               <div className="text-xs font-light leading-5 mt-2">
-                {(() => {
-                  const interval = sub.items?.data?.[0]?.price?.recurring?.interval;
-                  const priceCents = sub.items?.data?.[0]?.price?.unit_amount;
-                  let priceFormatted = '';
-                  if (typeof priceCents === 'number') {
-                    priceFormatted = ` ($${(priceCents / 100).toFixed(2)})`;
-                  }
-
-                  let type = 'N/A';
-                  if (interval === 'month') {
-                    type = 'Monthly';
-                  } else if (interval === 'year') {
-                    type = 'Annually';
-                  }
-
-                  return `${type}${priceFormatted}`;
-                })()}
+                {getSubscriptionTypeAndPrice(sub).displayText}
               </div>
               <div className={`text-xs font-light leading-5 ${COLORS.text.secondary}`}>
-                {(() => {
-                  const currentPeriodEnd = sub.items?.data?.[0]?.current_period_end;
-                  const status = sub.status;
-
-                  if (!currentPeriodEnd) {
-                    return 'N/A';
-                  }
-
-                  const date = new Date(currentPeriodEnd * 1000).toLocaleDateString();
-
-                  if (status === 'trialing') {
-                    return `Free until ${date}`;
-                  } else if (status === 'active') {
-                    return `Renews on ${date}`;
-                  } else if (status === 'canceled') {
-                    return `Cancels on ${date}`;
-                  } else {
-                    return date;
-                  }
-                })()}
+                {getSubscriptionRenewalInfo(sub).displayText}
               </div>
             </Link>
           </li>

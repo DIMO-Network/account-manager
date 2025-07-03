@@ -2,6 +2,7 @@ import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
 import { useTranslations } from 'next-intl';
 import React from 'react';
+import { getSubscriptionRenewalInfo } from '@/utils/subscriptionHelpers';
 
 type SubscriptionDetailCardProps = {
   subscription: StripeSubscription;
@@ -13,22 +14,21 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
   const metadata = subscription?.metadata || {};
   const connectionId = metadata.connectionId || 'N/A';
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
-  const interval = subscription?.items?.data?.[0]?.price?.recurring?.interval;
+
+  const { displayText: renewsOn } = getSubscriptionRenewalInfo(subscription);
+
+  let type = 'N/A';
+  if (subscription?.items?.data?.[0]?.price?.recurring?.interval === 'month') {
+    type = t('monthly');
+  } else if (subscription?.items?.data?.[0]?.price?.recurring?.interval === 'year') {
+    type = t('annually');
+  }
+
   const priceCents = subscription?.items?.data?.[0]?.price?.unit_amount;
   let priceFormatted = '';
   if (typeof priceCents === 'number') {
     priceFormatted = ` ($${(priceCents / 100).toFixed(2)})`;
   }
-
-  let type = 'N/A';
-  if (interval === 'month') {
-    type = t('monthly');
-  } else if (interval === 'year') {
-    type = t('annually');
-  }
-  const renewsOn = subscription?.items?.data?.[0]?.current_period_end
-    ? new Date(subscription.items.data[0].current_period_end * 1000).toLocaleDateString()
-    : 'N/A';
 
   return (
     <div className="p-4 bg-surface-raised rounded-2xl flex flex-col justify-between">
