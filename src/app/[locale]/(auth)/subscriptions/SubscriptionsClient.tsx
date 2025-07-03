@@ -1,10 +1,16 @@
+import type Stripe from 'stripe';
 import Link from 'next/link';
 import { CarIcon, ChevronRightIcon, ConnectionIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
 
+type EnhancedSubscription = Stripe.Subscription & {
+  productName: string;
+  vehicleDisplay: string;
+};
+
 type SubscriptionsClientProps = {
-  subscriptions: any[];
+  subscriptions: EnhancedSubscription[];
 };
 
 export function SubscriptionsClient({ subscriptions }: SubscriptionsClientProps) {

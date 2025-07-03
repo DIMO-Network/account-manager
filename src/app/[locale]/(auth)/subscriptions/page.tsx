@@ -5,6 +5,11 @@ import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
 import { stripe } from '@/libs/Stripe';
 import { SubscriptionsClient } from './SubscriptionsClient';
 
+type EnhancedSubscription = Stripe.Subscription & {
+  productName: string;
+  vehicleDisplay: string;
+};
+
 async function getProductInfo(productId: string): Promise<{ name: string } | null> {
   try {
     const product = await stripe().products.retrieve(productId);
@@ -31,7 +36,7 @@ export async function generateMetadata(props: {
 
 export default async function SubscriptionsPage() {
   const customerResult = await getOrCreateStripeCustomer();
-  let subscriptions: Stripe.Subscription[] = [];
+  let subscriptions: EnhancedSubscription[] = [];
 
   if (customerResult.success && customerResult.customerId) {
     const customerId = customerResult.customerId;
@@ -88,7 +93,6 @@ export default async function SubscriptionsPage() {
       }),
     );
 
-    // Simplify the data structure for easier access
     const simplifiedSubscriptions = subscriptionsWithVehicles.map(sub => ({
       ...sub,
       productName: sub.items?.data?.[0]?.price?.product?.name || `Subscription ${sub.id}`,
@@ -97,7 +101,7 @@ export default async function SubscriptionsPage() {
         : sub.metadata?.vehicleTokenId || 'N/A',
     }));
 
-    subscriptions = simplifiedSubscriptions as unknown as Stripe.Subscription[];
+    subscriptions = simplifiedSubscriptions as unknown as EnhancedSubscription[];
   }
 
   return <SubscriptionsClient subscriptions={subscriptions} />;
