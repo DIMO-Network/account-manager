@@ -1,3 +1,10 @@
+# [2.5.0](https://github.com/DIMO-Network/account-manager/compare/v2.4.1...v2.5.0) (2025-07-03)
+
+
+### Features
+
+* build subscriptions dashboard page ([#24](https://github.com/DIMO-Network/account-manager/issues/24)) ([d3b10db](https://github.com/DIMO-Network/account-manager/commit/d3b10dbfb97cbe48a713684e2a2621b424ac0ad3))
+
 ## [2.4.1](https://github.com/DIMO-Network/account-manager/compare/v2.4.0...v2.4.1) (2025-07-01)
 
 
