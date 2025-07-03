@@ -1,3 +1,10 @@
+# [2.6.0](https://github.com/DIMO-Network/account-manager/compare/v2.5.0...v2.6.0) (2025-07-03)
+
+
+### Features
+
+* payment methods page ([#25](https://github.com/DIMO-Network/account-manager/issues/25)) ([ce325ea](https://github.com/DIMO-Network/account-manager/commit/ce325eaa2bd68ba9f29665461894d724b7b3cfb6))
+
 # [2.5.0](https://github.com/DIMO-Network/account-manager/compare/v2.4.1...v2.5.0) (2025-07-03)
 
 
