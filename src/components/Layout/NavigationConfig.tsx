@@ -1,6 +1,6 @@
 import type { MenuItemConfig } from '@/types/menu';
 import { SignOutButton } from '@clerk/nextjs';
-import { HomeIcon, LogoutIcon, SettingsIcon, WalletIcon } from '@/components/Icons';
+import { CarIcon, HomeIcon, LogoutIcon, SettingsIcon, WalletIcon } from '@/components/Icons';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { MenuActionButton } from '@/components/Menu/MenuActionButton';
 
@@ -10,6 +10,7 @@ export type AuthNavigationTranslations = {
   user_profile_link: string;
   sign_out: string;
   subscriptions_link: string;
+  vehicles_link: string;
 };
 
 export type PublicNavigationTranslations = {
@@ -38,6 +39,13 @@ export const createAuthNavigation = (translations: AuthNavigationTranslations): 
     icon: WalletIcon,
     iconClassName: 'h-5 w-5',
     link: '/payment-methods/',
+    section: 'main',
+  },
+  {
+    label: translations.vehicles_link,
+    icon: CarIcon,
+    iconClassName: 'h-5 w-5',
+    link: '/vehicles/',
     section: 'main',
   },
   {

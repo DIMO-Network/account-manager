@@ -46,5 +46,17 @@
       "monthly": "Monthly",
       "annually": "Annually"
     }
+  },
+  "vehicles_link": "Véhicules",
+  "VehiclesLayout": {
+    "dashboard_link": "Tableau de bord",
+    "vehicles_link": "Véhicules",
+    "subscriptions_link": "Abonnements",
+    "payment_methods_link": "Moyens de paiement",
+    "user_profile_link": "Profil",
+    "sign_out": "Déconnexion"
+  },
+  "Vehicles": {
+    "meta_title": "Véhicules"
   }
 }

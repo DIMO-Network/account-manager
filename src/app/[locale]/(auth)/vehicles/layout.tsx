@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { DashboardLayoutClient } from './DashboardLayoutClient';
 
-export default async function DashboardLayout(props: {
+export default async function VehiclesLayout(props: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
@@ -9,7 +9,7 @@ export default async function DashboardLayout(props: {
   setRequestLocale(locale);
   const t = await getTranslations({
     locale,
-    namespace: 'DashboardLayout',
+    namespace: 'VehiclesLayout',
   });
 
   return (
