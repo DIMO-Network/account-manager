@@ -13,6 +13,8 @@ const isProtectedRoute = createRouteMatcher([
   '/:locale/dashboard(.*)',
   '/subscriptions(.*)',
   '/:locale/subscriptions(.*)',
+  '/vehicles(.*)',
+  '/:locale/vehicles(.*)',
 ]);
 
 const isAuthPage = createRouteMatcher([

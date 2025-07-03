@@ -17,6 +17,18 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customer_id');
+    const cardId = searchParams.get('cardId');
+
+    if (cardId && customerId) {
+      const card = await stripe().paymentMethods.retrieve(cardId);
+      if (card.customer !== customerId) {
+        return NextResponse.json(
+          { error: 'Card does not belong to this customer' },
+          { status: 403 },
+        );
+      }
+      return NextResponse.json({ card });
+    }
 
     if (!customerId) {
       return NextResponse.json(
@@ -25,11 +37,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch payment methods from Stripe using their official API
     const paymentMethods = await stripe().paymentMethods.list({
       customer: customerId,
       type: 'card',
-      limit: 100, // Get all payment methods
+      limit: 100,
     });
 
     // Fetch customer's default payment method
@@ -81,7 +92,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Detach payment method from customer using Stripe's official API
+    // Detach payment method from customer
     await stripe().paymentMethods.detach(paymentMethodId);
 
     return NextResponse.json({ success: true });
@@ -114,7 +125,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // Update customer's default payment method using Stripe's official API
+    // Update customer's default payment method
     await stripe().customers.update(customerId, {
       invoice_settings: {
         default_payment_method: paymentMethodId,
@@ -126,6 +137,50 @@ export async function PATCH(request: NextRequest) {
     console.error('Error setting default payment method:', error);
     return NextResponse.json(
       { error: 'Failed to set default payment method' },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 },
+      );
+    }
+
+    const { customerId, cardId, name, address_city, address_country, address_line1, address_line2, address_state, address_zip } = await request.json();
+
+    if (!customerId || !cardId) {
+      return NextResponse.json(
+        { error: 'Customer ID and Card ID are required' },
+        { status: 400 },
+      );
+    }
+
+    // Update the payment method
+    const updatedCard = await stripe().paymentMethods.update(cardId, {
+      billing_details: {
+        name,
+        address: {
+          city: address_city,
+          country: address_country,
+          line1: address_line1,
+          line2: address_line2,
+          state: address_state,
+          postal_code: address_zip,
+        },
+      },
+    });
+
+    return NextResponse.json({ success: true, card: updatedCard });
+  } catch (error) {
+    console.error('Error updating card:', error);
+    return NextResponse.json(
+      { error: 'Failed to update card' },
       { status: 500 },
     );
   }

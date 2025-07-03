@@ -84,7 +84,7 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
           </tbody>
         </table>
         <button
-          className="mt-6 py-2 px-4 rounded bg-gray-200 text-gray-500 cursor-not-allowed w-full"
+          className="mt-6 py-2 px-4 rounded-full bg-white text-black cursor-not-allowed w-full"
           disabled
           aria-disabled="true"
           title="Cancel subscription feature coming soon"

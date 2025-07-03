@@ -16,6 +16,7 @@ export default async function PaymentMethodsLayout(props: {
     <PaymentMethodsLayoutClient
       translations={{
         dashboard_link: t('dashboard_link'),
+        vehicles_link: t('vehicles_link'),
         subscriptions_link: t('subscriptions_link'),
         payment_methods_link: t('payment_methods_link'),
         user_profile_link: t('user_profile_link'),

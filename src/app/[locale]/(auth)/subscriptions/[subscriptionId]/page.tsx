@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import SubscriptionDetailCard from '@/components/subscription/SubscriptionDetailCard';
 import { stripe } from '@/libs/Stripe';
-import { PaymentMethodSection } from '../page';
+import { PaymentMethodSection } from '../PaymentMethodSection';
 
 export default async function SubscriptionDetailPage({ params }: { params: Promise<{ subscriptionId: string }> }) {
   const { subscriptionId } = await params;
