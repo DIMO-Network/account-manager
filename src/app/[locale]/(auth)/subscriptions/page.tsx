@@ -2,7 +2,11 @@ import type Stripe from 'stripe';
 import { getTranslations } from 'next-intl/server';
 import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
+import { WalletIcon } from '@/components/Icons';
+import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
 import { stripe } from '@/libs/Stripe';
+import { BORDER_RADIUS, COLORS, SPACING } from '@/utils/designSystem';
+import { PaymentMethodClient } from './PaymentMethodClient';
 import { SubscriptionsClient } from './SubscriptionsClient';
 
 type EnhancedSubscription = Stripe.Subscription & {
@@ -37,9 +41,10 @@ export async function generateMetadata(props: {
 export default async function SubscriptionsPage() {
   const customerResult = await getOrCreateStripeCustomer();
   let subscriptions: EnhancedSubscription[] = [];
+  let customerId: string | null = null;
 
   if (customerResult.success && customerResult.customerId) {
-    const customerId = customerResult.customerId;
+    customerId = customerResult.customerId;
     const subs = await stripe().subscriptions.list({
       customer: customerId,
       expand: ['data.items.data.price'],
@@ -104,5 +109,28 @@ export default async function SubscriptionsPage() {
     subscriptions = simplifiedSubscriptions as unknown as EnhancedSubscription[];
   }
 
-  return <SubscriptionsClient subscriptions={subscriptions} />;
+  return (
+    <div className="flex flex-col lg:flex-row gap-6">
+      <div className="w-full lg:w-3/4">
+        <SubscriptionsClient subscriptions={subscriptions} />
+      </div>
+      <PaymentMethodSection />
+    </div>
+  );
+}
+
+function PaymentMethodSection() {
+  return (
+    <div className="hidden lg:flex flex-col lg:w-1/4 gap-4">
+      <div className={`hidden lg:flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs}`}>
+        <div className="mb-4">
+          <WalletIcon className="w-4 h-4" />
+        </div>
+        <PaymentMethodClient />
+      </div>
+      <div className={`hidden lg:flex flex-col ${BORDER_RADIUS.lg} bg-surface-raised ${SPACING.xs}`}>
+        <PaymentMethodsNote />
+      </div>
+    </div>
+  );
 }

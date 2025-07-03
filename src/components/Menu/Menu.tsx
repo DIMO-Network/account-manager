@@ -28,7 +28,7 @@ export const Menu: FC<MenuProps> = ({ menuItems, onMenuItemClick }) => {
   const bottomMenuItems = menuItems.filter(item => item.section === 'bottom');
 
   return (
-    <div className={`flex flex-col gap-4 md:rounded-xl px-4 py-6 h-full w-64 ${COLORS.background.secondary}`}>
+    <div className={`flex flex-col gap-4 md:rounded-xl px-4 py-6 h-full w-full md:w-64 ${COLORS.background.primary}`}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white">
           {AppConfig.name}

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { DefaultPaymentMethodCard } from '@/components/payment/DefaultPaymentMethodCard';
+import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
-import { PaymentMethodCard } from './PaymentMethodCard';
 
 export const PaymentMethodsList = () => {
   const { customerId, loading: customerLoading, error: customerError } = useStripeCustomer();
@@ -14,11 +14,7 @@ export const PaymentMethodsList = () => {
     loading,
     error,
     fetchPaymentMethods,
-    setDefaultPaymentMethodId,
-    setPaymentMethods,
-    setError,
   } = usePaymentMethods(customerId);
-  const [actionLoading, setActionLoading] = useState(false);
 
   // Show loading state while getting customer
   if (customerLoading) {
@@ -104,150 +100,13 @@ export const PaymentMethodsList = () => {
     );
   }
 
-  // Group payment methods by type (though we're only showing cards for now)
-  const cardPaymentMethods = paymentMethods.filter(pm => pm.type === 'card');
-  const otherPaymentMethods = paymentMethods.filter(pm => pm.type !== 'card');
-
-  const handleSetDefault = async (paymentMethodId: string) => {
-    if (!customerId) {
-      return;
-    }
-
-    setActionLoading(true);
-    try {
-      const response = await fetch('/api/payment-methods', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentMethodId, customerId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to set default payment method');
-      }
-
-      setDefaultPaymentMethodId(paymentMethodId);
-    } catch (err) {
-      console.error('Error setting default payment method:', err);
-      setError(err instanceof Error ? err.message : 'Failed to set default payment method');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleRemove = async (paymentMethodId: string) => {
-    setActionLoading(true);
-    try {
-      const response = await fetch('/api/payment-methods', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentMethodId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to remove payment method');
-      }
-
-      // Remove from local state
-      setPaymentMethods(prev => prev.filter(pm => pm.id !== paymentMethodId));
-
-      // If this was the default, clear default
-      if (defaultPaymentMethodId === paymentMethodId) {
-        setDefaultPaymentMethodId(null);
-      }
-    } catch (err) {
-      console.error('Error removing payment method:', err);
-      setError(err instanceof Error ? err.message : 'Failed to remove payment method');
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  // Find the default payment method
+  const defaultPaymentMethod = paymentMethods.find(pm => pm.id === defaultPaymentMethodId);
 
   return (
     <div className="space-y-6">
-      {/* Customer Info */}
-      <div className={`${SPACING.sm} ${COLORS.background.secondary} border border-primary-500 rounded-lg`}>
-        <p className={`${RESPONSIVE.text.body} text-primary-500`}>
-          <strong>Customer ID:</strong>
-          {' '}
-          {customerId}
-        </p>
-      </div>
-
-      {/* Card Payment Methods */}
-      {cardPaymentMethods.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h3 className={`${RESPONSIVE.text.h3} font-medium ${COLORS.text.primary}`}>
-              Cards (
-              {cardPaymentMethods.length}
-              )
-            </h3>
-            <button
-              onClick={fetchPaymentMethods}
-              disabled={actionLoading}
-              className={`${RESPONSIVE.touch} px-3 py-1 text-sm text-grey-400 hover:text-grey-300 hover:bg-surface-sunken rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
-              type="button"
-            >
-              ↻ Refresh
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {cardPaymentMethods.map(paymentMethod => (
-              <PaymentMethodCard
-                key={paymentMethod.id}
-                paymentMethod={paymentMethod}
-                isDefault={defaultPaymentMethodId === paymentMethod.id}
-                onSetDefaultAction={handleSetDefault}
-                onRemoveAction={handleRemove}
-                isLoading={actionLoading}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Other Payment Methods (for future expansion) */}
-      {otherPaymentMethods.length > 0 && (
-        <div className="space-y-4">
-          <h3 className={`${RESPONSIVE.text.h3} font-medium ${COLORS.text.primary}`}>
-            Other Payment Methods (
-            {otherPaymentMethods.length}
-            )
-          </h3>
-          <div className="space-y-3">
-            {otherPaymentMethods.map(paymentMethod => (
-              <div key={paymentMethod.id} className={`border ${COLORS.border.default} rounded-lg ${SPACING.md} ${COLORS.background.secondary}`}>
-                <div className="text-grey-400">
-                  {paymentMethod.type}
-                  {' '}
-                  payment method (ID:
-                  {paymentMethod.id}
-                  )
-                </div>
-                <div className="text-xs text-grey-500 mt-1">
-                  Added
-                  {' '}
-                  {new Date(paymentMethod.created * 1000).toLocaleDateString()}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className={`${SPACING.sm} ${COLORS.background.secondary} border border-primary-500 rounded-lg`}>
-        <p className={`${RESPONSIVE.text.body} text-primary-500`}>
-          💡
-          {' '}
-          <strong>Tip:</strong>
-          {' '}
-          Payment methods are automatically saved when you create subscriptions.
-          Your default payment method will be used for automatic renewals.
-        </p>
-      </div>
+      {defaultPaymentMethod && <DefaultPaymentMethodCard paymentMethod={defaultPaymentMethod} />}
+      <PaymentMethodsNote />
     </div>
   );
 };
