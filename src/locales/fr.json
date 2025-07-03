@@ -31,6 +31,7 @@
   "DashboardLayout": {
     "dashboard_link": "Tableau de bord",
     "subscriptions_link": "Abonnements",
+    "vehicles_link": "Véhicules",
     "user_profile_link": "Gérer votre compte",
     "sign_out": "Se déconnecter"
   },
@@ -47,7 +48,6 @@
       "annually": "Annually"
     }
   },
-  "vehicles_link": "Véhicules",
   "VehiclesLayout": {
     "dashboard_link": "Tableau de bord",
     "vehicles_link": "Véhicules",

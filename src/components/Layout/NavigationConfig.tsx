@@ -21,17 +21,10 @@ export type PublicNavigationTranslations = {
 export const createAuthNavigation = (translations: AuthNavigationTranslations): MenuItemConfig[] => [
   // Main menu items
   {
-    label: translations.dashboard_link,
+    label: translations.subscriptions_link,
     icon: HomeIcon,
     iconClassName: 'h-5 w-5',
     link: '/dashboard/',
-    section: 'main',
-  },
-  {
-    label: translations.subscriptions_link,
-    icon: WalletIcon,
-    iconClassName: 'h-5 w-5',
-    link: '/subscriptions/',
     section: 'main',
   },
   {
