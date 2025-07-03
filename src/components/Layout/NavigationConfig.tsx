@@ -23,28 +23,28 @@ export const createAuthNavigation = (translations: AuthNavigationTranslations): 
   {
     label: translations.subscriptions_link,
     icon: HomeIcon,
-    iconClassName: 'h-5 w-5',
+    iconClassName: 'h-5 w-5 text-text-secondary',
     link: '/dashboard/',
     section: 'main',
   },
   {
     label: translations.payment_methods_link,
     icon: WalletIcon,
-    iconClassName: 'h-5 w-5',
+    iconClassName: 'h-5 w-5 text-text-secondary',
     link: '/payment-methods/',
     section: 'main',
   },
   {
     label: translations.vehicles_link,
     icon: CarIcon,
-    iconClassName: 'h-5 w-5',
+    iconClassName: 'h-5 w-5 text-text-secondary',
     link: '/vehicles/',
     section: 'main',
   },
   {
     label: translations.user_profile_link,
     icon: SettingsIcon,
-    iconClassName: 'h-5 w-5',
+    iconClassName: 'h-5 w-5 text-text-secondary',
     link: '/user-profile/',
     section: 'main',
   },
@@ -52,7 +52,7 @@ export const createAuthNavigation = (translations: AuthNavigationTranslations): 
   {
     label: translations.sign_out,
     icon: LogoutIcon,
-    iconClassName: 'h-5 w-5',
+    iconClassName: 'h-5 w-5 text-text-secondary',
     component: (
       <SignOutButton>
         <MenuActionButton>
@@ -75,7 +75,7 @@ export const createPublicNavigation = (translations: PublicNavigationTranslation
   {
     label: translations.home_link,
     icon: HomeIcon,
-    iconClassName: 'h-5 w-5',
+    iconClassName: 'h-5 w-5 text-text-secondary',
     link: '/',
     section: 'main',
   },
