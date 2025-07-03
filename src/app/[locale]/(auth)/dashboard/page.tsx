@@ -41,9 +41,13 @@ export async function generateMetadata(props: {
 
 function PaymentMethodSection() {
   return (
-    <div className="hidden lg:flex flex-col lg:w-1/4 gap-4">
-      <div className={`hidden lg:flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs}`}>
-        <div className="mb-4">
+    <div className="flex flex-col gap-4 lg:w-1/4 lg:block w-full order-1 lg:order-2">
+      <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 lg:hidden">
+        <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+        <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Payment Method</h1>
+      </div>
+      <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs} lg:block`}>
+        <div className="mb-4 hidden lg:block">
           <WalletIcon className="w-4 h-4" />
         </div>
         <PaymentMethodClient />
@@ -56,7 +60,7 @@ function PaymentMethodSection() {
           </Link>
         </div>
       </div>
-      <div className={`hidden lg:flex flex-col ${BORDER_RADIUS.lg} bg-surface-raised ${SPACING.xs}`}>
+      <div className={`flex flex-col ${BORDER_RADIUS.lg} bg-surface-raised ${SPACING.xs} lg:block`}>
         <PaymentMethodsNote />
       </div>
     </div>
@@ -136,10 +140,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-6">
-      <div className="w-full lg:w-3/4">
+      <PaymentMethodSection />
+      <div className="w-full lg:w-3/4 order-2 lg:order-1">
         <SubscriptionsClient subscriptions={subscriptions} />
       </div>
-      <PaymentMethodSection />
     </div>
   );
 }

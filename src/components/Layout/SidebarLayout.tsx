@@ -66,7 +66,7 @@ export const SidebarLayout: FC<SidebarLayoutProps> = ({
         {/* Page Content */}
         <main className={`
           flex-1
-          overflow-y-auto overflow-x-auto px-4 md:px-0 md:pr-4
+          overflow-y-auto overflow-x-auto p-4 md:p-0 md:pr-4
         `}
         >
           {children}
