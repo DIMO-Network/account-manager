@@ -41,7 +41,7 @@ export async function generateMetadata(props: {
 
 function PaymentMethodSection() {
   return (
-    <div className="flex flex-col gap-4 lg:w-1/4 lg:block w-full order-1 lg:order-2">
+    <div className="flex flex-col gap-4 lg:w-1/4 w-full order-1 lg:order-2">
       <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 lg:hidden">
         <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
         <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Payment Method</h1>

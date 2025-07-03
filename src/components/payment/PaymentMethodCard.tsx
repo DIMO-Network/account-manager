@@ -1,6 +1,7 @@
 'use client';
 
 import type Stripe from 'stripe';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { WalletIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS, SPACING } from '@/utils/designSystem';
@@ -11,7 +12,7 @@ type PaymentMethodCardProps = {
   onSetDefaultAction: (paymentMethodId: string) => Promise<void>;
   onRemoveAction: (paymentMethodId: string) => Promise<void>;
   isLoading: boolean;
-  onEditAction?: () => void;
+  customerId: string;
 };
 
 export const PaymentMethodCard = ({
@@ -20,9 +21,10 @@ export const PaymentMethodCard = ({
   onSetDefaultAction,
   onRemoveAction,
   isLoading,
-  onEditAction,
+  customerId,
 }: PaymentMethodCardProps) => {
   const [showConfirmRemove, setShowConfirmRemove] = useState(false);
+  const router = useRouter();
 
   const formatCardBrand = (brand: string) => {
     switch (brand.toLowerCase()) {
@@ -97,16 +99,16 @@ export const PaymentMethodCard = ({
           </span>
         )}
         <div className="flex flex-row gap-2 mt-2">
-          {onEditAction && (
-            <button
-              onClick={onEditAction}
-              disabled={isLoading}
-              className="inline-flex flex-row items-center justify-center w-full gap-2 mt-6 rounded-full bg-surface-raised px-4 font-medium h-10 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors disabled:opacity-50"
-              type="button"
-            >
-              Edit
-            </button>
-          )}
+          <button
+            onClick={() => {
+              router.push(`/payment-methods/edit/${paymentMethod.id}?customer_id=${customerId}`);
+            }}
+            disabled={isLoading}
+            className="w-full gap-2 mt-6 rounded-full bg-white px-4 font-medium h-10 text-black disabled:opacity-50"
+            type="button"
+          >
+            Edit
+          </button>
           {!isDefault && (
             <button
               onClick={handleSetDefault}

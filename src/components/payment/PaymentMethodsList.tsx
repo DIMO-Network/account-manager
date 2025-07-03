@@ -119,13 +119,9 @@ export const PaymentMethodsList = () => {
             await fetchPaymentMethods();
           }}
           isLoading={false}
-          onEditAction={() => {
-            // This function is no longer needed as editCardId is removed
-            // setEditCardId(pm.id);
-          }}
+          customerId={customerId}
         />
       ))}
-      {/* TODO: Render EditCardModal here, passing cardToEdit and onClose */}
       <div className={`flex flex-col ${BORDER_RADIUS.lg} bg-surface-raised ${SPACING.xs} lg:block`}>
         <PaymentMethodsNote />
       </div>
