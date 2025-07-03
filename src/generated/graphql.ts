@@ -1017,7 +1017,7 @@ export type GetVehicleQueryVariables = Exact<{
 }>;
 
 
-export type GetVehicleQuery = { __typename?: 'Query', vehicle: { __typename?: 'Vehicle', tokenId: number, owner: any, mintedAt: any, definition?: { __typename?: 'Definition', make?: string | null, model?: string | null, year?: number | null } | null, aftermarketDevice?: { __typename?: 'AftermarketDevice', tokenId: number, tokenDID: string, serial?: string | null, owner: any, pairedAt?: any | null, manufacturer: { __typename?: 'Manufacturer', name: string } } | null, syntheticDevice?: { __typename?: 'SyntheticDevice', tokenId: number } | null } };
+export type GetVehicleQuery = { __typename?: 'Query', vehicle: { __typename?: 'Vehicle', tokenId: number, owner: any, name: string, mintedAt: any, dcn?: { __typename?: 'DCN', id: string, name?: string | null } | null, definition?: { __typename?: 'Definition', make?: string | null, model?: string | null, year?: number | null } | null, aftermarketDevice?: { __typename?: 'AftermarketDevice', tokenId: number, tokenDID: string, serial?: string | null, owner: any, pairedAt?: any | null, manufacturer: { __typename?: 'Manufacturer', name: string } } | null, syntheticDevice?: { __typename?: 'SyntheticDevice', tokenId: number } | null } };
 
 export type GetVehiclesByOwnerQueryVariables = Exact<{
   owner: Scalars['Address']['input'];
@@ -1031,7 +1031,7 @@ export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
 {
-  __apiType?: DocumentTypeDecoration<TResult, TVariables>['__apiType'];
+  __apiType?: NonNullable<DocumentTypeDecoration<TResult, TVariables>['__apiType']>;
   private value: string;
   public __meta__?: Record<string, any> | undefined;
 
@@ -1041,7 +1041,7 @@ export class TypedDocumentString<TResult, TVariables>
     this.__meta__ = __meta__;
   }
 
-  toString(): string & DocumentTypeDecoration<TResult, TVariables> {
+  override toString(): string & DocumentTypeDecoration<TResult, TVariables> {
     return this.value;
   }
 }
@@ -1051,6 +1051,11 @@ export const GetVehicleDocument = new TypedDocumentString(`
   vehicle(tokenId: $tokenId) {
     tokenId
     owner
+    dcn {
+      id
+      name
+    }
+    name
     mintedAt
     definition {
       make

@@ -11,6 +11,8 @@ const handleI18nRouting = createMiddleware(routing);
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/:locale/dashboard(.*)',
+  '/subscriptions(.*)',
+  '/:locale/subscriptions(.*)',
 ]);
 
 const isAuthPage = createRouteMatcher([
@@ -21,10 +23,10 @@ const isAuthPage = createRouteMatcher([
 const isProtectedApiRoute = createRouteMatcher([
   '/api/stripe/customer',
   '/api/payment-methods',
+  '/api/subscriptions',
   '/api/subscriptions/(.*)',
 ]);
 
-// ADD THIS: Match ALL API routes to exclude them from i18n
 const isApiRoute = createRouteMatcher(['/api/(.*)']);
 
 // Improve security with Arcjet

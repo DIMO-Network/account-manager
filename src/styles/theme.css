@@ -69,3 +69,7 @@
   --color-red-900: #841818;
   --color-red-950: #480707;
 }
+
+.text-text-secondary {
+  color: var(--color-text-secondary);
+}

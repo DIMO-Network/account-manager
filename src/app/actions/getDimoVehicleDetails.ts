@@ -8,6 +8,11 @@ const GET_VEHICLE_DETAILS = graphql(`
     vehicle(tokenId: $tokenId) {
       tokenId
       owner
+      dcn {
+        id
+        name
+      }
+      name
       mintedAt
       definition {
         make

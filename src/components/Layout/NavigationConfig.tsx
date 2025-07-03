@@ -9,6 +9,7 @@ export type AuthNavigationTranslations = {
   payment_methods_link: string;
   user_profile_link: string;
   sign_out: string;
+  subscriptions_link: string;
 };
 
 export type PublicNavigationTranslations = {
@@ -23,6 +24,13 @@ export const createAuthNavigation = (translations: AuthNavigationTranslations): 
     icon: HomeIcon,
     iconClassName: 'h-5 w-5',
     link: '/dashboard/',
+    section: 'main',
+  },
+  {
+    label: translations.subscriptions_link,
+    icon: WalletIcon,
+    iconClassName: 'h-5 w-5',
+    link: '/subscriptions/',
     section: 'main',
   },
   {

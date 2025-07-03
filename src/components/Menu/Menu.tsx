@@ -21,7 +21,7 @@ export const Menu: FC<MenuProps> = ({ menuItems, onMenuItemClick }) => {
     const currentPath = pathname.replace(/\/$/, '');
     const itemPath = item.link.replace(/\/$/, '');
 
-    return currentPath === itemPath;
+    return currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
   };
 
   const mainMenuItems = menuItems.filter(item => !item.section || item.section === 'main');

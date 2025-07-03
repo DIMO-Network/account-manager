@@ -30,6 +30,7 @@
   },
   "DashboardLayout": {
     "dashboard_link": "Dashboard",
+    "subscriptions_link": "Subscriptions",
     "payment_methods_link": "Payment Methods",
     "user_profile_link": "Account",
     "sign_out": "Sign out"
@@ -42,5 +43,12 @@
     "meta_description": "Manage your saved payment methods and billing information.",
     "title": "Payment Methods",
     "description": "Manage your saved payment methods for subscriptions and billing."
+  },
+  "Subscriptions": {
+    "meta_title": "Subscriptions",
+    "interval": {
+      "monthly": "Monthly",
+      "annually": "Annually"
+    }
   }
 }

@@ -1,8 +1,6 @@
 {
   "RootLayout": {
     "home_link": "Accueil",
-    "about_link": "A propos",
-    "portfolio_link": "Portfolio",
     "sign_in_link": "Se connecter",
     "sign_up_link": "S'inscrire"
   },
@@ -32,6 +30,7 @@
   },
   "DashboardLayout": {
     "dashboard_link": "Tableau de bord",
+    "subscriptions_link": "Abonnements",
     "user_profile_link": "Gérer votre compte",
     "sign_out": "Se déconnecter"
   },
@@ -40,5 +39,12 @@
     "meta_description": "Manage your saved payment methods and billing information.",
     "title": "Payment Methods",
     "description": "Manage your saved payment methods for subscriptions and billing."
+  },
+  "Subscriptions": {
+    "meta_title": "Subscriptions",
+    "interval": {
+      "monthly": "Monthly",
+      "annually": "Annually"
+    }
   }
 }
