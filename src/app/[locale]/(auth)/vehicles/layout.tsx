@@ -9,7 +9,7 @@ export default async function VehiclesLayout(props: {
   setRequestLocale(locale);
   const t = await getTranslations({
     locale,
-    namespace: 'VehiclesLayout',
+    namespace: 'DashboardLayout',
   });
 
   return (

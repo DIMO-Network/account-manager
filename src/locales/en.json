@@ -52,14 +52,6 @@
       "annually": "Annually"
     }
   },
-  "VehiclesLayout": {
-    "dashboard_link": "Dashboard",
-    "subscriptions_link": "Subscriptions",
-    "payment_methods_link": "Payment Methods",
-    "vehicles_link": "Vehicles",
-    "user_profile_link": "Profile",
-    "sign_out": "Sign Out"
-  },
   "Vehicles": {
     "meta_title": "Vehicles"
   }
