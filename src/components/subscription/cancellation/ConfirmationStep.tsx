@@ -23,7 +23,10 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
   const metadata = subscription?.metadata || {};
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
 
-  const { displayText: renewsOn } = getSubscriptionRenewalInfo(subscription);
+  const { date } = getSubscriptionRenewalInfo(subscription);
+
+  const isMarkedForCancellation = subscription.cancel_at_period_end && subscription.cancel_at;
+  const labelText = isMarkedForCancellation ? 'Cancels on' : 'Renews on';
 
   let type = 'N/A';
   if (subscription?.items?.data?.[0]?.price?.recurring?.interval === 'month') {
@@ -73,8 +76,11 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
             </span>
           </div>
           <div>
-            <span className="font-medium">Renews on:</span>
-            <span className="text-gray-400 ml-2">{renewsOn}</span>
+            <span className="font-medium">
+              {labelText}
+              :
+            </span>
+            <span className="text-gray-400 ml-2">{date}</span>
           </div>
         </div>
       </div>

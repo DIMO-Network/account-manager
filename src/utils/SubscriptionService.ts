@@ -136,6 +136,39 @@ export class SubscriptionService {
     }
   }
 
+  static async updateSubscription(
+    subscriptionId: string,
+    cancellationDetails?: {
+      feedback: string;
+      comment?: string;
+    },
+  ): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    try {
+      const stripeCancellationDetails = cancellationDetails
+        ? {
+            feedback: cancellationDetails.feedback as Stripe.Subscription.CancellationDetails.Feedback,
+            comment: cancellationDetails.comment,
+          }
+        : undefined;
+
+      await stripe().subscriptions.update(subscriptionId, {
+        cancel_at_period_end: true,
+        cancellation_details: stripeCancellationDetails,
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
   static async getSubscriptionDetails(connectionId: string) {
     try {
       const db = await getDB();

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import {
-  cancelSubscriptionAction,
-  cancelSubscriptionActionV2,
   createCheckoutAction,
   createCheckoutActionV2,
+  updateSubscriptionAction,
+  updateSubscriptionActionV2,
 } from '@/app/actions/subscriptionActions';
 import { debugFeatureFlags, featureFlags } from '@/utils/FeatureFlags';
 
@@ -85,8 +85,8 @@ export const useSubscriptionActions = () => {
 
         try {
           const result = featureFlags.useBackendProxy
-            ? await cancelSubscriptionActionV2(subscriptionId, cancellationDetails)
-            : await cancelSubscriptionAction(subscriptionId, cancellationDetails);
+            ? await updateSubscriptionActionV2(subscriptionId, cancellationDetails)
+            : await updateSubscriptionAction(subscriptionId, cancellationDetails);
 
           if (result.success) {
             resolve({ success: true });

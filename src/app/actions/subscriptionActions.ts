@@ -326,3 +326,81 @@ export async function cancelSubscriptionActionV2(
     };
   }
 }
+
+export async function updateSubscriptionAction(
+  subscriptionId: string,
+  cancellationDetails?: {
+    feedback: string;
+    comment?: string;
+  },
+): Promise<ActionResult<void>> {
+  try {
+    const result = await SubscriptionService.updateSubscription(subscriptionId, cancellationDetails);
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
+
+    return result.success
+      ? { success: true, data: undefined }
+      : { success: false, error: result.error || 'Failed to update subscription' };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+export async function updateSubscriptionActionV2(
+  subscriptionId: string,
+  _cancellationDetails?: {
+    feedback: string;
+    comment?: string;
+  },
+): Promise<ActionResult<void>> {
+  try {
+    const user = await currentUser();
+    if (!user) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const dimoToken = user.privateMetadata?.dimoToken as string;
+    if (!dimoToken) {
+      return { success: false, error: 'DIMO authentication required' };
+    }
+
+    const backendUrl = `${featureFlags.backendApiUrl}/subscription/update/${subscriptionId}`;
+
+    // TODO: For V2 (backend proxy), send update details in the POST request
+    const backendResponse = await fetch(backendUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${dimoToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cancel_at_period_end: true,
+        cancellation_details: _cancellationDetails
+          ? {
+              feedback: _cancellationDetails.feedback,
+              comment: _cancellationDetails.comment,
+            }
+          : undefined,
+      }),
+    });
+
+    if (!backendResponse.ok) {
+      const error = await backendResponse.json();
+      throw new Error(error.message || 'Failed to update subscription');
+    }
+
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update subscription',
+    };
+  }
+}

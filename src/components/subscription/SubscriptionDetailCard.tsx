@@ -17,7 +17,10 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
   const connectionId = metadata.connectionId || 'N/A';
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
 
-  const { displayText: renewsOn } = getSubscriptionRenewalInfo(subscription);
+  const { date } = getSubscriptionRenewalInfo(subscription);
+
+  const isMarkedForCancellation = subscription.cancel_at_period_end && subscription.cancel_at;
+  const labelText = isMarkedForCancellation ? 'Cancels on' : 'Renews on';
 
   let type = 'N/A';
   if (subscription?.items?.data?.[0]?.price?.recurring?.interval === 'month') {
@@ -76,19 +79,24 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
                 {priceFormatted}
               </td>
             </tr>
-            {/* Renews on */}
+            {/* Renews or Cancels on */}
             <tr>
-              <td className="font-medium text-base leading-5 pt-4 pb-2">Renews on</td>
+              <td className="font-medium text-base leading-5 pt-4 pb-2">{labelText}</td>
             </tr>
             <tr>
-              <td className="font-light text-xs leading-5 pb-3 border-b border-gray-700">{renewsOn}</td>
+              <td className="font-light text-xs leading-5 pb-3 border-b border-gray-700">{date}</td>
             </tr>
           </tbody>
         </table>
         <button
-          className="mt-6 py-2 px-4 rounded-full bg-white text-black hover:bg-gray-100 transition-colors w-full"
+          className={`mt-6 py-2 px-4 rounded-full transition-colors w-full ${
+            isMarkedForCancellation
+              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-gray-100'
+          }`}
           type="button"
           onClick={() => window.location.href = `/subscriptions/${subscription.id}/cancel`}
+          disabled={!!isMarkedForCancellation}
         >
           Cancel Subscription
         </button>

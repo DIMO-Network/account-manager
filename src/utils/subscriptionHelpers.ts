@@ -22,12 +22,19 @@ export function getSubscriptionTypeAndPrice(subscription: Stripe.Subscription) {
 export function getSubscriptionRenewalInfo(subscription: Stripe.Subscription) {
   const currentPeriodEnd = subscription.items?.data?.[0]?.current_period_end;
   const status = subscription.status;
+  const cancelAtPeriodEnd = subscription.cancel_at_period_end;
+  const cancelAt = subscription.cancel_at;
 
   if (!currentPeriodEnd) {
     return { displayText: 'N/A', date: undefined };
   }
 
   const date = new Date(currentPeriodEnd * 1000).toLocaleDateString();
+
+  if (cancelAtPeriodEnd && cancelAt) {
+    const cancelDate = new Date(cancelAt * 1000).toLocaleDateString();
+    return { displayText: `Cancels on ${cancelDate}`, date: cancelDate };
+  }
 
   if (status === 'trialing') {
     return { displayText: `Free until ${date}`, date };
