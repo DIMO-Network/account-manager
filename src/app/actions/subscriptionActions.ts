@@ -1,6 +1,7 @@
 'use server';
 
 import type Stripe from 'stripe';
+import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
@@ -262,7 +263,7 @@ export async function createCheckoutActionV2(
 export async function cancelSubscriptionAction(
   subscriptionId: string,
   cancellationDetails?: {
-    feedback: string;
+    feedback: StripeCancellationFeedback;
     comment?: string;
   },
 ): Promise<ActionResult<void>> {
@@ -285,7 +286,7 @@ export async function cancelSubscriptionAction(
 export async function cancelSubscriptionActionV2(
   subscriptionId: string,
   _cancellationDetails?: {
-    feedback: string;
+    feedback: StripeCancellationFeedback;
     comment?: string;
   },
 ): Promise<ActionResult<void>> {
@@ -330,7 +331,7 @@ export async function cancelSubscriptionActionV2(
 export async function updateSubscriptionAction(
   subscriptionId: string,
   cancellationDetails?: {
-    feedback: string;
+    feedback: StripeCancellationFeedback;
     comment?: string;
   },
 ): Promise<ActionResult<void>> {
@@ -353,7 +354,7 @@ export async function updateSubscriptionAction(
 export async function updateSubscriptionActionV2(
   subscriptionId: string,
   _cancellationDetails?: {
-    feedback: string;
+    feedback: StripeCancellationFeedback;
     comment?: string;
   },
 ): Promise<ActionResult<void>> {

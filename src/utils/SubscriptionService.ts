@@ -1,5 +1,5 @@
-import type Stripe from 'stripe';
 import type { SubscriptionData } from '@/types/subscription';
+import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { currentUser } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
 import { getDB } from '@/libs/DB';
@@ -107,7 +107,7 @@ export class SubscriptionService {
   static async cancelSubscription(
     subscriptionId: string,
     cancellationDetails?: {
-      feedback: string;
+      feedback: StripeCancellationFeedback;
       comment?: string;
     },
   ): Promise<{
@@ -117,7 +117,7 @@ export class SubscriptionService {
     try {
       const stripeCancellationDetails = cancellationDetails
         ? {
-            feedback: cancellationDetails.feedback as Stripe.Subscription.CancellationDetails.Feedback,
+            feedback: cancellationDetails.feedback as StripeCancellationFeedback,
             comment: cancellationDetails.comment,
           }
         : undefined;
@@ -139,7 +139,7 @@ export class SubscriptionService {
   static async updateSubscription(
     subscriptionId: string,
     cancellationDetails?: {
-      feedback: string;
+      feedback: StripeCancellationFeedback;
       comment?: string;
     },
   ): Promise<{
@@ -149,7 +149,7 @@ export class SubscriptionService {
     try {
       const stripeCancellationDetails = cancellationDetails
         ? {
-            feedback: cancellationDetails.feedback as Stripe.Subscription.CancellationDetails.Feedback,
+            feedback: cancellationDetails.feedback as StripeCancellationFeedback,
             comment: cancellationDetails.comment,
           }
         : undefined;

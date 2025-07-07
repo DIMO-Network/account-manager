@@ -2,6 +2,7 @@
 
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
+import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
 import { useSubscriptionActions } from '@/hooks/useSubscriptionActions';
@@ -11,15 +12,7 @@ import {
   ReviewStep,
 } from './cancellation';
 
-type CancellationReason
-  = | 'too_expensive'
-    | 'unused'
-    | 'switched_service'
-    | 'missing_features'
-    | 'low_quality'
-    | 'customer_service'
-    | 'too_complex'
-    | 'other';
+type CancellationReason = StripeCancellationFeedback;
 
 type CancelSubscriptionCardProps = {
   subscription: StripeSubscription;

@@ -1,26 +1,13 @@
 'use client';
 
 import type { StripeSubscription } from '@/types/subscription';
+import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import React from 'react';
-import { getSubscriptionRenewalInfo } from '@/utils/subscriptionHelpers';
-
-// Stripe's official cancellation feedback enum values
-const CANCELLATION_REASONS = [
-  { value: 'too_expensive', label: 'It\'s too expensive' },
-  { value: 'unused', label: 'I don\'t use the service enough' },
-  { value: 'switched_service', label: 'I\'m switching to a different service' },
-  { value: 'missing_features', label: 'Some features are missing' },
-  { value: 'low_quality', label: 'Quality was less than expected' },
-  { value: 'customer_service', label: 'Customer service was less than expected' },
-  { value: 'too_complex', label: 'Ease of use was less than expected' },
-  { value: 'other', label: 'Other reason' },
-] as const;
-
-type CancellationReason = typeof CANCELLATION_REASONS[number]['value'];
+import { getCancellationFeedbackLabel, getSubscriptionRenewalInfo } from '@/utils/subscriptionHelpers';
 
 type ReviewStepProps = {
   subscription: StripeSubscription;
-  selectedReason: CancellationReason;
+  selectedReason: StripeCancellationFeedback;
   customComment?: string;
   onKeepSubscriptionAction: () => void;
   onCancelSubscriptionAction: () => void;
@@ -37,9 +24,8 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 }) => {
   const { date } = getSubscriptionRenewalInfo(subscription);
 
-  const getReasonLabel = (reason: CancellationReason) => {
-    const reasonObj = CANCELLATION_REASONS.find(r => r.value === reason);
-    return reasonObj?.label || reason;
+  const getReasonLabel = (reason: StripeCancellationFeedback) => {
+    return getCancellationFeedbackLabel(reason);
   };
 
   return (

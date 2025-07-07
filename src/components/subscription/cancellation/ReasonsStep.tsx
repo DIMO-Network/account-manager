@@ -1,23 +1,16 @@
 'use client';
 
+import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import React, { useState } from 'react';
+import { STRIPE_CANCELLATION_FEEDBACK } from '@/utils/subscriptionHelpers';
 
-// Stripe's official cancellation feedback enum values
-const CANCELLATION_REASONS = [
-  { value: 'too_expensive', label: 'It\'s too expensive' },
-  { value: 'unused', label: 'I don\'t use the service enough' },
-  { value: 'switched_service', label: 'I\'m switching to a different service' },
-  { value: 'missing_features', label: 'Some features are missing' },
-  { value: 'low_quality', label: 'Quality was less than expected' },
-  { value: 'customer_service', label: 'Customer service was less than expected' },
-  { value: 'too_complex', label: 'Ease of use was less than expected' },
-  { value: 'other', label: 'Other reason' },
-] as const;
-
-type CancellationReason = typeof CANCELLATION_REASONS[number]['value'];
+const CANCELLATION_REASONS = Object.entries(STRIPE_CANCELLATION_FEEDBACK).map(([value, label]) => ({
+  value: value as StripeCancellationFeedback,
+  label,
+}));
 
 type ReasonsStepProps = {
-  onContinueAction: (feedback: CancellationReason, comment?: string) => void;
+  onContinueAction: (feedback: StripeCancellationFeedback, comment?: string) => void;
   onGoBackAction: () => void;
 };
 
@@ -25,7 +18,7 @@ export const ReasonsStep: React.FC<ReasonsStepProps> = ({
   onContinueAction,
   onGoBackAction,
 }) => {
-  const [selectedReason, setSelectedReason] = useState<CancellationReason | ''>('');
+  const [selectedReason, setSelectedReason] = useState<StripeCancellationFeedback | ''>('');
   const [customComment, setCustomComment] = useState<string>('');
 
   const handleContinue = () => {
@@ -54,7 +47,7 @@ export const ReasonsStep: React.FC<ReasonsStepProps> = ({
               name="cancellationReason"
               value={reason.value}
               checked={selectedReason === reason.value}
-              onChange={e => setSelectedReason(e.target.value as CancellationReason)}
+              onChange={e => setSelectedReason(e.target.value as StripeCancellationFeedback)}
               className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
             />
             <span className="text-sm">{reason.label}</span>

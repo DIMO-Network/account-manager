@@ -1,5 +1,22 @@
 import type Stripe from 'stripe';
 
+export const STRIPE_CANCELLATION_FEEDBACK = {
+  customer_service: 'Customer service was less than expected',
+  low_quality: 'Quality was less than expected',
+  missing_features: 'Some features are missing',
+  other: 'Other reason',
+  switched_service: 'I\'m switching to a different service',
+  too_complex: 'Ease of use was less than expected',
+  too_expensive: 'It\'s too expensive',
+  unused: 'I don\'t use the service enough',
+} as const;
+
+export type StripeCancellationFeedback = keyof typeof STRIPE_CANCELLATION_FEEDBACK;
+
+export function getCancellationFeedbackLabel(feedback: StripeCancellationFeedback): string {
+  return STRIPE_CANCELLATION_FEEDBACK[feedback];
+}
+
 export function getSubscriptionTypeAndPrice(subscription: Stripe.Subscription) {
   const interval = subscription.items?.data?.[0]?.price?.recurring?.interval;
   const priceCents = subscription.items?.data?.[0]?.price?.unit_amount;

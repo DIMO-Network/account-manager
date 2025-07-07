@@ -1,3 +1,4 @@
+import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import {
   createCheckoutAction,
@@ -75,7 +76,7 @@ export const useSubscriptionActions = () => {
   const cancelSubscription = useCallback(async (
     subscriptionId: string,
     cancellationDetails?: {
-      feedback: string;
+      feedback: StripeCancellationFeedback;
       comment?: string;
     },
   ) => {
