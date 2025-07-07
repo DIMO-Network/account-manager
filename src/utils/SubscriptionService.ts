@@ -1,4 +1,5 @@
 import type { SubscriptionData } from '@/types/subscription';
+import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { currentUser } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
 import { getDB } from '@/libs/DB';
@@ -103,17 +104,64 @@ export class SubscriptionService {
     }
   }
 
-  static async cancelSubscription(subscriptionId: string): Promise<{
+  static async cancelSubscription(
+    subscriptionId: string,
+    cancellationDetails?: {
+      feedback: StripeCancellationFeedback;
+      comment?: string;
+    },
+  ): Promise<{
     success: boolean;
     error?: string;
   }> {
     try {
-    // Only cancel in Stripe - let the DIMO backend handle database updates via webhooks
-      await stripe().subscriptions.cancel(subscriptionId);
+      const stripeCancellationDetails = cancellationDetails
+        ? {
+            feedback: cancellationDetails.feedback as StripeCancellationFeedback,
+            comment: cancellationDetails.comment,
+          }
+        : undefined;
+
+      await stripe().subscriptions.cancel(subscriptionId, {
+        cancellation_details: stripeCancellationDetails,
+      });
 
       return { success: true };
     } catch (error) {
       console.error('Error canceling subscription:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  static async updateSubscription(
+    subscriptionId: string,
+    cancellationDetails?: {
+      feedback: StripeCancellationFeedback;
+      comment?: string;
+    },
+  ): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    try {
+      const stripeCancellationDetails = cancellationDetails
+        ? {
+            feedback: cancellationDetails.feedback as StripeCancellationFeedback,
+            comment: cancellationDetails.comment,
+          }
+        : undefined;
+
+      await stripe().subscriptions.update(subscriptionId, {
+        cancel_at_period_end: true,
+        cancellation_details: stripeCancellationDetails,
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating subscription:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',

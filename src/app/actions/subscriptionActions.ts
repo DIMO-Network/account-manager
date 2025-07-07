@@ -1,6 +1,7 @@
 'use server';
 
 import type Stripe from 'stripe';
+import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
@@ -52,7 +53,6 @@ async function createDirectSubscription(
       };
     }
 
-    // Handle incomplete status using Stripe's actual status enum
     if (subscription.status === 'incomplete') {
       const paymentIntent = invoice?.payment_intent;
 
@@ -159,13 +159,11 @@ export async function createCheckoutAction(
 
     const customerId = customerResult.customerId;
 
-    // Use Stripe's actual PaymentMethod list response
     const paymentMethods = await stripe().paymentMethods.list({
       customer: customerId,
       type: 'card',
     });
 
-    // Use Stripe's Customer type directly
     const customer = await stripe().customers.retrieve(customerId);
     let hasDefaultPaymentMethod: string | undefined;
 
@@ -264,9 +262,13 @@ export async function createCheckoutActionV2(
 
 export async function cancelSubscriptionAction(
   subscriptionId: string,
+  cancellationDetails?: {
+    feedback: StripeCancellationFeedback;
+    comment?: string;
+  },
 ): Promise<ActionResult<void>> {
   try {
-    const result = await SubscriptionService.cancelSubscription(subscriptionId);
+    const result = await SubscriptionService.cancelSubscription(subscriptionId, cancellationDetails);
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
 
@@ -283,6 +285,10 @@ export async function cancelSubscriptionAction(
 
 export async function cancelSubscriptionActionV2(
   subscriptionId: string,
+  _cancellationDetails?: {
+    feedback: StripeCancellationFeedback;
+    comment?: string;
+  },
 ): Promise<ActionResult<void>> {
   try {
     const user = await currentUser();
@@ -297,7 +303,7 @@ export async function cancelSubscriptionActionV2(
 
     const backendUrl = `${featureFlags.backendApiUrl}/subscription/cancel/${subscriptionId}`;
 
-    // Call backend API to cancel subscription
+    // TODO: For V2 (backend proxy), send cancellation_details in the DELETE request
     const backendResponse = await fetch(backendUrl, {
       method: 'DELETE',
       headers: {
@@ -318,6 +324,84 @@ export async function cancelSubscriptionActionV2(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to cancel subscription',
+    };
+  }
+}
+
+export async function updateSubscriptionAction(
+  subscriptionId: string,
+  cancellationDetails?: {
+    feedback: StripeCancellationFeedback;
+    comment?: string;
+  },
+): Promise<ActionResult<void>> {
+  try {
+    const result = await SubscriptionService.updateSubscription(subscriptionId, cancellationDetails);
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
+
+    return result.success
+      ? { success: true, data: undefined }
+      : { success: false, error: result.error || 'Failed to update subscription' };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+export async function updateSubscriptionActionV2(
+  subscriptionId: string,
+  _cancellationDetails?: {
+    feedback: StripeCancellationFeedback;
+    comment?: string;
+  },
+): Promise<ActionResult<void>> {
+  try {
+    const user = await currentUser();
+    if (!user) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const dimoToken = user.privateMetadata?.dimoToken as string;
+    if (!dimoToken) {
+      return { success: false, error: 'DIMO authentication required' };
+    }
+
+    const backendUrl = `${featureFlags.backendApiUrl}/subscription/update/${subscriptionId}`;
+
+    // TODO: For V2 (backend proxy), send update details in the POST request
+    const backendResponse = await fetch(backendUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${dimoToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cancel_at_period_end: true,
+        cancellation_details: _cancellationDetails
+          ? {
+              feedback: _cancellationDetails.feedback,
+              comment: _cancellationDetails.comment,
+            }
+          : undefined,
+      }),
+    });
+
+    if (!backendResponse.ok) {
+      const error = await backendResponse.json();
+      throw new Error(error.message || 'Failed to update subscription');
+    }
+
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update subscription',
     };
   }
 }

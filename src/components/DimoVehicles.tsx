@@ -126,7 +126,7 @@ export const DimoVehicles = () => {
             {vehicle.aftermarketDevice?.tokenDID && (
               <div className="border-t pt-4">
                 <DeviceSubscriptionStatus
-                  vehicleTokenId={vehicle.aftermarketDevice.tokenId}
+                  vehicleTokenId={vehicle.tokenId}
                   connectionId={vehicle.aftermarketDevice.tokenDID}
                   userEmail={user?.primaryEmailAddress?.emailAddress}
                   compact={true}

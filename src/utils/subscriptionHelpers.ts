@@ -1,5 +1,22 @@
 import type Stripe from 'stripe';
 
+export const STRIPE_CANCELLATION_FEEDBACK = {
+  customer_service: 'Customer service was less than expected',
+  low_quality: 'Quality was less than expected',
+  missing_features: 'Some features are missing',
+  other: 'Other reason',
+  switched_service: 'I\'m switching to a different service',
+  too_complex: 'Ease of use was less than expected',
+  too_expensive: 'It\'s too expensive',
+  unused: 'I don\'t use the service enough',
+} as const;
+
+export type StripeCancellationFeedback = keyof typeof STRIPE_CANCELLATION_FEEDBACK;
+
+export function getCancellationFeedbackLabel(feedback: StripeCancellationFeedback): string {
+  return STRIPE_CANCELLATION_FEEDBACK[feedback];
+}
+
 export function getSubscriptionTypeAndPrice(subscription: Stripe.Subscription) {
   const interval = subscription.items?.data?.[0]?.price?.recurring?.interval;
   const priceCents = subscription.items?.data?.[0]?.price?.unit_amount;
@@ -22,20 +39,27 @@ export function getSubscriptionTypeAndPrice(subscription: Stripe.Subscription) {
 export function getSubscriptionRenewalInfo(subscription: Stripe.Subscription) {
   const currentPeriodEnd = subscription.items?.data?.[0]?.current_period_end;
   const status = subscription.status;
+  const cancelAtPeriodEnd = subscription.cancel_at_period_end;
+  const cancelAt = subscription.cancel_at;
 
   if (!currentPeriodEnd) {
-    return { displayText: 'N/A' };
+    return { displayText: 'N/A', date: undefined };
   }
 
   const date = new Date(currentPeriodEnd * 1000).toLocaleDateString();
 
+  if (cancelAtPeriodEnd && cancelAt) {
+    const cancelDate = new Date(cancelAt * 1000).toLocaleDateString();
+    return { displayText: `Cancels on ${cancelDate}`, date: cancelDate };
+  }
+
   if (status === 'trialing') {
-    return { displayText: `Free until ${date}` };
+    return { displayText: `Free until ${date}`, date };
   } else if (status === 'active') {
-    return { displayText: `Renews on ${date}` };
+    return { displayText: `Renews on ${date}`, date };
   } else if (status === 'canceled') {
-    return { displayText: `Cancels on ${date}` };
+    return { displayText: `Cancels on ${date}`, date };
   } else {
-    return { displayText: date };
+    return { displayText: date, date };
   }
 }

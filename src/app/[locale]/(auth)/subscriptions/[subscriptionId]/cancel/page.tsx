@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
 import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
-import SubscriptionDetailCard from '@/components/subscription/SubscriptionDetailCard';
+import CancelSubscriptionCard from '@/components/subscription/CancelSubscriptionCard';
 import { stripe } from '@/libs/Stripe';
-import { PaymentMethodSection } from '../PaymentMethodSection';
+import { PaymentMethodSection } from '../../PaymentMethodSection';
 
-export default async function SubscriptionDetailPage({ params }: { params: Promise<{ subscriptionId: string }> }) {
+export default async function CancelSubscriptionPage({ params }: { params: Promise<{ subscriptionId: string }> }) {
   const { subscriptionId } = await params;
 
   if (!subscriptionId) {
@@ -32,7 +32,7 @@ export default async function SubscriptionDetailPage({ params }: { params: Promi
   return (
     <div className="flex flex-col lg:flex-row gap-6 py-5">
       <div className="w-full lg:w-3/4">
-        <SubscriptionDetailCard subscription={subscriptionData} vehicleInfo={vehicleInfo} />
+        <CancelSubscriptionCard subscription={subscriptionData} vehicleInfo={vehicleInfo} />
       </div>
       <PaymentMethodSection />
     </div>
