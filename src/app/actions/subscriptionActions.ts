@@ -52,7 +52,6 @@ async function createDirectSubscription(
       };
     }
 
-    // Handle incomplete status using Stripe's actual status enum
     if (subscription.status === 'incomplete') {
       const paymentIntent = invoice?.payment_intent;
 
@@ -159,13 +158,11 @@ export async function createCheckoutAction(
 
     const customerId = customerResult.customerId;
 
-    // Use Stripe's actual PaymentMethod list response
     const paymentMethods = await stripe().paymentMethods.list({
       customer: customerId,
       type: 'card',
     });
 
-    // Use Stripe's Customer type directly
     const customer = await stripe().customers.retrieve(customerId);
     let hasDefaultPaymentMethod: string | undefined;
 
@@ -264,9 +261,13 @@ export async function createCheckoutActionV2(
 
 export async function cancelSubscriptionAction(
   subscriptionId: string,
+  cancellationDetails?: {
+    feedback: string;
+    comment?: string;
+  },
 ): Promise<ActionResult<void>> {
   try {
-    const result = await SubscriptionService.cancelSubscription(subscriptionId);
+    const result = await SubscriptionService.cancelSubscription(subscriptionId, cancellationDetails);
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
 
@@ -283,6 +284,10 @@ export async function cancelSubscriptionAction(
 
 export async function cancelSubscriptionActionV2(
   subscriptionId: string,
+  _cancellationDetails?: {
+    feedback: string;
+    comment?: string;
+  },
 ): Promise<ActionResult<void>> {
   try {
     const user = await currentUser();
@@ -297,7 +302,7 @@ export async function cancelSubscriptionActionV2(
 
     const backendUrl = `${featureFlags.backendApiUrl}/subscription/cancel/${subscriptionId}`;
 
-    // Call backend API to cancel subscription
+    // TODO: For V2 (backend proxy), send cancellation_details in the DELETE request
     const backendResponse = await fetch(backendUrl, {
       method: 'DELETE',
       headers: {

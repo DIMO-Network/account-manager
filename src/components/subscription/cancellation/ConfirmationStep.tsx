@@ -79,7 +79,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
         </div>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3">
         <button
           onClick={onGoBackAction}
           className="flex-1 py-2 px-4 rounded-full bg-gray-600 text-white hover:bg-gray-700 transition-colors"

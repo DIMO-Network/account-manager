@@ -72,15 +72,21 @@ export const useSubscriptionActions = () => {
     });
   }, []);
 
-  const cancelSubscription = useCallback(async (subscriptionId: string) => {
+  const cancelSubscription = useCallback(async (
+    subscriptionId: string,
+    cancellationDetails?: {
+      feedback: string;
+      comment?: string;
+    },
+  ) => {
     return new Promise<{ success: boolean }>((resolve) => {
       startCancellationTransition(async () => {
         setError(null);
 
         try {
           const result = featureFlags.useBackendProxy
-            ? await cancelSubscriptionActionV2(subscriptionId)
-            : await cancelSubscriptionAction(subscriptionId);
+            ? await cancelSubscriptionActionV2(subscriptionId, cancellationDetails)
+            : await cancelSubscriptionAction(subscriptionId, cancellationDetails);
 
           if (result.success) {
             resolve({ success: true });

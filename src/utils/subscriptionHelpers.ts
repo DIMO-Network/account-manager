@@ -24,18 +24,18 @@ export function getSubscriptionRenewalInfo(subscription: Stripe.Subscription) {
   const status = subscription.status;
 
   if (!currentPeriodEnd) {
-    return { displayText: 'N/A' };
+    return { displayText: 'N/A', date: undefined };
   }
 
   const date = new Date(currentPeriodEnd * 1000).toLocaleDateString();
 
   if (status === 'trialing') {
-    return { displayText: `Free until ${date}` };
+    return { displayText: `Free until ${date}`, date };
   } else if (status === 'active') {
-    return { displayText: `Renews on ${date}` };
+    return { displayText: `Renews on ${date}`, date };
   } else if (status === 'canceled') {
-    return { displayText: `Cancels on ${date}` };
+    return { displayText: `Cancels on ${date}`, date };
   } else {
-    return { displayText: date };
+    return { displayText: date, date };
   }
 }

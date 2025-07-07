@@ -2,17 +2,22 @@
 
 import React, { useState } from 'react';
 
+// Stripe's official cancellation feedback enum values
 const CANCELLATION_REASONS = [
-  'Too expensive',
-  'Not using the service',
-  'Found a better alternative',
-  'Technical issues',
-  'Customer service issues',
-  'Other',
-];
+  { value: 'too_expensive', label: 'It\'s too expensive' },
+  { value: 'unused', label: 'I don\'t use the service enough' },
+  { value: 'switched_service', label: 'I\'m switching to a different service' },
+  { value: 'missing_features', label: 'Some features are missing' },
+  { value: 'low_quality', label: 'Quality was less than expected' },
+  { value: 'customer_service', label: 'Customer service was less than expected' },
+  { value: 'too_complex', label: 'Ease of use was less than expected' },
+  { value: 'other', label: 'Other reason' },
+] as const;
+
+type CancellationReason = typeof CANCELLATION_REASONS[number]['value'];
 
 type ReasonsStepProps = {
-  onContinueAction: (reason: string, customReason?: string) => void;
+  onContinueAction: (feedback: CancellationReason, comment?: string) => void;
   onGoBackAction: () => void;
 };
 
@@ -20,17 +25,17 @@ export const ReasonsStep: React.FC<ReasonsStepProps> = ({
   onContinueAction,
   onGoBackAction,
 }) => {
-  const [selectedReason, setSelectedReason] = useState<string>('');
-  const [customReason, setCustomReason] = useState<string>('');
+  const [selectedReason, setSelectedReason] = useState<CancellationReason | ''>('');
+  const [customComment, setCustomComment] = useState<string>('');
 
   const handleContinue = () => {
     if (!selectedReason) {
       return;
     }
-    onContinueAction(selectedReason, customReason);
+    onContinueAction(selectedReason, customComment);
   };
 
-  const isContinueDisabled = !selectedReason || (selectedReason === 'Other' && !customReason.trim());
+  const isContinueDisabled = !selectedReason || (selectedReason === 'other' && !customComment.trim());
 
   return (
     <>
@@ -43,24 +48,24 @@ export const ReasonsStep: React.FC<ReasonsStepProps> = ({
 
       <div className="mb-6 space-y-3">
         {CANCELLATION_REASONS.map(reason => (
-          <label key={reason} className="flex items-center space-x-3 cursor-pointer">
+          <label key={reason.value} className="flex items-center space-x-3 cursor-pointer">
             <input
               type="radio"
               name="cancellationReason"
-              value={reason}
-              checked={selectedReason === reason}
-              onChange={e => setSelectedReason(e.target.value)}
+              value={reason.value}
+              checked={selectedReason === reason.value}
+              onChange={e => setSelectedReason(e.target.value as CancellationReason)}
               className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
             />
-            <span className="text-sm">{reason}</span>
+            <span className="text-sm">{reason.label}</span>
           </label>
         ))}
 
-        {selectedReason === 'Other' && (
+        {selectedReason === 'other' && (
           <div className="mt-3">
             <textarea
-              value={customReason}
-              onChange={e => setCustomReason(e.target.value)}
+              value={customComment}
+              onChange={e => setCustomComment(e.target.value)}
               placeholder="Please tell us more..."
               className="w-full p-3 border border-gray-300 rounded-lg text-sm resize-none"
               rows={3}
@@ -69,7 +74,7 @@ export const ReasonsStep: React.FC<ReasonsStepProps> = ({
         )}
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3">
         <button
           onClick={onGoBackAction}
           className="flex-1 py-2 px-4 rounded-full bg-gray-600 text-white hover:bg-gray-700 transition-colors"

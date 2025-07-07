@@ -11,6 +11,16 @@ import {
   ReviewStep,
 } from './cancellation';
 
+type CancellationReason
+  = | 'too_expensive'
+    | 'unused'
+    | 'switched_service'
+    | 'missing_features'
+    | 'low_quality'
+    | 'customer_service'
+    | 'too_complex'
+    | 'other';
+
 type CancelSubscriptionCardProps = {
   subscription: StripeSubscription;
   vehicleInfo?: VehicleDetail;
@@ -20,8 +30,8 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({ 
   const { cancelSubscription, canceling, error } = useSubscriptionActions();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [selectedReason, setSelectedReason] = useState<string>('');
-  const [customReason, setCustomReason] = useState<string>('');
+  const [selectedReason, setSelectedReason] = useState<CancellationReason | ''>('');
+  const [customComment, setCustomComment] = useState<string>('');
 
   const step = searchParams.get('step') || 'confirm';
 
@@ -34,16 +44,14 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({ 
       router.push(`/subscriptions/${subscription.id}/cancel`);
     } else if (step === 'review') {
       router.push(`/subscriptions/${subscription.id}/cancel?step=reasons`);
-    } else if (step === 'final') {
-      router.push(`/subscriptions/${subscription.id}/cancel?step=review`);
     } else {
       router.push(`/subscriptions/${subscription.id}`);
     }
   };
 
-  const handleContinueToReview = (reason: string, custom?: string) => {
-    setSelectedReason(reason);
-    setCustomReason(custom || '');
+  const handleContinueToReview = (feedback: CancellationReason, comment?: string) => {
+    setSelectedReason(feedback);
+    setCustomComment(comment || '');
     router.push(`/subscriptions/${subscription.id}/cancel?step=review`);
   };
 
@@ -52,7 +60,12 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({ 
   };
 
   const handleFinalCancel = async () => {
-    const result = await cancelSubscription(subscription.id);
+    const cancellationDetails = {
+      feedback: selectedReason as CancellationReason,
+      comment: customComment || undefined,
+    };
+
+    const result = await cancelSubscription(subscription.id, cancellationDetails);
     if (result.success) {
       router.push('/subscriptions');
     }
@@ -71,8 +84,8 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({ 
         return (
           <ReviewStep
             subscription={subscription}
-            selectedReason={selectedReason}
-            customReason={customReason}
+            selectedReason={selectedReason as CancellationReason}
+            customComment={customComment}
             onKeepSubscriptionAction={handleKeepSubscription}
             onCancelSubscriptionAction={handleFinalCancel}
             canceling={canceling}

@@ -1,3 +1,4 @@
+import type Stripe from 'stripe';
 import type { SubscriptionData } from '@/types/subscription';
 import { currentUser } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
@@ -103,13 +104,27 @@ export class SubscriptionService {
     }
   }
 
-  static async cancelSubscription(subscriptionId: string): Promise<{
+  static async cancelSubscription(
+    subscriptionId: string,
+    cancellationDetails?: {
+      feedback: string;
+      comment?: string;
+    },
+  ): Promise<{
     success: boolean;
     error?: string;
   }> {
     try {
-    // Only cancel in Stripe - let the DIMO backend handle database updates via webhooks
-      await stripe().subscriptions.cancel(subscriptionId);
+      const stripeCancellationDetails = cancellationDetails
+        ? {
+            feedback: cancellationDetails.feedback as Stripe.Subscription.CancellationDetails.Feedback,
+            comment: cancellationDetails.comment,
+          }
+        : undefined;
+
+      await stripe().subscriptions.cancel(subscriptionId, {
+        cancellation_details: stripeCancellationDetails,
+      });
 
       return { success: true };
     } catch (error) {
