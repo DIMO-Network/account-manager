@@ -1,3 +1,10 @@
+# [2.8.0](https://github.com/DIMO-Network/account-manager/compare/v2.7.0...v2.8.0) (2025-07-07)
+
+
+### Features
+
+* implement cancel subscription flow ([#27](https://github.com/DIMO-Network/account-manager/issues/27)) ([3f227d6](https://github.com/DIMO-Network/account-manager/commit/3f227d61cd81595938f7b9417777da805405e0fd))
+
 # [2.7.0](https://github.com/DIMO-Network/account-manager/compare/v2.6.0...v2.7.0) (2025-07-03)
 
 
