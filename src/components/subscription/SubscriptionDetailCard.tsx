@@ -1,3 +1,5 @@
+'use client';
+
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
 import { useTranslations } from 'next-intl';
@@ -84,11 +86,9 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
           </tbody>
         </table>
         <button
-          className="mt-6 py-2 px-4 rounded-full bg-white text-black cursor-not-allowed w-full"
-          disabled
-          aria-disabled="true"
-          title="Cancel subscription feature coming soon"
+          className="mt-6 py-2 px-4 rounded-full bg-white text-black hover:bg-gray-100 transition-colors w-full"
           type="button"
+          onClick={() => window.location.href = `/subscriptions/${subscription.id}/cancel`}
         >
           Cancel Subscription
         </button>
