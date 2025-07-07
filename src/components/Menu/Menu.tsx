@@ -21,6 +21,10 @@ export const Menu: FC<MenuProps> = ({ menuItems, onMenuItemClick }) => {
     const currentPath = pathname.replace(/\/$/, '');
     const itemPath = item.link.replace(/\/$/, '');
 
+    if (itemPath === '/dashboard' && currentPath.startsWith('/subscriptions/')) {
+      return true;
+    }
+
     return currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
   };
 
