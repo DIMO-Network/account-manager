@@ -12,18 +12,42 @@ export type PreviewInvoice = {
   };
 };
 
+export type ScheduledChangePreview = {
+  scheduledChange: true;
+  nextInterval: string;
+  nextAmount: number;
+  nextDate: number;
+};
+
 export async function getPreviewInvoice(
   subscriptionId: string,
   newPriceId: string,
-): Promise<PreviewInvoice | null> {
+): Promise<PreviewInvoice | ScheduledChangePreview | null> {
   try {
     const subscription = await stripe().subscriptions.retrieve(subscriptionId, {
-      expand: ['items.data'],
+      expand: ['items.data', 'items.data.price'],
     });
 
     const subscriptionItemId = subscription.items.data[0]?.id;
     if (!subscriptionItemId) {
       return null;
+    }
+
+    // Determine current and new interval
+    const currentInterval = subscription.items.data[0]?.price?.recurring?.interval;
+    const currentPeriodEnd = subscription.items.data[0]?.current_period_end;
+    const newPrice = await stripe().prices.retrieve(newPriceId);
+    const newInterval = newPrice?.recurring?.interval;
+    const newAmount = newPrice?.unit_amount ?? 0;
+
+    // If switching from annual to monthly, return scheduled change info
+    if (currentInterval === 'year' && newInterval === 'month') {
+      return {
+        scheduledChange: true,
+        nextInterval: newInterval,
+        nextAmount: newAmount,
+        nextDate: currentPeriodEnd ?? 0,
+      };
     }
 
     const prorationDate = Math.floor(Date.now() / 1000);

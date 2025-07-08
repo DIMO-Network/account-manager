@@ -1,7 +1,7 @@
 'use client';
 
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
-import type { PreviewInvoice } from '@/app/actions/getPreviewInvoice';
+import type { PreviewInvoice, ScheduledChangePreview } from '@/app/actions/getPreviewInvoice';
 import type { ProductPrice } from '@/app/actions/getProductPrices';
 import type { StripeSubscription } from '@/types/subscription';
 import { useTranslations } from 'next-intl';
@@ -14,8 +14,8 @@ type EditConfirmationCardProps = {
   productName: string;
   vehicleDisplay: string;
   productPrices: ProductPrice[];
-  previewInvoice?: PreviewInvoice;
-  previewInvoiceMeta?: PreviewInvoice;
+  previewInvoice?: PreviewInvoice | ScheduledChangePreview;
+  previewInvoiceMeta?: PreviewInvoice | ScheduledChangePreview;
 };
 
 export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
@@ -75,7 +75,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
         body: JSON.stringify({
           subscriptionId: subscription.id,
           newPriceId: selectedPriceId,
-          prorationDate: previewInvoiceMeta?.prorationDate,
+          prorationDate: isPreviewInvoice(previewInvoiceMeta) ? previewInvoiceMeta.prorationDate : undefined,
         }),
       });
       const result = await res.json();
@@ -93,7 +93,13 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
     }
   };
 
-  const nextChargeDate = previewInvoiceMeta?.chargeDate;
+  // Type guard for PreviewInvoice
+  function isPreviewInvoice(obj: PreviewInvoice | ScheduledChangePreview | undefined): obj is PreviewInvoice {
+    return !!obj && 'id' in obj && 'lines' in obj;
+  }
+
+  const nextChargeDate = isPreviewInvoice(previewInvoiceMeta) ? previewInvoiceMeta.chargeDate : undefined;
+  const showScheduledChange = previewInvoice && (previewInvoice as any).scheduledChange;
 
   if (!selectedPrice) {
     return (
@@ -157,46 +163,69 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
         </div>
 
         {/* Preview Charges */}
-        {previewInvoice && (
-          <div className="mb-6 p-4 border border-gray-700 rounded-xl">
-            <h3 className="font-medium text-base mb-3">Preview of Charges</h3>
-            <div className="space-y-2">
-              {previewInvoice.lines?.data?.map((line: any) => (
-                <div key={line.id} className="flex justify-between text-sm">
-                  <span>{line.description}</span>
-                  <span>
-                    $
-                    {(line.amount / 100).toFixed(2)}
-                  </span>
-                </div>
-              ))}
-              <div className="border-t border-gray-700 pt-2 mt-2">
-                <div className="flex justify-between font-medium">
-                  <span>Total</span>
-                  <span>
-                    $
-                    {(previewInvoice.total / 100).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Charge Date */}
-            {nextChargeDate && (
-              <div className="mt-4 pt-3 border-t border-gray-700">
-                <p className="text-sm text-gray-400">
-                  Your payment method will be charged on
+        {showScheduledChange
+          ? (
+              <div className="mb-6 p-4 border border-blue-500 bg-blue-900/20 rounded-xl">
+                <h3 className="font-medium text-base mb-3">Plan Change Scheduled</h3>
+                <p className="text-base leading-6">
+                  Your plan will switch to
                   {' '}
-                  {new Date(nextChargeDate * 1000).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  <span className="font-bold">
+                    $
+                    {(previewInvoice as any).nextAmount / 100}
+                    /
+                    {(previewInvoice as any).nextInterval}
+                  </span>
+                  {' '}
+                  on
+                  {' '}
+                  <span className="font-bold">{new Date((previewInvoice as any).nextDate * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  .
+                  <br />
+                  You will not be charged until then.
                 </p>
               </div>
-            )}
-          </div>
-        )}
+            )
+          : previewInvoice && (
+            <div className="mb-6 p-4 border border-gray-700 rounded-xl">
+              <h3 className="font-medium text-base mb-3">Preview of Charges</h3>
+              <div className="space-y-2">
+                {isPreviewInvoice(previewInvoice) && previewInvoice.lines?.data?.map((line: any) => (
+                  <div key={line.id} className="flex justify-between text-sm">
+                    <span>{line.description}</span>
+                    <span>
+                      $
+                      {(line.amount / 100).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+                <div className="border-t border-gray-700 pt-2 mt-2">
+                  <div className="flex justify-between font-medium">
+                    <span>Total</span>
+                    <span>
+                      $
+                      {isPreviewInvoice(previewInvoice) ? (previewInvoice.total / 100).toFixed(2) : ''}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Charge Date */}
+              {nextChargeDate && (
+                <div className="mt-4 pt-3 border-t border-gray-700">
+                  <p className="text-sm text-gray-400">
+                    Your payment method will be charged on
+                    {' '}
+                    {new Date(nextChargeDate * 1000).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
         {/* Action Buttons */}
         <div className="flex gap-3">
