@@ -4,6 +4,7 @@ import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
 import { useTranslations } from 'next-intl';
 import React from 'react';
+import { EditIcon } from '@/components/Icons';
 import { getSubscriptionRenewalInfo } from '@/utils/subscriptionHelpers';
 
 type SubscriptionDetailCardProps = {
@@ -71,12 +72,18 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
             </tr>
             {/* Type */}
             <tr>
-              <td className="font-medium text-base leading-5 pt-4 pb-2">Type</td>
+              <td className="font-medium text-base leading-5 pt-4 pb-2">
+                Type
+              </td>
             </tr>
             <tr>
-              <td className="font-light text-xs leading-5 pb-3 border-b border-gray-700">
+              <td
+                className="font-light text-xs leading-5 pb-3 border-b border-gray-700 flex justify-between items-center cursor-pointer hover:bg-gray-800 transition-colors"
+                onClick={() => window.location.href = `/subscriptions/${subscription.id}/edit`}
+              >
                 {type}
                 {priceFormatted}
+                <EditIcon className="w-4 h-4 text-gray-400" />
               </td>
             </tr>
             {/* Renews or Cancels on */}
