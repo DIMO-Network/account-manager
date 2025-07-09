@@ -1,3 +1,10 @@
+# [2.10.0](https://github.com/DIMO-Network/account-manager/compare/v2.9.0...v2.10.0) (2025-07-09)
+
+
+### Features
+
+* add secure card collection workflow with Stripe Elements ([#31](https://github.com/DIMO-Network/account-manager/issues/31)) ([79098e5](https://github.com/DIMO-Network/account-manager/commit/79098e5bda38d958428e061b38eeaf624f45e839))
+
 # [2.9.0](https://github.com/DIMO-Network/account-manager/compare/v2.8.0...v2.9.0) (2025-07-09)
 
 
