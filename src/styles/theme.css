@@ -73,3 +73,7 @@
 .text-text-secondary {
   color: var(--color-text-secondary);
 }
+
+.bg-pill-gradient {
+  background: linear-gradient(90deg, #b1e3ff, #6ee4da);
+}

@@ -52,7 +52,7 @@
     "react-dom": "19.1.0",
     "react-hook-form": "^7.59.0",
     "react-hot-toast": "^2.5.2",
-    "stripe": "^18.2.1",
+    "stripe": "^18.3.0",
     "zod": "^3.25.67"
   },
   "devDependencies": {

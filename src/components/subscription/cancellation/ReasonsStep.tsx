@@ -4,10 +4,16 @@ import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import React, { useState } from 'react';
 import { STRIPE_CANCELLATION_FEEDBACK } from '@/utils/subscriptionHelpers';
 
-const CANCELLATION_REASONS = Object.entries(STRIPE_CANCELLATION_FEEDBACK).map(([value, label]) => ({
-  value: value as StripeCancellationFeedback,
-  label,
-}));
+const CANCELLATION_REASONS = [
+  { value: 'customer_service' as StripeCancellationFeedback, label: STRIPE_CANCELLATION_FEEDBACK.customer_service },
+  { value: 'low_quality' as StripeCancellationFeedback, label: STRIPE_CANCELLATION_FEEDBACK.low_quality },
+  { value: 'missing_features' as StripeCancellationFeedback, label: STRIPE_CANCELLATION_FEEDBACK.missing_features },
+  { value: 'switched_service' as StripeCancellationFeedback, label: STRIPE_CANCELLATION_FEEDBACK.switched_service },
+  { value: 'too_complex' as StripeCancellationFeedback, label: STRIPE_CANCELLATION_FEEDBACK.too_complex },
+  { value: 'too_expensive' as StripeCancellationFeedback, label: STRIPE_CANCELLATION_FEEDBACK.too_expensive },
+  { value: 'unused' as StripeCancellationFeedback, label: STRIPE_CANCELLATION_FEEDBACK.unused },
+  { value: 'other' as StripeCancellationFeedback, label: STRIPE_CANCELLATION_FEEDBACK.other },
+];
 
 type ReasonsStepProps = {
   onContinueAction: (feedback: StripeCancellationFeedback, comment?: string) => void;
