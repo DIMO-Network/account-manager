@@ -10,6 +10,8 @@ type FormFieldProps = {
   className?: string;
   type?: string;
   placeholder?: string;
+  required?: boolean;
+  maxLength?: number;
 };
 
 export const FormField = ({
@@ -22,6 +24,8 @@ export const FormField = ({
   className = '',
   type = 'text',
   placeholder,
+  required,
+  maxLength,
 }: FormFieldProps) => (
   <div>
     <label htmlFor={id} className="block text-sm font-medium mb-1">
@@ -35,6 +39,8 @@ export const FormField = ({
       readOnly={readOnly}
       type={type}
       placeholder={placeholder}
+      required={required}
+      maxLength={maxLength}
       className={`flex flex-row rounded-md bg-surface-raised px-4 py-2 w-full ${readOnly ? 'bg-surface-sunken cursor-not-allowed text-gray-700' : ''} ${className}`}
     />
   </div>

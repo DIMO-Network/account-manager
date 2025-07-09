@@ -78,8 +78,13 @@ export const PaymentMethodCard = ({
   const card = paymentMethod.card;
 
   return (
-    <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs} mb-4`}>
+    <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs} mb-4 relative`}>
       <div className="flex flex-col mt-4">
+        {isDefault && (
+          <div className="absolute -top-2 right-6 px-2 py-1 rounded-full text-xs font-medium text-black bg-pill-gradient">
+            Default
+          </div>
+        )}
         <span className="font-medium text-white">
           {formatCardBrand(card.brand)}
           {' '}
@@ -98,62 +103,64 @@ export const PaymentMethodCard = ({
             {paymentMethod.billing_details.name}
           </span>
         )}
-        <div className="flex flex-row gap-2 mt-2">
+        <div className="flex flex-row gap-2 mt-6">
           <button
             onClick={() => {
               router.push(`/payment-methods/edit/${paymentMethod.id}?customer_id=${customerId}`);
             }}
             disabled={isLoading}
-            className="w-full gap-2 mt-6 rounded-full bg-white px-4 font-medium h-10 text-black disabled:opacity-50"
+            className="w-full max-w-40 gap-2 rounded-full bg-white px-4 font-medium h-10 text-black disabled:opacity-50"
             type="button"
           >
             Edit
           </button>
-          {!isDefault && (
-            <button
-              onClick={handleSetDefault}
-              disabled={isLoading}
-              className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors disabled:opacity-50"
-              type="button"
-            >
-              Set as Default
-            </button>
-          )}
-          {!isDefault && (
-            <>
-              {!showConfirmRemove
-                ? (
-                    <button
-                      onClick={() => setShowConfirmRemove(true)}
-                      disabled={isLoading}
-                      className="px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
-                      type="button"
-                    >
-                      Remove
-                    </button>
-                  )
-                : (
-                    <div className="flex items-center space-x-2">
+          <div className="flex-1 flex justify-end gap-2">
+            {!isDefault && (
+              <button
+                onClick={handleSetDefault}
+                disabled={isLoading}
+                className="px-4 font-medium h-10 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50"
+                type="button"
+              >
+                Set as Default
+              </button>
+            )}
+            {!isDefault && (
+              <>
+                {!showConfirmRemove
+                  ? (
                       <button
-                        onClick={handleRemove}
+                        onClick={() => setShowConfirmRemove(true)}
                         disabled={isLoading}
-                        className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                        className="px-4 font-medium h-10 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
                         type="button"
                       >
-                        Confirm
+                        Remove
                       </button>
-                      <button
-                        onClick={() => setShowConfirmRemove(false)}
-                        disabled={isLoading}
-                        className="px-2 py-1 text-xs bg-gray-300 rounded hover:bg-gray-400"
-                        type="button"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  )}
-            </>
-          )}
+                    )
+                  : (
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={handleRemove}
+                          disabled={isLoading}
+                          className="px-2 h-10 text-xs bg-red-600 text-white rounded-full hover:bg-red-700 disabled:opacity-50"
+                          type="button"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => setShowConfirmRemove(false)}
+                          disabled={isLoading}
+                          className="px-2 h-10 text-xs bg-gray-300 rounded-full hover:bg-gray-400"
+                          type="button"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
