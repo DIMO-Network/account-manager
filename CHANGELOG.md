@@ -1,3 +1,10 @@
+# [2.9.0](https://github.com/DIMO-Network/account-manager/compare/v2.8.0...v2.9.0) (2025-07-09)
+
+
+### Features
+
+* add workflow to switch plan intervals ([#28](https://github.com/DIMO-Network/account-manager/issues/28)) ([65dc282](https://github.com/DIMO-Network/account-manager/commit/65dc2828b8798bb8127ed69cc735607d982ec845))
+
 # [2.8.0](https://github.com/DIMO-Network/account-manager/compare/v2.7.0...v2.8.0) (2025-07-07)
 
 
