@@ -3,8 +3,6 @@ import { useCallback, useEffect, useState, useTransition } from 'react';
 import {
   createCheckoutAction,
   createCheckoutActionV2,
-  updateSubscriptionAction,
-  updateSubscriptionActionV2,
 } from '@/app/actions/subscriptionActions';
 import { debugFeatureFlags, featureFlags } from '@/utils/FeatureFlags';
 
@@ -85,14 +83,20 @@ export const useSubscriptionActions = () => {
         setError(null);
 
         try {
-          const result = featureFlags.useBackendProxy
-            ? await updateSubscriptionActionV2(subscriptionId, cancellationDetails)
-            : await updateSubscriptionAction(subscriptionId, cancellationDetails);
+          const response = await fetch(`/api/subscriptions/${subscriptionId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ cancellationDetails }),
+          });
 
-          if (result.success) {
+          const result = await response.json();
+
+          if (response.ok && result.success) {
             resolve({ success: true });
           } else {
-            setError(result.error);
+            setError(result.error || 'Failed to cancel subscription');
             resolve({ success: false });
           }
         } catch (err) {
