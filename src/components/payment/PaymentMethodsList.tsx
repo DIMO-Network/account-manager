@@ -61,7 +61,6 @@ export const PaymentMethodsList = () => {
       await fetchPaymentMethods();
     } catch (error) {
       console.error('Error removing payment method:', error);
-      // You might want to show an error message to the user here
     }
   };
 
