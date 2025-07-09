@@ -36,6 +36,7 @@
     "@hookform/resolvers": "^5.1.1",
     "@logtail/pino": "^0.5.4",
     "@sentry/nextjs": "^9.34.0",
+    "@stripe/stripe-js": "^7.4.0",
     "@t3-oss/env-nextjs": "^0.13.8",
     "@types/classnames": "^2.3.0",
     "autoprefixer": "^10.4.21",

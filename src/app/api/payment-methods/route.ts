@@ -92,7 +92,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Detach payment method from customer
+    // Detach payment method from customer using Stripe's detach endpoint
     await stripe().paymentMethods.detach(paymentMethodId);
 
     return NextResponse.json({ success: true });
@@ -105,7 +105,7 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function PATCH(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
 
@@ -116,27 +116,79 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const { paymentMethodId, customerId } = await request.json();
+    const {
+      customerId,
+      paymentMethodId,
+      billing_details,
+      action,
+    } = await request.json();
 
-    if (!paymentMethodId || !customerId) {
+    if (!customerId) {
       return NextResponse.json(
-        { error: 'Payment method ID and customer ID are required' },
+        { error: 'Customer ID is required' },
         { status: 400 },
       );
     }
 
-    // Update customer's default payment method
-    await stripe().customers.update(customerId, {
-      invoice_settings: {
-        default_payment_method: paymentMethodId,
-      },
-    });
+    // Handle setting default payment method
+    if (action === 'set_default' && paymentMethodId) {
+      // Update customer's default payment method
+      await stripe().customers.update(customerId, {
+        invoice_settings: {
+          default_payment_method: paymentMethodId,
+        },
+      });
+      return NextResponse.json({ success: true });
+    }
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error setting default payment method:', error);
+    // Handle adding new payment method
+    if (paymentMethodId && billing_details) {
+      // Attach the payment method to the customer
+      await stripe().paymentMethods.attach(paymentMethodId, {
+        customer: customerId,
+      });
+
+      // Update billing details if provided
+      await stripe().paymentMethods.update(paymentMethodId, {
+        billing_details: {
+          name: billing_details.name,
+          address: {
+            city: billing_details.address?.city,
+            country: billing_details.address?.country,
+            line1: billing_details.address?.line1,
+            line2: billing_details.address?.line2,
+            state: billing_details.address?.state,
+            postal_code: billing_details.address?.postal_code,
+          },
+        },
+      });
+
+      // Check if this is the first payment method for the customer
+      const existingPaymentMethods = await stripe().paymentMethods.list({
+        customer: customerId,
+        type: 'card',
+      });
+
+      // If this is the first payment method, set it as default
+      if (existingPaymentMethods.data.length === 1) {
+        await stripe().customers.update(customerId, {
+          invoice_settings: {
+            default_payment_method: paymentMethodId,
+          },
+        });
+      }
+
+      return NextResponse.json({ success: true });
+    }
+
     return NextResponse.json(
-      { error: 'Failed to set default payment method' },
+      { error: 'Invalid request parameters' },
+      { status: 400 },
+    );
+  } catch (error) {
+    console.error('Error processing payment method request:', error);
+    return NextResponse.json(
+      { error: 'Failed to process payment method request' },
       { status: 500 },
     );
   }
