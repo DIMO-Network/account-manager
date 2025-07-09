@@ -2,13 +2,14 @@
 
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
-import { useTranslations } from 'next-intl';
 import React from 'react';
-import { getSubscriptionRenewalInfo } from '@/utils/subscriptionHelpers';
+import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
 
 type ConfirmationStepProps = {
   subscription: StripeSubscription;
   vehicleInfo?: VehicleDetail;
+  nextScheduledPrice?: any;
+  nextScheduledDate?: number | null;
   onProceedAction: () => void;
   onGoBackAction: () => void;
 };
@@ -16,30 +17,15 @@ type ConfirmationStepProps = {
 export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
   subscription,
   vehicleInfo,
+  nextScheduledPrice,
+  nextScheduledDate,
   onProceedAction,
   onGoBackAction,
 }) => {
-  const t = useTranslations('Subscriptions.interval');
   const metadata = subscription?.metadata || {};
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
 
-  const { date } = getSubscriptionRenewalInfo(subscription);
-
-  const isMarkedForCancellation = subscription.cancel_at_period_end && subscription.cancel_at;
-  const labelText = isMarkedForCancellation ? 'Cancels on' : 'Renews on';
-
-  let type = 'N/A';
-  if (subscription?.items?.data?.[0]?.price?.recurring?.interval === 'month') {
-    type = t('monthly');
-  } else if (subscription?.items?.data?.[0]?.price?.recurring?.interval === 'year') {
-    type = t('annually');
-  }
-
-  const priceCents = subscription?.items?.data?.[0]?.price?.unit_amount;
-  let priceFormatted = '';
-  if (typeof priceCents === 'number') {
-    priceFormatted = ` ($${(priceCents / 100).toFixed(2)})`;
-  }
+  const { displayText } = getSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
 
   return (
     <>
@@ -71,16 +57,14 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
           <div>
             <span className="font-medium">Type:</span>
             <span className="text-gray-400 ml-2">
-              {type}
-              {priceFormatted}
+              {getSubscriptionTypeAndPrice(subscription).displayText}
             </span>
           </div>
           <div>
             <span className="font-medium">
-              {labelText}
-              :
+              Schedule:
             </span>
-            <span className="text-gray-400 ml-2">{date}</span>
+            <span className="text-gray-400 ml-2">{displayText}</span>
           </div>
         </div>
       </div>

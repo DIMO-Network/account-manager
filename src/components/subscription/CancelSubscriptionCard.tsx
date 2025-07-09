@@ -17,9 +17,16 @@ type CancellationReason = StripeCancellationFeedback;
 type CancelSubscriptionCardProps = {
   subscription: StripeSubscription;
   vehicleInfo?: VehicleDetail;
+  nextScheduledPrice?: any;
+  nextScheduledDate?: number | null;
 };
 
-export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({ subscription, vehicleInfo }) => {
+export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
+  subscription,
+  vehicleInfo,
+  nextScheduledPrice,
+  nextScheduledDate,
+}) => {
   const { cancelSubscription, canceling, error } = useSubscriptionActions();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -91,6 +98,8 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({ 
             vehicleInfo={vehicleInfo}
             onProceedAction={handleProceedToReasons}
             onGoBackAction={handleGoBack}
+            nextScheduledPrice={nextScheduledPrice}
+            nextScheduledDate={nextScheduledDate}
           />
         );
     }

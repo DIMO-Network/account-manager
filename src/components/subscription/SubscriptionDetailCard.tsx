@@ -2,39 +2,25 @@
 
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
-import { useTranslations } from 'next-intl';
 import React from 'react';
 import { EditIcon } from '@/components/Icons';
-import { getSubscriptionRenewalInfo } from '@/utils/subscriptionHelpers';
+import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
 
 type SubscriptionDetailCardProps = {
   subscription: StripeSubscription;
   vehicleInfo?: VehicleDetail;
+  nextScheduledPrice?: any;
+  nextScheduledDate?: number | null;
 };
 
-export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ subscription, vehicleInfo }) => {
-  const t = useTranslations('Subscriptions.interval');
+export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ subscription, vehicleInfo, nextScheduledPrice, nextScheduledDate }) => {
   const metadata = subscription?.metadata || {};
   const connectionId = metadata.connectionId || 'N/A';
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
 
-  const { date } = getSubscriptionRenewalInfo(subscription);
-
   const isMarkedForCancellation = subscription.cancel_at_period_end && subscription.cancel_at;
-  const labelText = isMarkedForCancellation ? 'Cancels on' : 'Renews on';
 
-  let type = 'N/A';
-  if (subscription?.items?.data?.[0]?.price?.recurring?.interval === 'month') {
-    type = t('monthly');
-  } else if (subscription?.items?.data?.[0]?.price?.recurring?.interval === 'year') {
-    type = t('annually');
-  }
-
-  const priceCents = subscription?.items?.data?.[0]?.price?.unit_amount;
-  let priceFormatted = '';
-  if (typeof priceCents === 'number') {
-    priceFormatted = ` ($${(priceCents / 100).toFixed(2)})`;
-  }
+  const { displayText } = getSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
 
   return (
     <div className="p-4 bg-surface-raised rounded-2xl flex flex-col justify-between">
@@ -81,17 +67,18 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
                 className="font-light text-xs leading-5 pb-3 border-b border-gray-700 flex justify-between items-center cursor-pointer hover:bg-gray-800 transition-colors"
                 onClick={() => window.location.href = `/subscriptions/${subscription.id}/edit`}
               >
-                {type}
-                {priceFormatted}
+                {getSubscriptionTypeAndPrice(subscription).displayText}
                 <EditIcon className="w-4 h-4 text-gray-400" />
               </td>
             </tr>
-            {/* Renews or Cancels on */}
+            {/* Schedule */}
             <tr>
-              <td className="font-medium text-base leading-5 pt-4 pb-2">{labelText}</td>
+              <td className="font-medium text-base leading-5 pt-4 pb-2">Schedule</td>
             </tr>
             <tr>
-              <td className="font-light text-xs leading-5 pb-3 border-b border-gray-700">{date}</td>
+              <td className="font-light text-xs leading-5 pb-3 border-b border-gray-700">
+                {displayText}
+              </td>
             </tr>
           </tbody>
         </table>

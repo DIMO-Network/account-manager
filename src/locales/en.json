@@ -54,5 +54,7 @@
   },
   "Vehicles": {
     "meta_title": "Vehicles"
-  }
+  },
+  "monthly": "monthly",
+  "annually": "annually"
 }
