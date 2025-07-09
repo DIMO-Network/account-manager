@@ -1,7 +1,7 @@
 'use client';
 
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
-import type { StripeSubscription } from '@/types/subscription';
+import type { StripeSubscription, StripeSubscriptionSchedule } from '@/types/subscription';
 import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
@@ -27,13 +27,25 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
   nextScheduledPrice,
   nextScheduledDate,
 }) => {
-  const { cancelSubscription, canceling, error } = useSubscriptionActions();
+  const { cancelSubscription, releaseSubscriptionSchedule, canceling, cancelingSchedule, error } = useSubscriptionActions();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedReason, setSelectedReason] = useState<CancellationReason | ''>('');
   const [customComment, setCustomComment] = useState<string>('');
 
   const step = searchParams.get('step') || 'confirm';
+
+  // Helper function to determine if subscription has a schedule
+  const hasSchedule = (): boolean => {
+    const schedule = subscription.schedule as StripeSubscriptionSchedule | null;
+    return !!(schedule && schedule.id && (schedule.status === 'not_started' || schedule.status === 'active'));
+  };
+
+  // Helper function to get schedule ID
+  const getScheduleId = (): string | null => {
+    const schedule = subscription.schedule as StripeSubscriptionSchedule | null;
+    return schedule?.id || null;
+  };
 
   const handleProceedToReasons = () => {
     router.push(`/subscriptions/${subscription.id}/cancel?step=reasons`);
@@ -65,6 +77,22 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
       comment: customComment || undefined,
     };
 
+    // Check if this is a scheduled subscription
+    if (hasSchedule()) {
+      const scheduleId = getScheduleId();
+      if (scheduleId) {
+        // Release the subscription schedule
+        const result = await releaseSubscriptionSchedule(scheduleId, {
+          preserve_cancel_date: true,
+        });
+        if (result.success) {
+          router.push('/subscriptions');
+        }
+        return;
+      }
+    }
+
+    // Fall back to regular subscription cancellation
     const result = await cancelSubscription(subscription.id, cancellationDetails);
     if (result.success) {
       router.push('/subscriptions');
@@ -88,7 +116,7 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
             customComment={customComment}
             onKeepSubscriptionAction={handleKeepSubscription}
             onCancelSubscriptionAction={handleFinalCancel}
-            canceling={canceling}
+            canceling={canceling || cancelingSchedule}
           />
         );
       default:

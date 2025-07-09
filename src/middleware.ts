@@ -27,6 +27,8 @@ const isProtectedApiRoute = createRouteMatcher([
   '/api/payment-methods',
   '/api/subscriptions',
   '/api/subscriptions/(.*)',
+  '/api/subscription-schedules',
+  '/api/subscription-schedules/(.*)',
 ]);
 
 const isApiRoute = createRouteMatcher(['/api/(.*)']);

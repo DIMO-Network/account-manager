@@ -12,6 +12,7 @@ export type SubscriptionData = {
 };
 
 export type StripeSubscription = Stripe.Subscription;
+export type StripeSubscriptionSchedule = Stripe.SubscriptionSchedule;
 
 export type LocalSubscription = {
   id: number;
