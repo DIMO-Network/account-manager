@@ -1,3 +1,10 @@
+## [2.10.1](https://github.com/DIMO-Network/account-manager/compare/v2.10.0...v2.10.1) (2025-07-10)
+
+
+### Bug Fixes
+
+* handle subscription schedule conflicts when updating plans ([#32](https://github.com/DIMO-Network/account-manager/issues/32)) ([5584449](https://github.com/DIMO-Network/account-manager/commit/558444934a846d7d5bdbca167d4f861181e3ff72))
+
 # [2.10.0](https://github.com/DIMO-Network/account-manager/compare/v2.9.0...v2.10.0) (2025-07-09)
 
 
