@@ -170,21 +170,32 @@ export const PaymentMethodsList = () => {
           Add a Card
         </Link>
       </div>
-      {paymentMethods.map(pm => (
-        <PaymentMethodCard
-          key={pm.id}
-          paymentMethod={pm}
-          isDefault={pm.id === defaultPaymentMethodId}
-          onSetDefaultAction={async () => {
-            await handleSetDefault(pm.id);
-          }}
-          onRemoveAction={async () => {
-            await handleRemove(pm.id);
-          }}
-          isLoading={false}
-          customerId={customerId}
-        />
-      ))}
+      {paymentMethods
+        .sort((a, b) => {
+          // Default payment method first
+          if (a.id === defaultPaymentMethodId) {
+            return -1;
+          }
+          if (b.id === defaultPaymentMethodId) {
+            return 1;
+          }
+          return 0;
+        })
+        .map(pm => (
+          <PaymentMethodCard
+            key={pm.id}
+            paymentMethod={pm}
+            isDefault={pm.id === defaultPaymentMethodId}
+            onSetDefaultAction={async () => {
+              await handleSetDefault(pm.id);
+            }}
+            onRemoveAction={async () => {
+              await handleRemove(pm.id);
+            }}
+            isLoading={false}
+            customerId={customerId}
+          />
+        ))}
       <div className={`flex flex-col ${BORDER_RADIUS.lg} bg-surface-raised ${SPACING.xs} lg:block`}>
         <PaymentMethodsNote />
       </div>
