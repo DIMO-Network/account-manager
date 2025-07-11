@@ -13,6 +13,7 @@ export const DimoSignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const hasProcessedTokenRef = useRef<string | null>(null);
+  const isAutoSignIn = searchParams.get('action') === 'auto-signin' && searchParams.get('token');
 
   // Handle auto sign-in from callback
   useEffect(() => {
@@ -94,7 +95,7 @@ export const DimoSignIn = () => {
     }
   }, [isSignedIn, router, searchParams]);
 
-  if (isLoading) {
+  if (isLoading || isAutoSignIn) {
     return (
       <div className="space-y-4">
         <div className="text-center">
