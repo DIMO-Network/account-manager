@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
               // Wait a moment for the release to process
               await new Promise(resolve => setTimeout(resolve, 1000));
 
-              // Now create a new schedule from the subscription
+              // Create a new schedule from the subscription
               const newSchedule = await stripe().subscriptionSchedules.create({
                 from_subscription: subscriptionId,
               });

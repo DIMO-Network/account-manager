@@ -4,6 +4,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
 import arcjet from '@/libs/Arcjet';
+import { AppConfig } from '@/utils/AppConfig';
 import { routing } from './libs/i18nRouting';
 
 const handleI18nRouting = createMiddleware(routing);
@@ -15,6 +16,10 @@ const isProtectedRoute = createRouteMatcher([
   '/:locale/subscriptions(.*)',
   '/vehicles(.*)',
   '/:locale/vehicles(.*)',
+  '/payment-methods(.*)',
+  '/:locale/payment-methods(.*)',
+  '/user-profile(.*)',
+  '/:locale/user-profile(.*)',
 ]);
 
 const isAuthPage = createRouteMatcher([
@@ -58,36 +63,34 @@ export default async function middleware(
     }
   }
 
-  // Handle API routes FIRST - don't apply i18n to them
+  // Handle API routes - apply Clerk protection
   if (isApiRoute(request)) {
-    // Only apply Clerk protection to specific API routes
     if (isProtectedApiRoute(request)) {
       return clerkMiddleware(async (auth) => {
         await auth.protect();
         return NextResponse.next();
       })(request, event);
     }
-
-    // For unprotected API routes, just continue without i18n
     return NextResponse.next();
   }
 
-  // Clerk keyless mode doesn't work with i18n, this is why we need to run the middleware conditionally
-  if (
-    isAuthPage(request)
-    || isProtectedRoute(request)
-  ) {
+  // Handle protected routes with Clerk authentication
+  if (isProtectedRoute(request)) {
     return clerkMiddleware(async (auth, req) => {
-      // Protect dashboard routes
-      if (isProtectedRoute(req)) {
-        const locale = req.nextUrl.pathname.match(/(\/.*)\/dashboard/)?.at(1) ?? '';
-        const signInUrl = new URL(`${locale}/sign-in`, req.url);
+      const locale = req.nextUrl.pathname.match(/(\/.*)\/dashboard/)?.at(1) ?? `/${AppConfig.defaultLocale}`;
+      const signInUrl = new URL(`${locale}/sign-in`, req.url);
 
-        await auth.protect({
-          unauthenticatedUrl: signInUrl.toString(),
-        });
-      }
+      await auth.protect({
+        unauthenticatedUrl: signInUrl.toString(),
+      });
 
+      return handleI18nRouting(request);
+    })(request, event);
+  }
+
+  // Handle auth pages
+  if (isAuthPage(request)) {
+    return clerkMiddleware(async (_auth) => {
       return handleI18nRouting(request);
     })(request, event);
   }
