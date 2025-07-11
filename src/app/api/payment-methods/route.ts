@@ -1,34 +1,23 @@
 import type { NextRequest } from 'next/server';
 import type { PaymentMethodsResponse } from '@/types/paymentMethod';
-import { auth } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { stripe } from '@/libs/Stripe';
 
+async function authenticateUser() {
+  const user = await currentUser();
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  return user;
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 },
-      );
-    }
+    await authenticateUser(); // Verify user is authenticated
 
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customer_id');
-    const cardId = searchParams.get('cardId');
-
-    if (cardId && customerId) {
-      const card = await stripe().paymentMethods.retrieve(cardId);
-      if (card.customer !== customerId) {
-        return NextResponse.json(
-          { error: 'Card does not belong to this customer' },
-          { status: 403 },
-        );
-      }
-      return NextResponse.json({ card });
-    }
 
     if (!customerId) {
       return NextResponse.json(
@@ -65,6 +54,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching payment methods:', error);
+    if (error instanceof Error && error.message === 'User not authenticated') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 },
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to fetch payment methods' },
       { status: 500 },
@@ -74,14 +69,7 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 },
-      );
-    }
+    await authenticateUser(); // Verify user is authenticated
 
     const { paymentMethodId } = await request.json();
 
@@ -98,6 +86,12 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error removing payment method:', error);
+    if (error instanceof Error && error.message === 'User not authenticated') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 },
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to remove payment method' },
       { status: 500 },
@@ -107,14 +101,7 @@ export async function DELETE(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 },
-      );
-    }
+    await authenticateUser(); // Verify user is authenticated
 
     const {
       customerId,
@@ -163,13 +150,12 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Check if this is the first payment method for the customer
+      // Set as default if it's the first payment method
       const existingPaymentMethods = await stripe().paymentMethods.list({
         customer: customerId,
         type: 'card',
       });
 
-      // If this is the first payment method, set it as default
       if (existingPaymentMethods.data.length === 1) {
         await stripe().customers.update(customerId, {
           invoice_settings: {
@@ -182,57 +168,19 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Invalid request parameters' },
+      { error: 'Invalid request' },
       { status: 400 },
     );
   } catch (error) {
-    console.error('Error processing payment method request:', error);
-    return NextResponse.json(
-      { error: 'Failed to process payment method request' },
-      { status: 500 },
-    );
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
+    console.error('Error adding payment method:', error);
+    if (error instanceof Error && error.message === 'User not authenticated') {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 },
       );
     }
-
-    const { customerId, cardId, name, address_city, address_country, address_line1, address_line2, address_state, address_zip } = await request.json();
-
-    if (!customerId || !cardId) {
-      return NextResponse.json(
-        { error: 'Customer ID and Card ID are required' },
-        { status: 400 },
-      );
-    }
-
-    // Update the payment method
-    const updatedCard = await stripe().paymentMethods.update(cardId, {
-      billing_details: {
-        name,
-        address: {
-          city: address_city,
-          country: address_country,
-          line1: address_line1,
-          line2: address_line2,
-          state: address_state,
-          postal_code: address_zip,
-        },
-      },
-    });
-
-    return NextResponse.json({ success: true, card: updatedCard });
-  } catch (error) {
-    console.error('Error updating card:', error);
     return NextResponse.json(
-      { error: 'Failed to update card' },
+      { error: 'Failed to add payment method' },
       { status: 500 },
     );
   }

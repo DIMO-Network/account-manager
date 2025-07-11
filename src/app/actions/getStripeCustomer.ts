@@ -15,14 +15,14 @@ export async function getOrCreateStripeCustomer(): Promise<{
       return { success: false, error: 'User not authenticated' };
     }
 
-    const email = user.primaryEmailAddress?.emailAddress;
-
-    if (!email) {
+    if (!user.primaryEmailAddress?.emailAddress) {
       return { success: false, error: 'User email not found' };
     }
 
+    const userEmail = user.primaryEmailAddress.emailAddress;
+
     // Check if we already have a customer ID stored
-    const existingCustomerId = user.publicMetadata?.stripeCustomerId as string;
+    const existingCustomerId: string | undefined = user.publicMetadata?.stripeCustomerId as string;
 
     if (existingCustomerId) {
       // Verify the customer still exists in Stripe
@@ -36,7 +36,7 @@ export async function getOrCreateStripeCustomer(): Promise<{
 
     // Search for existing customer by email
     const existingCustomers = await stripe().customers.search({
-      query: `email:'${email}'`,
+      query: `email:'${userEmail}'`,
       limit: 1,
     });
 
@@ -48,16 +48,17 @@ export async function getOrCreateStripeCustomer(): Promise<{
     } else {
       // Create new customer
       const customer = await stripe().customers.create({
-        email,
+        email: userEmail,
         name: user.fullName || undefined,
         metadata: {
-          clerk_user_id: user.id,
+          user_id: user.id,
+          auth_type: 'clerk',
         },
       });
       customerId = customer.id;
     }
 
-    // Store customer ID in user's public metadata
+    // Store customer ID in user's metadata
     const client = await clerkClient();
     await client.users.updateUserMetadata(user.id, {
       publicMetadata: {
