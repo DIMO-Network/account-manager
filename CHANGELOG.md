@@ -1,3 +1,10 @@
+# [2.11.0](https://github.com/DIMO-Network/account-manager/compare/v2.10.1...v2.11.0) (2025-07-11)
+
+
+### Features
+
+* auth web app with DIMO JWT ([#33](https://github.com/DIMO-Network/account-manager/issues/33)) ([b8da2ba](https://github.com/DIMO-Network/account-manager/commit/b8da2badbb22ef2a5a07560cb915a5b3e2db8d58))
+
 ## [2.10.1](https://github.com/DIMO-Network/account-manager/compare/v2.10.0...v2.10.1) (2025-07-10)
 
 
