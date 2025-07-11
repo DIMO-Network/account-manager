@@ -1,8 +1,21 @@
 import type { JWTPayload } from 'jose';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
-const JWKS = createRemoteJWKSet(new URL(process.env.DIMO_JWKS_URL!));
-const ISSUER = process.env.DIMO_JWT_ISSUER!;
+function getJWKS() {
+  const jwksUrl = process.env.DIMO_JWKS_URL;
+  if (!jwksUrl) {
+    throw new Error('DIMO_JWKS_URL environment variable is not set');
+  }
+  return createRemoteJWKSet(new URL(jwksUrl));
+}
+
+function getIssuer() {
+  const issuer = process.env.DIMO_JWT_ISSUER;
+  if (!issuer) {
+    throw new Error('DIMO_JWT_ISSUER environment variable is not set');
+  }
+  return issuer;
+}
 
 export type DimoJwtPayload = JWTPayload & {
   email?: string;
@@ -12,6 +25,9 @@ export type DimoJwtPayload = JWTPayload & {
 
 export async function verifyDimoJwt(token: string): Promise<DimoJwtPayload> {
   try {
+    const JWKS = getJWKS();
+    const ISSUER = getIssuer();
+
     const { payload } = await jwtVerify(token, JWKS, {
       algorithms: ['RS256'],
       issuer: ISSUER,

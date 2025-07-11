@@ -75,6 +75,17 @@ async function ensureClerkUser(dimoProfile: any, dimoToken: string) {
 }
 
 export async function GET(request: NextRequest) {
+  // Validate required environment variables
+  if (!process.env.DIMO_JWKS_URL) {
+    logger.error('DIMO_JWKS_URL environment variable is not set');
+    return NextResponse.redirect(new URL('/sign-in?error=configuration_error', getBaseUrl()));
+  }
+
+  if (!process.env.DIMO_JWT_ISSUER) {
+    logger.error('DIMO_JWT_ISSUER environment variable is not set');
+    return NextResponse.redirect(new URL('/sign-in?error=configuration_error', getBaseUrl()));
+  }
+
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
   const error = searchParams.get('error');
