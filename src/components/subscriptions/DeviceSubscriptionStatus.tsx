@@ -1,12 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ActivateButton } from '@/components/subscription/ActivateButton';
-import { CancellationFlow } from '@/components/subscription/CancellationFlow';
-import { ErrorDisplay } from '@/components/subscription/ErrorDisplay';
-import { StatusHeader } from '@/components/subscription/StatusHeader';
-import { SubscriptionStatusCard } from '@/components/subscription/SubscriptionStatusCard';
-import { SuccessMessage } from '@/components/subscription/SuccessMessage';
+import { ActivateButton } from '@/components/subscriptions/ActivateButton';
+import { CancellationFlow } from '@/components/subscriptions/CancellationFlow';
+import { ErrorDisplay } from '@/components/subscriptions/ErrorDisplay';
+import { StatusHeader } from '@/components/subscriptions/StatusHeader';
+import { SubscriptionStatusCard } from '@/components/subscriptions/SubscriptionStatusCard';
+import { SuccessMessage } from '@/components/subscriptions/SuccessMessage';
 import { useCancellationSuccess } from '@/hooks/useCancellationSuccess';
 import { useCheckoutSuccess } from '@/hooks/useCheckoutSuccess';
 import { useSubscriptionActions } from '@/hooks/useSubscriptionActions';
