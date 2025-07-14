@@ -1,6 +1,7 @@
 import type { AllSubscriptionStatusesResponse } from '@/types/subscription';
 import { ConnectionIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
+import { featureFlags } from '@/utils/FeatureFlags';
 import { getBackendSubscriptionRenewalInfo } from '@/utils/subscriptionHelpers';
 
 function BackendSubscriptionItem({ status, index }: { status: any; index: number }) {
@@ -77,13 +78,17 @@ function getStatusDisplay(status: any) {
 }
 
 export function BackendSubscriptions({ statuses }: { statuses: AllSubscriptionStatusesResponse }) {
-  if (statuses.length === 0) {
+  const filteredStatuses = featureFlags.useBackendProxy
+    ? statuses.filter(status => status.status !== 'canceled' && status.new_status !== 'canceled')
+    : statuses;
+
+  if (filteredStatuses.length === 0) {
     return <p>No devices found.</p>;
   }
 
   return (
     <ul className="space-y-4">
-      {statuses.map((status, index) => {
+      {filteredStatuses.map((status, index) => {
         const device = status.device;
         const key = device?.tokenId
           ? `device-${device.tokenId}`

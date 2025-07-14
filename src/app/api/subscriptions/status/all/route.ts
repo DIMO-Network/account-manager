@@ -23,9 +23,6 @@ export async function GET(_request: NextRequest) {
 
     const backendUrl = `${featureFlags.backendApiUrl}/subscription/status/all`;
 
-    console.warn('Making backend request to:', backendUrl);
-    console.warn('Using DIMO token (first 20 chars):', `${dimoToken.substring(0, 20)}...`);
-
     const response = await fetch(backendUrl, {
       headers: {
         'Authorization': `Bearer ${dimoToken}`,
@@ -64,8 +61,6 @@ export async function GET(_request: NextRequest) {
     }
 
     const data = await response.json();
-    console.warn('Backend response data:', data);
-    console.warn('Number of subscriptions in response:', Array.isArray(data) ? data.length : 'Not an array');
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error fetching all subscription statuses:', error);
