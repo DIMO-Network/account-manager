@@ -11,6 +11,46 @@ export type SubscriptionData = {
   error?: string;
 };
 
+// Backend subscription status types
+export type DeviceInfo = {
+  address: string;
+  tokenId: number;
+  tokenDID: string;
+  serial: string;
+  vehicle: {
+    tokenId: number;
+    definition: {
+      make: string;
+      model: string;
+      year: number;
+    };
+  };
+  claimedAt?: string;
+  mintedAt?: string;
+  manufacturer?: {
+    name: string;
+  };
+  connection?: {
+    name: string;
+    mintedAt: string;
+  };
+};
+
+export type SubscriptionStatusV2 = {
+  device: DeviceInfo | null;
+  status: string;
+  new_status: string;
+  plan: string | null;
+  price: string | null;
+  start_date: string;
+  trial_end: string | null;
+  next_renewal_date: string | null;
+  ended_at: string | null;
+  cancel_at: string | null;
+};
+
+export type AllSubscriptionStatusesResponse = SubscriptionStatusV2[];
+
 export type StripeSubscription = Stripe.Subscription;
 export type StripeSubscriptionSchedule = Stripe.SubscriptionSchedule;
 

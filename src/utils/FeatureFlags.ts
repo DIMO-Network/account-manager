@@ -23,9 +23,9 @@ const getBackendApiUrl = (): string => {
   const env = getEnvironment();
   switch (env) {
     case 'development':
-      return 'https://api.dev.dimo.co';
+      return 'https://api.dimo.co';
     case 'staging':
-      return 'https://api.dev.dimo.co';
+      return 'https://api.dimo.co';
     case 'production':
       return 'https://api.dimo.co';
     default:
