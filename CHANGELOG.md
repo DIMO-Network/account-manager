@@ -1,3 +1,10 @@
+# [2.12.0](https://github.com/DIMO-Network/account-manager/compare/v2.11.0...v2.12.0) (2025-07-14)
+
+
+### Features
+
+* migrate dashboard to use backend proxy calls ([#34](https://github.com/DIMO-Network/account-manager/issues/34)) ([b61daec](https://github.com/DIMO-Network/account-manager/commit/b61daec671669fb567b2dcb44a6f6bf3f5bb5b8d))
+
 # [2.11.0](https://github.com/DIMO-Network/account-manager/compare/v2.10.1...v2.11.0) (2025-07-11)
 
 
