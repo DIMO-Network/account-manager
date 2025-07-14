@@ -2,7 +2,10 @@ import type Stripe from 'stripe';
 import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import { stripe } from '@/libs/Stripe';
 
-// Shared constants
+// ============================================================================
+// SHARED CONSTANTS
+// ============================================================================
+
 export const SUBSCRIPTION_INTERVALS = {
   MONTH: 'month',
   YEAR: 'year',
@@ -39,6 +42,10 @@ export type EnhancedSubscription = Stripe.Subscription & {
   nextScheduledPrice?: Stripe.Price | null;
   nextScheduledDate?: number | null;
 };
+
+// ============================================================================
+// STRIPE SUBSCRIPTION HELPERS
+// ============================================================================
 
 async function getProductInfo(productId: string): Promise<{ name: string } | null> {
   try {
@@ -322,4 +329,43 @@ export async function withStripeErrorHandling<T>(
 
 export function getCancellationFeedbackLabel(feedback: StripeCancellationFeedback): string {
   return STRIPE_CANCELLATION_FEEDBACK[feedback];
+}
+
+// ============================================================================
+// BACKEND SUBSCRIPTION HELPERS
+// ============================================================================
+
+export function getBackendSubscriptionRenewalInfo(status: {
+  new_status: string;
+  cancel_at: string | null;
+  next_renewal_date: string | null;
+  trial_end: string | null;
+}) {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) {
+      return 'N/A';
+    }
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  // For trialing_incomplete status, show trial_end if cancel_at is null
+  if (status.new_status === 'trialing_incomplete') {
+    if (status.cancel_at) {
+      return { displayText: `Cancels on ${formatDate(status.cancel_at)}`, date: formatDate(status.cancel_at) };
+    }
+    if (status.trial_end) {
+      return { displayText: `Trial ends on ${formatDate(status.trial_end)}`, date: formatDate(status.trial_end) };
+    }
+  }
+
+  if (status.cancel_at) {
+    return { displayText: `Cancels on ${formatDate(status.cancel_at)}`, date: formatDate(status.cancel_at) };
+  }
+  if (status.next_renewal_date) {
+    return { displayText: `Renews on ${formatDate(status.next_renewal_date)}`, date: formatDate(status.next_renewal_date) };
+  }
+  if (status.trial_end) {
+    return { displayText: `Trial ends on ${formatDate(status.trial_end)}`, date: formatDate(status.trial_end) };
+  }
+  return { displayText: 'N/A', date: undefined };
 }
