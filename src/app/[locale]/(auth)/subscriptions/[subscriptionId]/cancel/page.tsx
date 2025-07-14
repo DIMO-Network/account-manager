@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import CancelSubscriptionCard from '@/components/subscription/CancelSubscriptionCard';
+import CancelSubscriptionCard from '@/components/subscriptions/CancelSubscriptionCard';
 import { fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 

@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation';
 import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import { getPreviewInvoice } from '@/app/actions/getPreviewInvoice';
 import { getProductPrices } from '@/app/actions/getProductPrices';
-import { EditConfirmationCard } from '@/components/subscription/EditConfirmationCard';
-import { EditSubscriptionCard } from '@/components/subscription/EditSubscriptionCard';
+import { EditConfirmationCard } from '@/components/subscriptions/EditConfirmationCard';
+import { EditSubscriptionCard } from '@/components/subscriptions/EditSubscriptionCard';
 import { stripe } from '@/libs/Stripe';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 

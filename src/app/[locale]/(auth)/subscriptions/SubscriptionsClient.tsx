@@ -4,8 +4,8 @@ import type { AllSubscriptionStatusesResponse } from '@/types/subscription';
 import type { EnhancedSubscription } from '@/utils/subscriptionHelpers';
 import { useEffect, useState } from 'react';
 import { CarIcon } from '@/components/Icons';
-import { BackendSubscriptions } from '@/components/subscription/BackendSubscriptions';
-import { StripeSubscriptions } from '@/components/subscription/StripeSubscriptions';
+import { BackendSubscriptions } from '@/components/subscriptions/BackendSubscriptions';
+import { StripeSubscriptions } from '@/components/subscriptions/StripeSubscriptions';
 import { COLORS } from '@/utils/designSystem';
 import { featureFlags } from '@/utils/FeatureFlags';
 
