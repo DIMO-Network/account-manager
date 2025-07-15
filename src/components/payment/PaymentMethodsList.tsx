@@ -1,11 +1,14 @@
 'use client';
 
+import Link from 'next/link';
+import { CreditBalanceCard } from '@/components/payment/CreditBalanceCard';
 import { PaymentMethodCard } from '@/components/payment/PaymentMethodCard';
 import { PaymentMethodSkeleton } from '@/components/payment/PaymentMethodSkeleton';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { WalletIcon } from '../Icons';
 
 export const PaymentMethodsList = () => {
   const { customerId, loading: customerLoading, error: customerError } = useStripeCustomer();
@@ -132,7 +135,20 @@ export const PaymentMethodsList = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <div className="flex flex-row items-center justify-between border-b border-gray-700 pb-2">
+        <div className="flex flex-row items-center gap-2">
+          <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+          <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Payment Method</h1>
+        </div>
+        <CreditBalanceCard customerId={customerId} />
+        <Link
+          href="/payment-methods/add"
+          className="px-4 py-2 text-sm bg-white text-black rounded-full font-medium hover:bg-gray-100 transition-colors"
+        >
+          Add a Card
+        </Link>
+      </div>
       {paymentMethods
         .sort((a, b) => {
           // Default payment method first
