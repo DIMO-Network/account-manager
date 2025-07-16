@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CreditCardIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS, SPACING } from '@/utils/designSystem';
@@ -14,6 +15,7 @@ type CreditBalance = {
 };
 
 export const CreditBalanceCard = ({ customerId }: CreditBalanceCardProps) => {
+  const router = useRouter();
   const [creditBalance, setCreditBalance] = useState<CreditBalance | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -97,6 +99,17 @@ export const CreditBalanceCard = ({ customerId }: CreditBalanceCardProps) => {
             ? 'This credit will be automatically applied to your next invoice'
             : 'No available credit balance'}
         </span>
+        <div className="flex flex-row gap-2 mt-6">
+          <button
+            onClick={() => {
+              router.push('/payment-methods/top-up');
+            }}
+            className="w-full max-w-40 gap-2 rounded-full bg-white px-4 font-medium h-10 text-black hover:bg-gray-100 transition-colors"
+            type="button"
+          >
+            Top Up
+          </button>
+        </div>
       </div>
     </div>
   );
