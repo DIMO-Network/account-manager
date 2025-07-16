@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { featureFlags } from '@/utils/FeatureFlags';
 
 type TopUpFormProps = {
   onSuccessAction: () => void;
@@ -11,7 +12,7 @@ type TopUpFormProps = {
 export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) => {
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
-  const [dimoBalance, setDimoBalance] = useState<number | null>(null);
+  const [tokenBalance, setTokenBalance] = useState<number | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(true);
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const [isAmountFieldFocused, setIsAmountFieldFocused] = useState(false);
@@ -23,6 +24,8 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
   const [inputUsdLoading, setInputUsdLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
+  const TOKEN_SYMBOL = featureFlags.useOmidToken ? 'OMID' : 'DIMO';
+
   // Debounced function to calculate USD value
   const debouncedCalculateUsd = useCallback((amount: string, price: number | null) => {
     if (timeoutRef.current) {
@@ -31,8 +34,8 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
 
     timeoutRef.current = setTimeout(() => {
       if (amount && price && !Number.isNaN(Number(amount))) {
-        // Calculate USD value for the net amount (transfer amount minus gas fee)
-        const netAmount = Math.max(0, Number(amount) - 0.1);
+        // Calculate USD value for the net amount (transfer amount minus transfer fee)
+        const netAmount = Math.max(0, Number(amount) - 0.5);
         setInputUsdValue(netAmount * price);
         setInputUsdLoading(false);
       } else {
@@ -42,10 +45,10 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
     }, 500); // 500ms delay
   }, []);
 
-  // Fetch DIMO balance and price on component mount
+  // Fetch token balance and price on component mount
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch DIMO balance
+      // Fetch token balance
       try {
         setBalanceLoading(true);
         setBalanceError(null);
@@ -53,18 +56,18 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
         const balanceResponse = await fetch('/api/dimo-balance');
 
         if (!balanceResponse.ok) {
-          throw new Error('Failed to fetch DIMO balance');
+          throw new Error('Failed to fetch token balance');
         }
 
         const balanceData = await balanceResponse.json();
-        setDimoBalance(balanceData.balance);
+        setTokenBalance(balanceData.balance);
       } catch (err) {
-        setBalanceError(err instanceof Error ? err.message : 'Failed to load DIMO balance');
+        setBalanceError(err instanceof Error ? err.message : 'Failed to load token balance');
       } finally {
         setBalanceLoading(false);
       }
 
-      // Fetch DIMO price
+      // Fetch token price (same for both tokens)
       try {
         setPriceLoading(true);
         setPriceError(null);
@@ -72,13 +75,13 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
         const priceResponse = await fetch('/api/dimo-price');
 
         if (!priceResponse.ok) {
-          throw new Error('Failed to fetch DIMO price');
+          throw new Error('Failed to fetch token price');
         }
 
         const priceData = await priceResponse.json();
         setDimoPrice(Number(priceData.price));
       } catch (err) {
-        setPriceError(err instanceof Error ? err.message : 'Failed to load DIMO price');
+        setPriceError(err instanceof Error ? err.message : 'Failed to load token price');
       } finally {
         setPriceLoading(false);
       }
@@ -97,21 +100,21 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
       return 'Please enter a valid amount';
     }
 
-    if (dimoBalance !== null && (numValue + 0.1) > dimoBalance) {
-      return 'Insufficient DIMO balance';
+    if (tokenBalance !== null && (numValue + 0.5) > tokenBalance) {
+      return 'Insufficient token balance';
     }
 
     if (numValue < 0.5) {
-      return 'Minimum amount is 0.5 DIMO';
+      return 'Minimum amount is 0.5 tokens';
     }
 
     return null;
   };
 
   const setAmountToMax = () => {
-    if (dimoBalance !== null) {
-      // Set to available balance minus gas fee (0.1 DIMO)
-      const maxAmount = Math.max(0, dimoBalance - 0.1);
+    if (tokenBalance !== null) {
+      // Set to available balance minus transfer fee (0.5 tokens)
+      const maxAmount = Math.max(0, tokenBalance - 0.5);
       const maxAmountString = maxAmount.toFixed(6);
       setAmount(maxAmountString);
       setAmountError(null);
@@ -159,11 +162,19 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
 
   return (
     <div className="space-y-6">
-      {/* DIMO Balance Card */}
+      {/* Token Balance Card */}
       <div className={`${SPACING.lg} border ${COLORS.border.default} rounded-lg ${COLORS.background.secondary}`}>
-        <h3 className={`${RESPONSIVE.text.h3} font-medium ${COLORS.text.primary} mb-2`}>Your $DIMO Balance</h3>
+        <h3 className={`${RESPONSIVE.text.h3} font-medium ${COLORS.text.primary} mb-2`}>
+          Your $
+          {TOKEN_SYMBOL}
+          {' '}
+          Balance
+        </h3>
         <p className={`${RESPONSIVE.text.body} text-grey-400 mb-4`}>
-          Add credits to your account using your $DIMO balance
+          Add credits to your account using your $
+          {TOKEN_SYMBOL}
+          {' '}
+          balance
         </p>
         <div className="text-2xl font-bold text-white">
           {balanceLoading
@@ -175,7 +186,7 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
                   <span className="text-red-400">Error loading balance</span>
                 )
               : (
-                  `${dimoBalance?.toFixed(2) || '0.00'} DIMO`
+                  `${tokenBalance?.toFixed(2) || '0.00'} ${TOKEN_SYMBOL}`
                 )}
         </div>
         {priceLoading
@@ -186,11 +197,11 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
             ? (
                 <div className="text-xs text-red-400 mt-1">Error loading price</div>
               )
-            : dimoBalance !== null && dimoPrice !== null
+            : tokenBalance !== null && dimoPrice !== null
               ? (
                   <div className="text-sm text-gray-400 mt-1">
                     ≈ $
-                    {(dimoBalance * dimoPrice).toFixed(2)}
+                    {(tokenBalance * dimoPrice).toFixed(2)}
                     {' '}
                     USD
                   </div>
@@ -200,13 +211,18 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
 
       {/* Add Credits Form */}
       <div className={`${SPACING.lg} border ${COLORS.border.default} rounded-lg ${COLORS.background.secondary}`}>
-        <h3 className={`${RESPONSIVE.text.h3} font-medium ${COLORS.text.primary} mb-4`}>Add Credits with $DIMO</h3>
+        <h3 className={`${RESPONSIVE.text.h3} font-medium ${COLORS.text.primary} mb-4`}>
+          Add Credits with $
+          {TOKEN_SYMBOL}
+        </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <div className="flex justify-between items-center mb-2">
               <label htmlFor="amount" className="block text-sm font-medium text-white">
-                Amount to convert ($DIMO)
+                Amount to convert ($
+                {TOKEN_SYMBOL}
+                )
               </label>
               <button
                 type="button"
@@ -217,7 +233,10 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
               </button>
             </div>
             <p className="text-xs text-gray-400 mb-2">
-              Includes a 0.1 DIMO gas and buffer fee. USD conversion shows net credits you'll receive.
+              Includes a 0.5 $
+              {TOKEN_SYMBOL}
+              {' '}
+              transfer fee. USD conversion shows net credits you'll receive.
             </p>
             <div className={`relative border rounded ${BORDER_RADIUS.md} ${
               amountError
@@ -241,20 +260,20 @@ export const TopUpForm = ({ onSuccessAction, onCancelAction }: TopUpFormProps) =
                 required
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                DIMO
+                {TOKEN_SYMBOL}
               </div>
             </div>
             {amountError && (
               <p className="text-red-400 text-xs mt-1">{amountError}</p>
             )}
-            {dimoBalance !== null && !amountError && (
+            {tokenBalance !== null && !amountError && (
               <div className="mt-1">
                 <p className="text-gray-400 text-xs">
                   Available:
                   {' '}
-                  {dimoBalance.toFixed(6)}
+                  {tokenBalance.toFixed(6)}
                   {' '}
-                  DIMO
+                  {TOKEN_SYMBOL}
                 </p>
                 {amount && dimoPrice && (
                   <div className="text-xs text-gray-400 mt-1">
