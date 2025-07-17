@@ -31,6 +31,7 @@
   "dependencies": {
     "@arcjet/next": "^1.0.0-beta.6",
     "@dimo-network/login-with-dimo": "^0.0.26",
+    "@dimo-network/transactions": "^0.1.94",
     "@hookform/resolvers": "^5.1.1",
     "@logtail/pino": "^0.5.4",
     "@sentry/nextjs": "^9.34.0",
