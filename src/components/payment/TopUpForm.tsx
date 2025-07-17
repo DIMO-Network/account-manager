@@ -1,8 +1,8 @@
 'use client';
 
+import process from 'node:process';
 import { useCallback, useRef, useState } from 'react';
 import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
-import { featureFlags } from '@/utils/FeatureFlags';
 
 type TopUpFormProps = {
   onReviewAction: (amount: number, usdValue: number) => void;
@@ -32,7 +32,7 @@ export const TopUpForm = ({
   const [inputUsdLoading, setInputUsdLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  const TOKEN_SYMBOL = featureFlags.useOmidToken ? 'OMID' : 'DIMO';
+  const TOKEN_SYMBOL = process.env.NEXT_PUBLIC_USE_OMID_TOKEN ? 'OMID' : 'DIMO';
   const TRANSFER_FEE = 0.5;
 
   // Debounced function to calculate USD value

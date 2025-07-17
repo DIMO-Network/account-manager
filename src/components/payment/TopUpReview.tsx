@@ -1,8 +1,9 @@
 'use client';
 
+import { ExecuteAdvancedTransactionWithDimo } from '@dimo-network/login-with-dimo';
 import { useEffect, useState } from 'react';
 import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
-import { featureFlags } from '@/utils/FeatureFlags';
+import { TransactionsSDKTopUp } from './TransactionsSDKTopUp';
 
 type TopUpReviewProps = {
   amount: number;
@@ -11,11 +12,10 @@ type TopUpReviewProps = {
 };
 
 export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpReviewProps) => {
-  const [loading, setLoading] = useState(false);
   const [dimoPrice, setDimoPrice] = useState<number | null>(null);
   const [priceLoading, setPriceLoading] = useState(true);
 
-  const TOKEN_SYMBOL = featureFlags.useOmidToken ? 'OMID' : 'DIMO';
+  const TOKEN_SYMBOL = process.env.NEXT_PUBLIC_USE_OMID_TOKEN ? 'OMID' : 'DIMO';
   const TRANSFER_FEE = 0.5;
 
   // Fetch price on component mount
@@ -48,15 +48,30 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
   const netCredits = transferAmount; // Amount that becomes credits
   const netCreditsUsd = netCredits * (dimoPrice || 0);
 
-  const handleSubmit = async () => {
-    setLoading(true);
+  const ERC20_TRANSFER_ABI = [
+    {
+      inputs: [
+        { internalType: 'address', name: 'to', type: 'address' },
+        { internalType: 'uint256', name: 'amount', type: 'uint256' },
+      ],
+      name: 'transfer',
+      outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+  ];
 
-    // TODO: Implement top-up logic
-    console.warn('Top-up functionality not implemented');
+  const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_USE_OMID_TOKEN
+    ? '0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10' // OMID (Polygon Amoy)
+    : '0xE261D618a959aFfFd53168Cd07D12E37B26761db'; // DIMO (Polygon Mainnet)
 
-    setLoading(false);
-    onSuccessAction();
-  };
+  const RECIPIENT = '0xCec224A21bdF3Bd2d5E95aC38A92523146b814Bd';
+
+  function toWei(amount: number): string {
+    // Convert to wei (18 decimals)
+    const weiAmount = BigInt(Math.floor(amount * 1e18));
+    return weiAmount.toString();
+  }
 
   return (
     <div className="space-y-6">
@@ -125,14 +140,32 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
           </div>
 
           <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={loading}
-              className={`${RESPONSIVE.touch} px-4 py-2 text-sm bg-white text-black rounded-full font-medium hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-1`}
-            >
-              {loading ? 'Processing...' : 'Add Credits'}
-            </button>
+            {process.env.NEXT_PUBLIC_USE_EXECUTE_ADVANCED_TRANSACTION
+              ? (
+                  <ExecuteAdvancedTransactionWithDimo
+                    mode="popup"
+                    onSuccess={() => onSuccessAction()}
+                    onError={(error: unknown) => {
+                      console.error('Error:', error);
+                    }}
+                    address={TOKEN_CONTRACT}
+                    value="0"
+                    abi={ERC20_TRANSFER_ABI}
+                    functionName="transfer"
+                    args={[RECIPIENT, toWei(amount)]}
+                    authenticatedLabel="Add Credits"
+                    unAuthenticatedLabel="Add Credits"
+                  />
+                )
+              : (
+                  <TransactionsSDKTopUp
+                    amount={amount}
+                    onSuccessAction={onSuccessAction}
+                    onErrorAction={(error: unknown) => {
+                      console.error('Error:', error);
+                    }}
+                  />
+                )}
             <button
               type="button"
               onClick={onBackAction}
