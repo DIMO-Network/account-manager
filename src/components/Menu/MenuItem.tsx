@@ -1,5 +1,4 @@
 import type { FC, ReactNode } from 'react';
-import classNames from 'classnames';
 import Link from 'next/link';
 import { MenuActionButton } from './MenuActionButton';
 
@@ -49,7 +48,7 @@ export const MenuItem: FC<MenuItemProps> = ({
           className="block"
         >
           <MenuActionButton disabled={disabled} active={isHighlighted}>
-            {Icon && <Icon className={classNames(iconClassName, { 'text-white': isHighlighted })} />}
+            {Icon && <Icon className={iconClassName} />}
             {label}
           </MenuActionButton>
         </Link>
@@ -64,7 +63,7 @@ export const MenuItem: FC<MenuItemProps> = ({
         disabled={disabled}
         active={isHighlighted}
       >
-        {Icon && <Icon className={classNames(iconClassName, { 'text-white': isHighlighted })} />}
+        {Icon && <Icon className={iconClassName} />}
         {label}
       </MenuActionButton>
     </li>

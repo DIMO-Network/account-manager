@@ -25,6 +25,11 @@ export const COLORS = {
     primary: 'bg-primary-500 hover:bg-primary-600 text-white',
     secondary: 'bg-cta-default hover:bg-grey-700 text-white',
     disabled: 'bg-cta-disabled text-grey-400 cursor-not-allowed',
+    menu: {
+      default: 'text-text-secondary hover:bg-grey-900',
+      active: 'bg-grey-800 text-white font-bold',
+      disabled: 'text-gray-400 cursor-not-allowed',
+    },
   },
 
   // Feedback

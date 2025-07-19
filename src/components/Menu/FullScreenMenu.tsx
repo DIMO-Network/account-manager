@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import type { MenuItemConfig } from '@/types/menu';
-import { DIMOLogo } from '@/components/Icons';
+import { CloseIcon, DIMOLogo } from '@/components/Icons';
 import { COLORS, SPACING } from '@/utils/designSystem';
 import { Menu } from './Menu';
 
@@ -20,9 +20,9 @@ export const FullScreenMenu: FC<FullScreenMenuProps> = ({
   }
 
   return (
-    <div className={`fixed inset-0 z-50 md:hidden ${COLORS.background.primary}`}>
+    <div className="fixed inset-0 z-50 md:hidden bg-black">
       <div className="flex flex-col h-full">
-        <div className={`flex justify-between items-center ${SPACING.md} border-b ${COLORS.border.default}`}>
+        <div className={`flex justify-between items-center ${SPACING.md}`}>
           <DIMOLogo className="h-6 w-auto" />
           <button
             onClick={onClose}
@@ -30,20 +30,7 @@ export const FullScreenMenu: FC<FullScreenMenuProps> = ({
             aria-label="Close menu"
             type="button"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <CloseIcon className="w-6 h-6" />
           </button>
         </div>
 
