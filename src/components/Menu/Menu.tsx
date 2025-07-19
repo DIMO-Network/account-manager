@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import type { MenuItemConfig } from '@/types/menu';
 import { usePathname } from 'next/navigation';
-import { AppConfig } from '@/utils/AppConfig';
+import { DIMOLogo } from '@/components/Icons';
 import { COLORS } from '@/utils/designSystem';
 import { MenuItem } from './MenuItem';
 
@@ -33,10 +33,8 @@ export const Menu: FC<MenuProps> = ({ menuItems, onMenuItemClick }) => {
 
   return (
     <div className={`flex flex-col gap-4 md:rounded-xl px-4 py-6 h-full w-full md:w-64 ${COLORS.background.primary}`}>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">
-          {AppConfig.name}
-        </h1>
+      <div className="mb-6 hidden md:block">
+        <DIMOLogo className="h-8 w-28" />
       </div>
       <ul className="flex flex-col gap-4 justify-center">
         {mainMenuItems.map(item => (

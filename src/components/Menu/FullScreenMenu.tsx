@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import type { MenuItemConfig } from '@/types/menu';
+import { DIMOLogo } from '@/components/Icons';
 import { COLORS, SPACING } from '@/utils/designSystem';
 import { Menu } from './Menu';
 
@@ -22,7 +23,7 @@ export const FullScreenMenu: FC<FullScreenMenuProps> = ({
     <div className={`fixed inset-0 z-50 md:hidden ${COLORS.background.primary}`}>
       <div className="flex flex-col h-full">
         <div className={`flex justify-between items-center ${SPACING.md} border-b ${COLORS.border.default}`}>
-          <h1 className={`text-xl font-bold ${COLORS.text.primary}`}>Menu</h1>
+          <DIMOLogo className="h-6 w-auto" />
           <button
             onClick={onClose}
             className={`p-2 rounded-lg hover:bg-surface-sunken transition-colors ${COLORS.text.primary}`}
