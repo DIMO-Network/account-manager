@@ -79,13 +79,14 @@ export const RESPONSIVE = {
   touch: 'min-h-[44px] min-w-[44px]',
 } as const;
 
-// Breakpoint utilities
+// Breakpoint utilities - references CSS custom properties from theme.css
 export const BREAKPOINTS = {
-  'sm': '640px',
-  'md': '768px',
-  'lg': '1024px',
-  'xl': '1280px',
-  '2xl': '1536px',
+  'xs': 'var(--breakpoint-xs)',
+  'sm': 'var(--breakpoint-sm)',
+  'md': 'var(--breakpoint-md)',
+  'lg': 'var(--breakpoint-lg)',
+  'xl': 'var(--breakpoint-xl)',
+  '2xl': 'var(--breakpoint-2xl)',
 } as const;
 
 // Common responsive patterns
