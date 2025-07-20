@@ -1,7 +1,9 @@
 @theme {
+  --color-dimo-red: #e80303;
   --color-surface-default: #131417;
   --color-surface-sunken: #0a0508;
   --color-surface-raised: #232729;
+  --color-surface-input: #322d2f;
   --color-cta-default: #232729;
   --color-cta-disabled: #0a0508;
   --color-border-disabled: #bababa;
