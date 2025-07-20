@@ -22,11 +22,11 @@ export const COLORS = {
 
   // Buttons
   button: {
-    primary: 'bg-primary-500 hover:bg-primary-600 text-white',
-    secondary: 'bg-cta-default hover:bg-grey-700 text-white',
+    primary: 'bg-cta-default text-white cursor-pointer',
+    secondary: 'bg-cta-default text-white cursor-pointer',
     disabled: 'bg-cta-disabled text-grey-400 cursor-not-allowed',
     menu: {
-      default: 'text-text-secondary hover:bg-grey-900',
+      default: 'text-text-secondary',
       active: 'bg-surface-raised text-white font-bold',
       disabled: 'text-gray-400 cursor-not-allowed',
     },

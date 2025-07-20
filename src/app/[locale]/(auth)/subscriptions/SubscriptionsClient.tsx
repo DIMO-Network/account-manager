@@ -2,12 +2,14 @@
 
 import type { AllSubscriptionStatusesResponse } from '@/types/subscription';
 import type { EnhancedSubscription } from '@/utils/subscriptionHelpers';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { CarIcon } from '@/components/Icons';
+import { CarIcon, ChevronRightIcon, ConnectionIcon } from '@/components/Icons';
 import { BackendSubscriptions } from '@/components/subscriptions/BackendSubscriptions';
 import { StripeSubscriptions } from '@/components/subscriptions/StripeSubscriptions';
-import { COLORS } from '@/utils/designSystem';
+import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { featureFlags } from '@/utils/FeatureFlags';
+import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
 
 type SubscriptionsClientProps = {
   subscriptions: EnhancedSubscription[];
@@ -52,19 +54,36 @@ export function SubscriptionsClient({ subscriptions }: SubscriptionsClientProps)
     content = <p>Loading subscription statuses...</p>;
   } else if (error) {
     content = (
-      <div className="flex flex-col items-center justify-center py-8 gap-4">
-        <div className="text-sm text-red-500">
-          Error:
-          {error}
-        </div>
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-        >
-          Retry
-        </button>
-      </div>
+      <ul className="space-y-4">
+        {subscriptions.map(sub => (
+          <li key={sub.id} className={`gap-2 ${BORDER_RADIUS.xl} bg-surface-raised`}>
+            <Link href={`/subscriptions/${sub.id}`} className="block">
+              <div className="border-b border-gray-700 pb-2">
+                <div className="flex flex-row items-center justify-between gap-2 px-4 pt-3 w-full">
+                  <div className="flex flex-row items-center gap-2">
+                    <ConnectionIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+                    <h3 className="text-base font-medium leading-6">
+                      {sub.productName}
+                    </h3>
+                  </div>
+                  <ChevronRightIcon className={`w-2 h-3 ${COLORS.text.secondary}`} />
+                </div>
+              </div>
+              <div className="px-4 py-3">
+                <div className="text-base font-medium leading-5">
+                  {sub.vehicleDisplay}
+                </div>
+                <div className="text-xs font-light leading-5 mt-1">
+                  {getSubscriptionTypeAndPrice(sub).displayText}
+                </div>
+                <div className={`text-xs font-light leading-5 ${COLORS.text.secondary}`}>
+                  {getSubscriptionRenewalInfo(sub, sub.nextScheduledPrice, sub.nextScheduledDate).displayText}
+                </div>
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
     );
   } else if (featureFlags.useBackendProxy && useBackendData && backendStatuses) {
     content = <BackendSubscriptions statuses={backendStatuses} />;
