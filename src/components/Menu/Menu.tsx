@@ -31,7 +31,7 @@ export const Menu: FC<MenuProps> = ({ menuItems, onMenuItemClick }) => {
   const bottomMenuItems = menuItems.filter(item => item.section === 'bottom');
 
   return (
-    <div className="flex flex-col gap-4 md:rounded-xl px-4 py-6 h-full w-full md:w-64 bg-black">
+    <div className="flex flex-col gap-4 md:rounded-xl px-4 py-6 h-full w-full md:w-64 bg-black md:bg-surface-default">
       <div className="mb-6 hidden md:block">
         <DIMOLogo className="h-8 w-28" />
       </div>

@@ -27,7 +27,7 @@ export const COLORS = {
     disabled: 'bg-cta-disabled text-grey-400 cursor-not-allowed',
     menu: {
       default: 'text-text-secondary hover:bg-grey-900',
-      active: 'bg-grey-800 text-white font-bold',
+      active: 'bg-surface-raised text-white font-bold',
       disabled: 'text-gray-400 cursor-not-allowed',
     },
   },

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
 import { WalletIcon } from '@/components/Icons';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
-import { BORDER_RADIUS, COLORS, SPACING } from '@/utils/designSystem';
+import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { fetchEnhancedSubscriptions } from '@/utils/subscriptionHelpers';
 import { PaymentMethodClient } from '../subscriptions/PaymentMethodClient';
 import { SubscriptionsClient } from '../subscriptions/SubscriptionsClient';
@@ -16,11 +16,15 @@ function PaymentMethodSection() {
         <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
         <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Payment Method</h1>
       </div>
-      <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs} lg:block`}>
-        <div className="mb-4 hidden lg:block">
-          <WalletIcon className="w-4 h-4" />
+      <div className={`flex flex-col justify-between ${BORDER_RADIUS.lg} ${COLORS.background.primary} py-3 px-4 lg:block min-h-36`}>
+        <div className="flex flex-col">
+          <div className="mb-4 hidden lg:block">
+            <WalletIcon className="w-4 h-4" />
+          </div>
+          <div className="flex-1">
+            <PaymentMethodClient />
+          </div>
         </div>
-        <PaymentMethodClient />
         <div className="mt-6 flex justify-center">
           <Link
             href="/payment-methods"
@@ -30,9 +34,7 @@ function PaymentMethodSection() {
           </Link>
         </div>
       </div>
-      <div className={`flex flex-col ${BORDER_RADIUS.lg} bg-surface-raised ${SPACING.xs} lg:block`}>
-        <PaymentMethodsNote />
-      </div>
+      <PaymentMethodsNote />
     </div>
   );
 }
