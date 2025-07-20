@@ -14,7 +14,7 @@ export default async function CancelSubscriptionPage({ params }: { params: Promi
     const { subscription, vehicleInfo, nextScheduledPrice, nextScheduledDate } = await fetchSubscriptionWithSchedule(subscriptionId);
 
     return (
-      <div className="flex flex-col lg:flex-row gap-6 py-5">
+      <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:w-3/4">
           <CancelSubscriptionCard
             subscription={subscription}

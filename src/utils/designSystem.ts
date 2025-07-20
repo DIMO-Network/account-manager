@@ -24,6 +24,7 @@ export const COLORS = {
   button: {
     primary: 'bg-cta-default text-white cursor-pointer',
     secondary: 'bg-cta-default text-white cursor-pointer',
+    tertiary: 'bg-surface-default text-text-secondary cursor-pointer',
     disabled: 'bg-cta-disabled text-grey-400 cursor-not-allowed',
     menu: {
       default: 'text-text-secondary',
