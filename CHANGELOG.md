@@ -1,3 +1,10 @@
+# [2.13.0](https://github.com/DIMO-Network/account-manager/compare/v2.12.0...v2.13.0) (2025-07-22)
+
+
+### Features
+
+* styling and ux refinements ([#36](https://github.com/DIMO-Network/account-manager/issues/36)) ([f294f55](https://github.com/DIMO-Network/account-manager/commit/f294f555ff2140e4569422d0e8c9e43717a3738d))
+
 # [2.12.0](https://github.com/DIMO-Network/account-manager/compare/v2.11.0...v2.12.0) (2025-07-14)
 
 
