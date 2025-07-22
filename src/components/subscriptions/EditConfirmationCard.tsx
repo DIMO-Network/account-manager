@@ -185,8 +185,8 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
             {showScheduledChange
               ? (
                   <div className="border-t border-gray-700 mt-4 pt-4">
-                    <h3 className="font-medium text-base px-4">Note</h3>
-                    <p className="font-medium text-sm mt-1 text-text-secondary px-4">
+                    <h3 className="text-base font-medium leading-6 px-4">Note</h3>
+                    <p className="text-sm leading-4.5 mt-1 text-text-secondary px-4">
                       Your plan will switch to
                       {' '}
                       <span className="font-medium">
@@ -232,7 +232,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
                   {nextChargeDate
                     ? (
                         <div className="mt-4 pt-3 border-t border-gray-700 px-4">
-                          <p className="text-sm text-gray-400">
+                          <p className="text-sm leading-4.5 text-text-secondary">
                             After pressing confirm, your payment method will be charged on
                             {' '}
                             {new Date(nextChargeDate * 1000).toLocaleDateString('en-US', {
@@ -246,7 +246,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
                       )
                     : (
                         <div className="mt-4 pt-3 border-t border-gray-700 px-4">
-                          <p className="text-sm text-gray-400">
+                          <p className="text-sm leading-4.5 text-text-secondary">
                             Your payment method will be charged immediately after pressing confirm.
                           </p>
                         </div>
