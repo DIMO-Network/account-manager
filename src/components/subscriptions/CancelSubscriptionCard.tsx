@@ -97,7 +97,7 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
     // Fall back to regular subscription cancellation
     const result = await cancelSubscription(subscription.id, cancellationDetails);
     if (result.success) {
-      router.push('/subscriptions');
+      router.push(`/subscriptions/${subscription.id}`);
     }
   };
 
@@ -143,7 +143,7 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
       </div>
       <div className="flex flex-col justify-between min-w-full bg-surface-default rounded-xl py-4 px-3">
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-4 px-4 py-3 border border-red-400 text-dimo-red rounded-xl">
             {error}
           </div>
         )}

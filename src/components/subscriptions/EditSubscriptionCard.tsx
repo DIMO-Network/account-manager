@@ -95,7 +95,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
             {vehicleDisplay}
           </h3>
         </div>
-        <div className="space-y-3 mb-6 px-4">
+        <div className="flex flex-col px-4 gap-3 mb-4">
           {sortedProductPrices.map((price) => {
             const { displayText, priceFormatted, isCurrent } = formatPrice(price);
             const isSelected = price.id === selectedPriceId;
@@ -155,7 +155,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
             Continue to Review
           </button>
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push(`/subscriptions/${subscription.id}`)}
             className={`${RESPONSIVE.touch} ${COLORS.button.tertiary} ${BORDER_RADIUS.full} font-medium w-full mt-2`}
             type="button"
           >

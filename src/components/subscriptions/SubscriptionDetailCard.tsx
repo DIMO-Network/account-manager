@@ -2,6 +2,7 @@
 
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 import { CarIcon, EditIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
@@ -15,6 +16,7 @@ type SubscriptionDetailCardProps = {
 };
 
 export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ subscription, vehicleInfo, nextScheduledPrice, nextScheduledDate }) => {
+  const router = useRouter();
   const metadata = subscription?.metadata || {};
   const connectionId = metadata.connectionId || 'N/A';
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
@@ -81,12 +83,19 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
           </div>
         </div>
 
-        <div className="mt-4 px-4">
+        <div className="flex flex-col mt-4 px-4 gap-2">
+          <button
+            onClick={() => router.push('/dashboard')}
+            className={`${RESPONSIVE.touch} ${COLORS.button.secondary} ${BORDER_RADIUS.full} font-medium w-full mt-2`}
+            type="button"
+          >
+            Go Back
+          </button>
           <button
             className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
               isMarkedForCancellation
-                ? COLORS.button.disabled
-                : COLORS.button.secondary
+                ? COLORS.button.disabledTransparent
+                : `${COLORS.button.tertiary}`
             }`}
             type="button"
             onClick={() => window.location.href = `/subscriptions/${subscription.id}/cancel`}

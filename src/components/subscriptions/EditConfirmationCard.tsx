@@ -7,6 +7,8 @@ import type { StripeSubscription } from '@/types/subscription';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
+import { CarIcon } from '@/components/Icons';
+import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 
 type EditConfirmationCardProps = {
   subscription: StripeSubscription;
@@ -43,15 +45,18 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
     const interval = price.recurring.interval;
 
     let intervalText = '';
+    let perIntervalText = '';
     if (interval === 'month') {
       intervalText = t('monthly');
+      perIntervalText = '/ month';
     } else if (interval === 'year') {
       intervalText = t('annually');
+      perIntervalText = '/ year';
     }
 
     return {
       displayText: intervalText,
-      priceFormatted: `$${amount.toFixed(2)}`,
+      priceFormatted: `$${amount.toFixed(2)} ${perIntervalText}`,
     };
   };
 
@@ -103,19 +108,28 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
 
   if (!selectedPrice) {
     return (
-      <div className="p-4 bg-surface-raised rounded-2xl">
-        <h1 className="text-2xl font-bold mb-4">Invalid Selection</h1>
-        <p className="text-base leading-6 mb-6">
-          The selected price is not valid. Please go back and try again.
-        </p>
-        <button
-          onClick={handleBack}
-          className="w-full py-3 px-4 bg-gray-600 text-white rounded-full font-medium hover:bg-gray-700 transition-colors"
-          type="button"
-        >
-          Go Back
-        </button>
-      </div>
+      <>
+        <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 mb-4">
+          <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+          <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Invalid Selection</h1>
+        </div>
+        <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
+          <div className="px-4 mb-6">
+            <p className="text-base leading-6">
+              The selected price is not valid. Please go back and try again.
+            </p>
+          </div>
+          <div className="px-4">
+            <button
+              onClick={handleBack}
+              className={`${RESPONSIVE.touch} ${COLORS.button.tertiary} ${BORDER_RADIUS.full} font-medium w-full`}
+              type="button"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -123,131 +137,148 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   const selectedFormatted = formatPrice(selectedPrice);
 
   return (
-    <div className="p-4 bg-surface-raised rounded-2xl flex flex-col justify-between">
-      <h1 className="text-2xl font-bold mb-4">Confirm Subscription Change</h1>
-      <div className="min-w-full bg-surface-default rounded-xl p-4">
-        <p className="text-base leading-6 mb-6">
-          Review your subscription change for
-          {' '}
-          {productName}
-          {' '}
-          connected to
-          {' '}
-          {vehicleDisplay}
-          .
-        </p>
+    <>
+      <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 mb-4">
+        <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+        <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Confirm Subscription Change</h1>
+      </div>
+      <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
+        <div className="px-4 mb-6">
+          <p className="text-base leading-6">
+            Review your subscription change for
+            {' '}
+            {productName}
+            {' '}
+            connected to
+            {' '}
+            {vehicleDisplay}
+            .
+          </p>
+        </div>
 
         {/* Current vs New Plan Comparison */}
-        <div className="space-y-4 mb-6">
-          <div className="p-4 border border-gray-700 rounded-xl">
-            <h3 className="font-medium text-sm text-gray-400 mb-2">Current Plan</h3>
+        <div className="flex flex-col px-4 gap-6 mb-4">
+          <div className="relative border border-surface-raised rounded-xl bg-surface-raised pt-6 pb-4 px-4">
+            <div className="absolute -top-3 right-8 px-2 py-1 rounded-full text-xs text-text-secondary font-medium bg-gray-700">
+              Current
+            </div>
             <div className="flex justify-between items-center">
               <div>
-                <div className="font-medium text-base">{currentFormatted?.displayText}</div>
-                <div className="text-sm text-gray-400">{currentFormatted?.priceFormatted}</div>
+                <div className="font-medium text-base text-text-secondary">{currentFormatted?.displayText}</div>
               </div>
-              <div className="text-lg font-bold">{currentFormatted?.priceFormatted}</div>
+              <div className="font-medium text-base text-text-secondary">{currentFormatted?.priceFormatted}</div>
             </div>
           </div>
 
-          <div className="p-4 border border-blue-500 bg-blue-900/20 rounded-xl">
-            <h3 className="font-medium text-sm text-blue-400 mb-2">New Plan</h3>
-            <div className="flex justify-between items-center">
+          <div className="relative border border-surface-raised rounded-xl bg-surface-raised pt-6 pb-4">
+            <div className="absolute -top-3 right-10 px-2 py-1 rounded-full text-xs font-medium text-black bg-pill-gradient">
+              New
+            </div>
+            <div className="flex justify-between items-center px-4">
               <div>
                 <div className="font-medium text-base">{selectedFormatted.displayText}</div>
-                <div className="text-sm text-gray-400">{selectedFormatted.priceFormatted}</div>
               </div>
-              <div className="text-lg font-bold">{selectedFormatted.priceFormatted}</div>
+              <div className="font-medium text-base">{selectedFormatted.priceFormatted}</div>
             </div>
+
+            {/* Preview Charges */}
+            {showScheduledChange
+              ? (
+                  <div className="border-t border-gray-700 mt-4 pt-4">
+                    <h3 className="font-medium text-base px-4">Note</h3>
+                    <p className="font-medium text-sm mt-1 text-text-secondary px-4">
+                      Your plan will switch to
+                      {' '}
+                      <span className="font-medium">
+                        $
+                        {(previewInvoice as any).nextAmount / 100}
+                        /
+                        {(previewInvoice as any).nextInterval}
+                      </span>
+                      {' '}
+                      on
+                      {' '}
+                      <span className="font-medium">{new Date((previewInvoice as any).nextDate * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                      . You will not be charged until then.
+                    </p>
+                  </div>
+                )
+              : previewInvoice && (
+                <div className="border-t border-gray-700 mt-4 pt-4">
+                  <h3 className="font-medium text-base mb-3 px-4">Preview of Charges</h3>
+                  <div className="flex flex-col gap-1">
+                    {isPreviewInvoice(previewInvoice) && previewInvoice.lines?.data?.map((line: any) => (
+                      <div key={line.id} className="flex justify-between text-sm px-4">
+                        <span>{line.description}</span>
+                        <span className="ml-3">
+                          {line.amount < 0
+                            ? `($${Math.abs(line.amount / 100).toFixed(2)})`
+                            : `$${(line.amount / 100).toFixed(2)}`}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="border-t border-gray-700 pt-4 mt-2">
+                      <div className="flex justify-between font-medium px-4">
+                        <span>Total</span>
+                        <span>
+                          $
+                          {isPreviewInvoice(previewInvoice) ? (previewInvoice.total / 100).toFixed(2) : ''}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Charge Date */}
+                  {nextChargeDate
+                    ? (
+                        <div className="mt-4 pt-3 border-t border-gray-700 px-4">
+                          <p className="text-sm text-gray-400">
+                            After pressing confirm, your payment method will be charged on
+                            {' '}
+                            {new Date(nextChargeDate * 1000).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                            .
+                          </p>
+                        </div>
+                      )
+                    : (
+                        <div className="mt-4 pt-3 border-t border-gray-700 px-4">
+                          <p className="text-sm text-gray-400">
+                            Your payment method will be charged immediately after pressing confirm.
+                          </p>
+                        </div>
+                      )}
+                </div>
+              )}
           </div>
         </div>
 
-        {/* Preview Charges */}
-        {showScheduledChange
-          ? (
-              <div className="mb-6 p-4 border border-blue-500 bg-blue-900/20 rounded-xl">
-                <h3 className="font-medium text-base mb-3">Plan Change Scheduled</h3>
-                <p className="text-base leading-6">
-                  Your plan will switch to
-                  {' '}
-                  <span className="font-bold">
-                    $
-                    {(previewInvoice as any).nextAmount / 100}
-                    /
-                    {(previewInvoice as any).nextInterval}
-                  </span>
-                  {' '}
-                  on
-                  {' '}
-                  <span className="font-bold">{new Date((previewInvoice as any).nextDate * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                  .
-                  <br />
-                  You will not be charged until then.
-                </p>
-              </div>
-            )
-          : previewInvoice && (
-            <div className="mb-6 p-4 border border-gray-700 rounded-xl">
-              <h3 className="font-medium text-base mb-3">Preview of Charges</h3>
-              <div className="space-y-2">
-                {isPreviewInvoice(previewInvoice) && previewInvoice.lines?.data?.map((line: any) => (
-                  <div key={line.id} className="flex justify-between text-sm">
-                    <span>{line.description}</span>
-                    <span>
-                      $
-                      {(line.amount / 100).toFixed(2)}
-                    </span>
-                  </div>
-                ))}
-                <div className="border-t border-gray-700 pt-2 mt-2">
-                  <div className="flex justify-between font-medium">
-                    <span>Total</span>
-                    <span>
-                      $
-                      {isPreviewInvoice(previewInvoice) ? (previewInvoice.total / 100).toFixed(2) : ''}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Charge Date */}
-              {nextChargeDate && (
-                <div className="mt-4 pt-3 border-t border-gray-700">
-                  <p className="text-sm text-gray-400">
-                    Your payment method will be charged on
-                    {' '}
-                    {new Date(nextChargeDate * 1000).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
         {/* Action Buttons */}
-        <div className="flex gap-3">
+        <div className="px-4">
+          <button
+            onClick={handleConfirm}
+            className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
+              isUpdating ? COLORS.button.disabled : COLORS.button.primary
+            }`}
+            disabled={isUpdating}
+            type="button"
+          >
+            {isUpdating ? 'Updating...' : 'Confirm'}
+          </button>
           <button
             onClick={handleBack}
-            className="flex-1 py-3 px-4 bg-gray-600 text-white rounded-full font-medium hover:bg-gray-700 transition-colors"
+            className={`${RESPONSIVE.touch} ${COLORS.button.tertiary} ${BORDER_RADIUS.full} font-medium w-full mt-2`}
             disabled={isUpdating}
             type="button"
           >
             Go Back
           </button>
-          <button
-            onClick={handleConfirm}
-            className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-            disabled={isUpdating}
-            type="button"
-          >
-            {isUpdating ? 'Updating...' : 'Confirm Change'}
-          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

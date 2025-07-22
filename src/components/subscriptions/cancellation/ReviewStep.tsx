@@ -69,7 +69,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           disabled={canceling}
           type="button"
         >
-          {canceling ? 'Canceling...' : 'Confirm cancellation'}
+          {canceling ? 'Canceling...' : 'Confirm'}
         </button>
       </div>
     </>
