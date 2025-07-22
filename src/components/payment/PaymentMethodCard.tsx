@@ -4,7 +4,7 @@ import type Stripe from 'stripe';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { WalletIcon } from '@/components/Icons';
-import { BORDER_RADIUS, COLORS, SPACING } from '@/utils/designSystem';
+import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
 
 type PaymentMethodCardProps = {
   paymentMethod: Stripe.PaymentMethod;
@@ -24,6 +24,7 @@ export const PaymentMethodCard = ({
   customerId,
 }: PaymentMethodCardProps) => {
   const [showConfirmRemove, setShowConfirmRemove] = useState(false);
+  const [showConfirmSetDefault, setShowConfirmSetDefault] = useState(false);
   const router = useRouter();
 
   const formatCardBrand = (brand: string) => {
@@ -50,6 +51,7 @@ export const PaymentMethodCard = ({
   const handleSetDefault = async () => {
     if (!isDefault && !isLoading) {
       await onSetDefaultAction(paymentMethod.id);
+      setShowConfirmSetDefault(false);
     }
   };
 
@@ -63,7 +65,7 @@ export const PaymentMethodCard = ({
   // Handle different payment method types
   if (paymentMethod.type !== 'card' || !paymentMethod.card) {
     return (
-      <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs} mb-4`}>
+      <div className={`flex flex-col ${BORDER_RADIUS.xl} ${COLORS.background.primary} ${SPACING.xs} mb-4`}>
         <div className="mb-4">
           <WalletIcon className="w-4 h-4" />
         </div>
@@ -78,10 +80,10 @@ export const PaymentMethodCard = ({
   const card = paymentMethod.card;
 
   return (
-    <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs} mb-4 relative`}>
-      <div className="flex flex-col mt-4">
+    <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} p-4 mb-4 relative`}>
+      <div className="flex flex-col">
         {isDefault && (
-          <div className="absolute -top-2 right-6 px-2 py-1 rounded-full text-xs font-medium text-black bg-pill-gradient">
+          <div className="absolute -top-3 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider">
             Default
           </div>
         )}
@@ -91,7 +93,7 @@ export const PaymentMethodCard = ({
           ••••
           {card.last4}
         </span>
-        <span className="text-xs text-grey-400 mt-1">
+        <span className="text-xs text-white mt-1">
           Expires
           {' '}
           {String(card.exp_month).padStart(2, '0')}
@@ -99,68 +101,97 @@ export const PaymentMethodCard = ({
           {card.exp_year}
         </span>
         {paymentMethod.billing_details?.name && (
-          <span className="text-xs text-grey-500">
+          <span className="text-xs text-text-secondary">
             {paymentMethod.billing_details.name}
           </span>
         )}
-        <div className="flex flex-row gap-2 mt-6">
+        <div className="flex flex-row gap-2 mt-4">
           <button
             onClick={() => {
               router.push(`/payment-methods/edit/${paymentMethod.id}?customer_id=${customerId}`);
             }}
             disabled={isLoading}
-            className="w-full max-w-40 gap-2 rounded-full bg-white px-4 font-medium h-10 text-black disabled:opacity-50"
+            className={`${RESPONSIVE.touchSmall} ${COLORS.button.secondary} ${BORDER_RADIUS.full} font-medium text-xs px-4`}
             type="button"
           >
             Edit
           </button>
-          <div className="flex-1 flex justify-end gap-2">
-            {!isDefault && (
-              <button
-                onClick={handleSetDefault}
-                disabled={isLoading}
-                className="px-4 font-medium h-10 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50"
-                type="button"
-              >
-                Set as Default
-              </button>
-            )}
-            {!isDefault && (
-              <>
-                {!showConfirmRemove
-                  ? (
+          {!isDefault && !showConfirmRemove && (
+            <>
+              {!showConfirmSetDefault
+                ? (
+                    <button
+                      onClick={() => {
+                        setShowConfirmSetDefault(true);
+                        setShowConfirmRemove(false);
+                      }}
+                      disabled={isLoading}
+                      className={`${RESPONSIVE.touchSmall} ${COLORS.button.secondaryTransparent} ${BORDER_RADIUS.full} font-medium text-xs px-4`}
+                      type="button"
+                    >
+                      Set as Default
+                    </button>
+                  )
+                : (
+                    <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => setShowConfirmRemove(true)}
+                        onClick={handleSetDefault}
                         disabled={isLoading}
-                        className="px-4 font-medium h-10 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
+                        className={`${RESPONSIVE.touchSmall} ${COLORS.button.secondaryTransparent} ${BORDER_RADIUS.full} font-medium text-xs px-4`}
                         type="button"
                       >
-                        Remove
+                        Confirm
                       </button>
-                    )
-                  : (
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={handleRemove}
-                          disabled={isLoading}
-                          className="px-2 h-10 text-xs bg-red-600 text-white rounded-full hover:bg-red-700 disabled:opacity-50"
-                          type="button"
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          onClick={() => setShowConfirmRemove(false)}
-                          disabled={isLoading}
-                          className="px-2 h-10 text-xs bg-gray-300 rounded-full hover:bg-gray-400"
-                          type="button"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
-              </>
-            )}
-          </div>
+                      <button
+                        onClick={() => setShowConfirmSetDefault(false)}
+                        disabled={isLoading}
+                        className={`${RESPONSIVE.touchSmall} ${COLORS.button.secondaryTransparent} ${BORDER_RADIUS.full} font-medium text-xs px-4`}
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+            </>
+          )}
+          {!isDefault && !showConfirmSetDefault && (
+            <>
+              {!showConfirmRemove
+                ? (
+                    <button
+                      onClick={() => {
+                        setShowConfirmRemove(true);
+                        setShowConfirmSetDefault(false);
+                      }}
+                      disabled={isLoading}
+                      className={`${RESPONSIVE.touchSmall} ${COLORS.button.secondaryRed} ${BORDER_RADIUS.full} font-medium text-xs px-4`}
+                      type="button"
+                    >
+                      Remove
+                    </button>
+                  )
+                : (
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={handleRemove}
+                        disabled={isLoading}
+                        className={`${RESPONSIVE.touchSmall} ${COLORS.button.secondaryRed} ${BORDER_RADIUS.full} font-medium text-xs px-4`}
+                        type="button"
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        onClick={() => setShowConfirmRemove(false)}
+                        disabled={isLoading}
+                        className={`${RESPONSIVE.touchSmall} ${COLORS.button.secondaryRed} ${BORDER_RADIUS.full} font-medium text-xs px-4`}
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+            </>
+          )}
         </div>
       </div>
     </div>

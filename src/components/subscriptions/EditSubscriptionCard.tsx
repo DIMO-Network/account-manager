@@ -84,7 +84,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
         <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Edit Subscription</h1>
       </div>
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
-        <div className="mb-6 px-4">
+        <div className="mb-8 px-4">
           <h3 className="font-medium text-base leading-6">
             Select your renewal plan for
             {' '}
@@ -122,19 +122,17 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                 {isCurrent && (
                   <div
                     id="current-plan"
-                    className="absolute -top-3 right-8 px-2 py-1 rounded-full text-xs font-medium text-black bg-pill-gradient"
+                    className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
                   >
                     Current
                   </div>
                 )}
 
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="font-medium text-base">{displayText}</div>
-                  </div>
+                <div className="flex flex-col">
                   <div className="font-medium text-base">
-                    {priceFormatted}
+                    {displayText}
                   </div>
+                  <div className="text-sm text-text-secondary">{priceFormatted}</div>
                 </div>
               </button>
             );

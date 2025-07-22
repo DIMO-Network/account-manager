@@ -24,6 +24,8 @@ export const COLORS = {
   button: {
     primary: 'bg-cta-default text-white cursor-pointer',
     secondary: 'bg-cta-default text-white cursor-pointer',
+    secondaryTransparent: 'bg-transparent border-2 border-surface-raised text-white cursor-pointer',
+    secondaryRed: 'bg-transparent border-2 border-surface-raised text-red-300 cursor-pointer',
     tertiary: 'bg-transparent text-text-secondary cursor-pointer',
     tertiaryRed: 'bg-transparent text-dimo-red cursor-pointer',
     disabled: 'bg-cta-disabled text-grey-400 cursor-not-allowed',
@@ -81,6 +83,7 @@ export const RESPONSIVE = {
 
   // Touch-friendly
   touch: 'min-h-[44px] min-w-[44px]',
+  touchSmall: 'min-h-[36px] min-w-[36px]',
 } as const;
 
 // Breakpoint utilities - references CSS custom properties from theme.css

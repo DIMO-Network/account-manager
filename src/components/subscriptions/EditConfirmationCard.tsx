@@ -143,7 +143,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
         <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Confirm Subscription Change</h1>
       </div>
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
-        <div className="px-4 mb-6">
+        <div className="px-4 mb-8">
           <p className="text-base leading-6">
             Review your subscription change for
             {' '}
@@ -158,27 +158,25 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
 
         {/* Current vs New Plan Comparison */}
         <div className="flex flex-col px-4 gap-6 mb-4">
-          <div className="relative border border-surface-raised rounded-xl bg-surface-raised pt-6 pb-4 px-4">
-            <div className="absolute -top-3 right-8 px-2 py-1 rounded-full text-xs text-text-secondary font-medium bg-gray-700">
+          <div className="relative border border-surface-raised rounded-xl bg-surface-raised p-4">
+            <div className="absolute -top-3 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-text-secondary bg-gray-700 uppercase tracking-wider">
               Current
             </div>
             <div className="flex justify-between items-center">
-              <div>
+              <div className="flex flex-col">
                 <div className="font-medium text-base text-text-secondary">{currentFormatted?.displayText}</div>
+                <div className="text-sm text-text-secondary">{currentFormatted?.priceFormatted}</div>
               </div>
-              <div className="font-medium text-base text-text-secondary">{currentFormatted?.priceFormatted}</div>
             </div>
           </div>
 
-          <div className="relative border border-surface-raised rounded-xl bg-surface-raised pt-6 pb-4">
-            <div className="absolute -top-3 right-10 px-2 py-1 rounded-full text-xs font-medium text-black bg-pill-gradient">
+          <div className="relative border border-surface-raised rounded-xl bg-surface-raised py-4">
+            <div className="absolute -top-3 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider">
               New
             </div>
-            <div className="flex justify-between items-center px-4">
-              <div>
-                <div className="font-medium text-base">{selectedFormatted.displayText}</div>
-              </div>
-              <div className="font-medium text-base">{selectedFormatted.priceFormatted}</div>
+            <div className="flex flex-col px-4">
+              <div className="font-medium text-base">{selectedFormatted.displayText}</div>
+              <div className="font-medium text-sm">{selectedFormatted.priceFormatted}</div>
             </div>
 
             {/* Preview Charges */}
