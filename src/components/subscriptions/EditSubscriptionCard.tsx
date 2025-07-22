@@ -6,6 +6,8 @@ import type { StripeSubscription } from '@/types/subscription';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import { CarIcon } from '@/components/Icons';
+import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 
 type EditSubscriptionCardProps = {
   subscription: StripeSubscription;
@@ -26,7 +28,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
   const router = useRouter();
 
   const currentPriceId = subscription?.items?.data?.[0]?.price?.id;
-  const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
+  const [selectedPriceId, setSelectedPriceId] = useState<string | null>(currentPriceId || null);
 
   // Sort productPrices so current subscription is always first
   const sortedProductPrices = [...productPrices].sort((a, b) => {
@@ -44,15 +46,18 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
     const interval = price.recurring.interval;
 
     let intervalText = '';
+    let perIntervalText = '';
     if (interval === 'month') {
       intervalText = t('monthly');
+      perIntervalText = '/ month';
     } else if (interval === 'year') {
       intervalText = t('annually');
+      perIntervalText = '/ year';
     }
 
     return {
       displayText: intervalText,
-      priceFormatted: `$${amount.toFixed(2)}`,
+      priceFormatted: `$${amount.toFixed(2)} ${perIntervalText}`,
       isCurrent: price.id === currentPriceId,
     };
   };
@@ -73,21 +78,24 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
   const hasValidSelection = selectedPriceId && selectedPriceId !== currentPriceId;
 
   return (
-    <div className="p-4 bg-surface-raised rounded-2xl flex flex-col justify-between">
-      <h1 className="text-2xl font-bold mb-4">Edit Subscription</h1>
-      <div className="min-w-full bg-surface-default rounded-xl p-4">
-        <p className="text-base leading-6 mb-6">
-          Select your renewal plan for
-          {' '}
-          {productName}
-          {' '}
-          connected to
-          {' '}
-          {vehicleDisplay}
-          .
-        </p>
-
-        <div className="space-y-3 mb-6">
+    <>
+      <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 mb-4">
+        <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+        <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Edit Subscription</h1>
+      </div>
+      <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
+        <div className="mb-6 px-4">
+          <h3 className="font-medium text-base leading-6">
+            Select your renewal plan for
+            {' '}
+            {productName}
+            {' '}
+            connected to
+            {' '}
+            {vehicleDisplay}
+          </h3>
+        </div>
+        <div className="space-y-3 mb-6 px-4">
           {sortedProductPrices.map((price) => {
             const { displayText, priceFormatted, isCurrent } = formatPrice(price);
             const isSelected = price.id === selectedPriceId;
@@ -96,12 +104,10 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
               <button
                 key={price.id}
                 type="button"
-                className={`relative p-4 rounded-xl border-2 transition-all cursor-pointer hover:bg-gray-800 w-full text-left ${
-                  isCurrent
-                    ? 'border-white bg-gray-800'
-                    : isSelected
-                      ? 'border-blue-500 bg-blue-900/20'
-                      : 'border-gray-700 hover:border-gray-600'
+                className={`relative p-4 rounded-xl border border-surface-raised transition-all duration-200 cursor-pointer w-full text-left min-h-20 bg-surface-raised ${
+                  isSelected
+                    ? 'border-white'
+                    : 'border-gray-700'
                 }`}
                 onClick={() => handlePriceSelect(price.id)}
                 onKeyDown={(e) => {
@@ -110,10 +116,13 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                     handlePriceSelect(price.id);
                   }
                 }}
+                aria-pressed={isSelected}
+                aria-describedby={isCurrent ? 'current-plan' : undefined}
               >
                 {isCurrent && (
                   <div
-                    className="absolute -top-2 right-6 px-2 py-1 rounded-full text-xs font-medium text-black bg-pill-gradient"
+                    id="current-plan"
+                    className="absolute -top-3 right-8 px-2 py-1 rounded-full text-xs font-medium text-black bg-pill-gradient"
                   >
                     Current
                   </div>
@@ -122,9 +131,8 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                 <div className="flex justify-between items-center">
                   <div>
                     <div className="font-medium text-base">{displayText}</div>
-                    <div className="text-sm text-gray-400">{priceFormatted}</div>
                   </div>
-                  <div className="text-lg font-bold">
+                  <div className="font-medium text-base">
                     {priceFormatted}
                   </div>
                 </div>
@@ -133,20 +141,29 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
           })}
         </div>
 
-        <button
-          onClick={handleContinue}
-          className={`w-full py-3 px-4 rounded-full font-medium transition-colors ${
-            hasValidSelection
-              ? 'bg-blue-600 text-white cursor-pointer hover:bg-blue-700'
-              : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-          }`}
-          type="button"
-          disabled={!hasValidSelection}
-        >
-          Continue to Review
-        </button>
+        <div className="px-4">
+          <button
+            onClick={handleContinue}
+            className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
+              hasValidSelection
+                ? COLORS.button.primary
+                : COLORS.button.disabled
+            }`}
+            type="button"
+            disabled={!hasValidSelection}
+          >
+            Continue to Review
+          </button>
+          <button
+            onClick={() => router.back()}
+            className={`${RESPONSIVE.touch} ${COLORS.button.tertiary} ${BORDER_RADIUS.full} font-medium w-full mt-2`}
+            type="button"
+          >
+            Go Back
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
