@@ -10,6 +10,7 @@ export const PaymentMethodSkeleton = ({ count = 2, showNote = true }: PaymentMet
     <div className="space-y-4">
       {/* Payment method cards loading */}
       {Array.from({ length: count }).map((_, index) => (
+        // eslint-disable-next-line react/no-array-index-key
         <div key={index} className={`animate-pulse ${COLORS.background.primary} ${BORDER_RADIUS.lg} p-4 mb-4`}>
           <div className="space-y-3">
             <div className={`animate-pulse ${COLORS.background.tertiary} h-4 w-48 rounded`}></div>
