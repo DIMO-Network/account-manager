@@ -16,7 +16,7 @@ export default function EditPaymentMethodPage() {
   }
 
   return (
-    <div className="py-5">
+    <div className="flex flex-col">
       <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 mb-6">
         <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
         <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Edit Card</h1>

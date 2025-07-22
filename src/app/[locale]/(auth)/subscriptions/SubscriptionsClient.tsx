@@ -1,3 +1,6 @@
+'use client';
+
+import type { AllSubscriptionStatusesResponse } from '@/types/subscription';
 import type { EnhancedSubscription } from '@/utils/subscriptionHelpers';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -7,7 +10,6 @@ import { StripeSubscriptions } from '@/components/subscriptions/StripeSubscripti
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { featureFlags } from '@/utils/FeatureFlags';
 import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
-import type { AllSubscriptionStatusesResponse } from '@/types/subscription';
 
 type SubscriptionsClientProps = {
   subscriptions: EnhancedSubscription[];

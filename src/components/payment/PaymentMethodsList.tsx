@@ -130,7 +130,7 @@ export const PaymentMethodsList = () => {
           </p>
           <Link
             href="/payment-methods/add"
-            className={`${RESPONSIVE.touch} px-4 py-2 text-sm bg-white text-black rounded-full font-medium hover:bg-gray-100 transition-colors inline-block`}
+            className={`${RESPONSIVE.touchSmall} px-4 py-2 text-sm ${COLORS.background.primary} ${BORDER_RADIUS.full}`}
           >
             Add a Card
           </Link>

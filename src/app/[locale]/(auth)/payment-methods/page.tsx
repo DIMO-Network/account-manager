@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { WalletIcon } from '@/components/Icons';
 import { PaymentMethodsList } from '@/components/payment/PaymentMethodsList';
-import { COLORS } from '@/utils/designSystem';
+import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string }>;
@@ -28,7 +28,7 @@ export default async function PaymentMethods() {
         </div>
         <Link
           href="/payment-methods/add"
-          className="px-4 py-2 text-sm bg-white text-black rounded-full font-medium hover:bg-gray-100 transition-colors"
+          className={`${RESPONSIVE.touchSmall} px-4 py-2 text-sm ${COLORS.background.secondary} ${BORDER_RADIUS.full}`}
         >
           Add a Card
         </Link>

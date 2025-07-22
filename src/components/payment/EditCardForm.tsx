@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { FormField } from '@/components/FormField';
+import { FormSkeleton } from '@/components/payment/FormSkeleton';
 import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
 
 type EditCardFormProps = {
@@ -99,7 +100,7 @@ export const EditCardForm = ({ cardId, customerId, onSuccess, onCancel }: EditCa
   };
 
   if (loading) {
-    return <div className="p-8 text-center">Loading...</div>;
+    return <FormSkeleton fieldCount={5} showButtons={true} />;
   }
   if (error) {
     return <div className="p-8 text-center text-red-500">{error}</div>;
