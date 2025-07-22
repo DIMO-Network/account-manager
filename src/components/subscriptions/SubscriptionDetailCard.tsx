@@ -89,7 +89,7 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
             className={`${RESPONSIVE.touch} ${COLORS.button.secondary} ${BORDER_RADIUS.full} font-medium w-full mt-2`}
             type="button"
           >
-            Go Back
+            Back to Dashboard
           </button>
           <button
             className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
