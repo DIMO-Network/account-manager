@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { useSubscriptionActions } from '@/hooks/useSubscriptionActions';
-import { COLORS } from '@/utils/designSystem';
+import { COLORS, SPACING } from '@/utils/designSystem';
 import {
   ConfirmationStep,
   ReasonsStep,
@@ -143,8 +143,8 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
       </div>
       <div className="flex flex-col justify-between min-w-full bg-surface-default rounded-xl py-4 px-3">
         {error && (
-          <div className="mb-4 px-4 py-3 border border-red-400 text-dimo-red rounded-xl">
-            {error}
+          <div className={`${SPACING.sm} mb-4 ${COLORS.background.secondary} border border-feedback-error rounded-lg`}>
+            <p className="text-feedback-error text-sm">{error}</p>
           </div>
         )}
 
