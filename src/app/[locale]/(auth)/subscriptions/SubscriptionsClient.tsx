@@ -6,7 +6,8 @@ import { useEffect, useState } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { BackendSubscriptions } from '@/components/subscriptions/BackendSubscriptions';
 import { StripeSubscriptions } from '@/components/subscriptions/StripeSubscriptions';
-import { COLORS } from '@/utils/designSystem';
+import { SubscriptionSkeleton } from '@/components/subscriptions/SubscriptionSkeleton';
+import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
 import { featureFlags } from '@/utils/FeatureFlags';
 
 type SubscriptionsClientProps = {
@@ -19,58 +20,34 @@ export function SubscriptionsClient({ subscriptions }: SubscriptionsClientProps)
   const [error, setError] = useState<string | null>(null);
   const [useBackendData, setUseBackendData] = useState(false);
 
-  useEffect(() => {
-    if (featureFlags.useBackendProxy) {
-      const fetchBackendData = async () => {
-        try {
-          setLoading(true);
-          setError(null);
-          const response = await fetch('/api/subscriptions/status/all');
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data: AllSubscriptionStatusesResponse = await response.json();
-          setBackendStatuses(data);
-          setUseBackendData(true);
-        } catch (err) {
-          console.error('Error fetching backend subscription statuses:', err);
-          setError(err instanceof Error ? err.message : 'Unknown error');
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchBackendData();
+  const fetchBackendData = async () => {
+    if (!featureFlags.useBackendProxy) {
+      return;
     }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('/api/subscriptions/status/all');
+
+      if (response.ok) {
+        const data: AllSubscriptionStatusesResponse = await response.json();
+        setBackendStatuses(data);
+        setUseBackendData(true);
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (err) {
+      console.error('Error fetching backend subscription statuses:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBackendData();
   }, []);
-
-  let content;
-
-  if (loading) {
-    content = <p>Loading subscription statuses...</p>;
-  } else if (error) {
-    content = (
-      <div className="flex flex-col items-center justify-center py-8 gap-4">
-        <div className="text-sm text-red-500">
-          Error:
-          {error}
-        </div>
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  } else if (featureFlags.useBackendProxy && useBackendData && backendStatuses) {
-    content = <BackendSubscriptions statuses={backendStatuses} />;
-  } else {
-    content = <StripeSubscriptions subscriptions={subscriptions} />;
-  }
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -78,7 +55,35 @@ export function SubscriptionsClient({ subscriptions }: SubscriptionsClientProps)
         <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
         <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Subscriptions</h1>
       </div>
-      {content}
+      {loading
+        ? (
+            <SubscriptionSkeleton count={3} />
+          )
+        : error
+          ? (
+              <div className={`${SPACING.md} ${COLORS.background.primary} border border-feedback-error rounded-lg`}>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <h3 className="text-feedback-error font-medium">Error loading subscription statuses</h3>
+                    <p className="text-text-secondary text-sm mt-1">{error}</p>
+                  </div>
+                  <button
+                    onClick={fetchBackendData}
+                    className={`${RESPONSIVE.touchSmall} px-3 py-1 text-sm text-feedback-error border-2 border-surface-raised rounded-full cursor-pointer`}
+                    type="button"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            )
+          : featureFlags.useBackendProxy && useBackendData && backendStatuses
+            ? (
+                <BackendSubscriptions statuses={backendStatuses} />
+              )
+            : (
+                <StripeSubscriptions subscriptions={subscriptions} />
+              )}
     </div>
   );
 }

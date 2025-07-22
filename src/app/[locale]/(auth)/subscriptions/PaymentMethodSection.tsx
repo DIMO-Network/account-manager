@@ -1,13 +1,13 @@
 import Link from 'next/link';
 import { WalletIcon } from '@/components/Icons';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
-import { BORDER_RADIUS, COLORS, SPACING } from '@/utils/designSystem';
+import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { PaymentMethodClient } from './PaymentMethodClient';
 
 export function PaymentMethodSection() {
   return (
     <div className="hidden lg:flex flex-col lg:w-1/4 gap-4">
-      <div className={`hidden lg:flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs}`}>
+      <div className={`hidden lg:flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} px-4 py-3`}>
         <div className="mb-4">
           <WalletIcon className="w-4 h-4" />
         </div>
@@ -21,7 +21,7 @@ export function PaymentMethodSection() {
           </Link>
         </div>
       </div>
-      <div className={`hidden lg:flex flex-col ${BORDER_RADIUS.lg} bg-surface-raised ${SPACING.xs}`}>
+      <div className="hidden lg:flex">
         <PaymentMethodsNote />
       </div>
     </div>

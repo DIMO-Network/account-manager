@@ -5,7 +5,9 @@ import type { StripeSubscription, StripeSubscriptionSchedule } from '@/types/sub
 import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
+import { CarIcon } from '@/components/Icons';
 import { useSubscriptionActions } from '@/hooks/useSubscriptionActions';
+import { COLORS, SPACING } from '@/utils/designSystem';
 import {
   ConfirmationStep,
   ReasonsStep,
@@ -95,7 +97,7 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
     // Fall back to regular subscription cancellation
     const result = await cancelSubscription(subscription.id, cancellationDetails);
     if (result.success) {
-      router.push('/subscriptions');
+      router.push(`/subscriptions/${subscription.id}`);
     }
   };
 
@@ -134,18 +136,21 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
   };
 
   return (
-    <div className="p-4 bg-surface-raised rounded-2xl flex flex-col justify-between">
-      <h1 className="text-2xl font-bold mb-4">Cancel Subscription</h1>
-      <div className="min-w-full bg-surface-default rounded-xl p-4">
+    <>
+      <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 mb-4">
+        <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+        <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Cancel Subscription</h1>
+      </div>
+      <div className="flex flex-col justify-between min-w-full bg-surface-default rounded-xl py-4 px-3">
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
+          <div className={`${SPACING.sm} mb-4 ${COLORS.background.secondary} border border-feedback-error rounded-lg`}>
+            <p className="text-feedback-error text-sm">{error}</p>
           </div>
         )}
 
         {renderCurrentStep()}
       </div>
-    </div>
+    </>
   );
 };
 

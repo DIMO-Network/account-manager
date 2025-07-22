@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { PaymentMethodCard } from '@/components/payment/PaymentMethodCard';
+import { PaymentMethodSkeleton } from '@/components/payment/PaymentMethodSkeleton';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
-import { WalletIcon } from '../Icons';
 
 export const PaymentMethodsList = () => {
   const { customerId, loading: customerLoading, error: customerError } = useStripeCustomer();
@@ -66,50 +66,34 @@ export const PaymentMethodsList = () => {
 
   // Show loading state while getting customer
   if (customerLoading) {
-    return (
-      <div className="space-y-4">
-        <div className={`animate-pulse ${COLORS.background.tertiary} h-8 rounded w-1/3`}></div>
-        <div className={`animate-pulse ${COLORS.background.tertiary} h-24 rounded-lg`}></div>
-        <div className={`animate-pulse ${COLORS.background.tertiary} h-24 rounded-lg`}></div>
-      </div>
-    );
+    return <PaymentMethodSkeleton count={2} showNote={true} />;
   }
 
   // Show customer error
   if (customerError) {
     return (
-      <div className={`${SPACING.md} ${COLORS.background.secondary} border border-feedback-error rounded-lg`}>
+      <div className={`${SPACING.md} ${COLORS.background.primary} border border-feedback-error rounded-lg`}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h3 className="text-feedback-error font-semibold">Error setting up payment methods</h3>
-            <p className="text-grey-400 text-sm mt-1">{customerError}</p>
+            <h3 className="text-feedback-error font-medium">Error setting up payment methods</h3>
+            <p className="text-text-secondary text-sm mt-1">{customerError}</p>
           </div>
         </div>
       </div>
     );
   }
 
-  // Show loading state while fetching payment methods
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <div className={`animate-pulse ${COLORS.background.tertiary} h-24 rounded-lg`}></div>
-        <div className={`animate-pulse ${COLORS.background.tertiary} h-24 rounded-lg`}></div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
-      <div className={`${SPACING.md} ${COLORS.background.secondary} border border-feedback-error rounded-lg`}>
+      <div className={`${SPACING.md} ${COLORS.background.primary} border border-feedback-error rounded-lg`}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h3 className="text-feedback-error font-semibold">Error loading payment methods</h3>
-            <p className="text-grey-400 text-sm mt-1">{error}</p>
+            <h3 className="text-feedback-error font-medium">Error loading payment methods</h3>
+            <p className="text-text-secondary text-sm mt-1">{error}</p>
           </div>
           <button
             onClick={fetchPaymentMethods}
-            className={`${RESPONSIVE.touch} px-3 py-1 text-sm text-feedback-error hover:text-feedback-error hover:bg-surface-sunken rounded transition-colors`}
+            className={`${RESPONSIVE.touchSmall} px-3 py-1 text-sm text-feedback-error border-2 border-surface-raised rounded-full cursor-pointer`}
             type="button"
           >
             Retry
@@ -129,13 +113,15 @@ export const PaymentMethodsList = () => {
     );
   }
 
+  // Show loading state if we're still loading OR if we have a customerId but no payment methods yet
+  if (loading || (customerId && paymentMethods.length === 0 && !error)) {
+    return <PaymentMethodSkeleton count={2} showNote={true} />;
+  }
+
+  // Only show "No payment methods found" if we're not loading and have confirmed there are no payment methods
   if (paymentMethods.length === 0) {
     return (
-      <div className="space-y-6">
-        <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2">
-          <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
-          <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Payment Method</h1>
-        </div>
+      <div className="space-y-4">
         <div className={`${SPACING.lg} text-center border ${COLORS.border.default} rounded-lg ${COLORS.background.secondary}`}>
           <div className="text-grey-400 text-4xl mb-3">💳</div>
           <h3 className={`${RESPONSIVE.text.h3} font-medium ${COLORS.text.primary} mb-2`}>No payment methods found</h3>
@@ -144,7 +130,7 @@ export const PaymentMethodsList = () => {
           </p>
           <Link
             href="/payment-methods/add"
-            className={`${RESPONSIVE.touch} px-4 py-2 text-sm bg-white text-black rounded-full font-medium hover:bg-gray-100 transition-colors inline-block`}
+            className={`${RESPONSIVE.touchSmall} px-4 py-2 text-sm ${COLORS.background.primary} ${BORDER_RADIUS.full}`}
           >
             Add a Card
           </Link>
@@ -157,19 +143,7 @@ export const PaymentMethodsList = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-row items-center justify-between border-b border-gray-700 pb-2">
-        <div className="flex flex-row items-center gap-2">
-          <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
-          <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Payment Method</h1>
-        </div>
-        <Link
-          href="/payment-methods/add"
-          className="px-4 py-2 text-sm bg-white text-black rounded-full font-medium hover:bg-gray-100 transition-colors"
-        >
-          Add a Card
-        </Link>
-      </div>
+    <div className="space-y-4">
       {paymentMethods
         .sort((a, b) => {
           // Default payment method first
@@ -196,9 +170,7 @@ export const PaymentMethodsList = () => {
             customerId={customerId}
           />
         ))}
-      <div className={`flex flex-col ${BORDER_RADIUS.lg} bg-surface-raised ${SPACING.xs} lg:block`}>
-        <PaymentMethodsNote />
-      </div>
+      <PaymentMethodsNote />
     </div>
   );
 };

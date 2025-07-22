@@ -2,6 +2,7 @@
 
 import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import React, { useState } from 'react';
+import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { STRIPE_CANCELLATION_FEEDBACK } from '@/utils/subscriptionHelpers';
 
 const CANCELLATION_REASONS = [
@@ -39,51 +40,58 @@ export const ReasonsStep: React.FC<ReasonsStepProps> = ({
   return (
     <>
       <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">Why are you cancelling?</h2>
-        <p className="text-sm text-gray-400 mb-4">
+        <h3 className="font-medium text-base leading-6">Why are you cancelling?</h3>
+        <p className="text-sm text-gray-400 mt-1">
           Your feedback helps us improve our service. Please let us know why you're cancelling.
         </p>
       </div>
 
-      <div className="mb-6 space-y-3">
-        {CANCELLATION_REASONS.map(reason => (
-          <label key={reason.value} className="flex items-center space-x-3 cursor-pointer">
-            <input
-              type="radio"
-              name="cancellationReason"
-              value={reason.value}
-              checked={selectedReason === reason.value}
-              onChange={e => setSelectedReason(e.target.value as StripeCancellationFeedback)}
-              className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
-            />
-            <span className="text-sm">{reason.label}</span>
-          </label>
-        ))}
+      <div className="bg-surface-raised rounded-xl mb-4 py-4">
+        <div className="space-y-3 px-4">
+          {CANCELLATION_REASONS.map(reason => (
+            <label key={reason.value} className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="radio"
+                name="cancellationReason"
+                value={reason.value}
+                checked={selectedReason === reason.value}
+                onChange={e => setSelectedReason(e.target.value as StripeCancellationFeedback)}
+                className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
+              />
+              <span className="text-sm">{reason.label}</span>
+            </label>
+          ))}
 
-        {selectedReason === 'other' && (
-          <div className="mt-3">
-            <textarea
-              value={customComment}
-              onChange={e => setCustomComment(e.target.value)}
-              placeholder="Please tell us more..."
-              className="w-full p-3 border border-gray-300 rounded-lg text-sm resize-none"
-              rows={3}
-            />
-          </div>
-        )}
+          {selectedReason === 'other' && (
+            <div className="mt-3">
+              <textarea
+                name="customComment"
+                value={customComment}
+                onChange={e => setCustomComment(e.target.value)}
+                placeholder="Please tell us more..."
+                className="w-full p-3 rounded-lg text-sm resize-none bg-surface-input text-text-secondary"
+                rows={3}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         <button
           onClick={onGoBackAction}
-          className="flex-1 py-2 px-4 rounded-full bg-gray-600 text-white hover:bg-gray-700 transition-colors"
+          className={`${RESPONSIVE.touch} ${COLORS.button.secondary} ${BORDER_RADIUS.full} font-medium w-full`}
           type="button"
         >
           Back
         </button>
         <button
           onClick={handleContinue}
-          className="flex-1 py-2 px-4 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+          className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
+            isContinueDisabled
+              ? `${COLORS.button.disabledTransparent}`
+              : COLORS.button.tertiary
+          }`}
           disabled={isContinueDisabled}
           type="button"
         >

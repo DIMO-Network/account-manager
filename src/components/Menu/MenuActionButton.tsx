@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, PropsWithChildren } from 'react';
 import classNames from 'classnames';
+import { COLORS } from '@/utils/designSystem';
 
 export type MenuActionButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   active?: boolean;
@@ -21,10 +22,9 @@ export function MenuActionButton({
       className={classNames(
         'flex flex-row gap-3 items-center h-10 text-base rounded-full px-3 transition-colors font-medium w-full text-left cursor-pointer',
         {
-          'text-gray-400 cursor-not-allowed': disabled,
-          'bg-red-900 text-white font-bold': active,
-          'hover:bg-gray-700': !disabled && !active,
-          'text-white': active,
+          [COLORS.button.menu.disabled]: disabled,
+          [COLORS.button.menu.active]: active,
+          [COLORS.button.menu.default]: !disabled && !active,
         },
         className,
       )}

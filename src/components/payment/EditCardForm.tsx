@@ -1,29 +1,25 @@
 'use client';
 
-import { loadStripe } from '@stripe/stripe-js';
 import { useEffect, useState } from 'react';
 import { FormField } from '@/components/FormField';
-import { usePaymentMethods } from '@/hooks/usePaymentMethods';
-import { useStripeCustomer } from '@/hooks/useStripeCustomer';
+import { FormSkeleton } from '@/components/payment/FormSkeleton';
 import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
 
-type AddCardFormProps = {
+type EditCardFormProps = {
+  cardId: string;
+  customerId: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 };
 
-export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
-  const { customerId } = useStripeCustomer();
-  const { fetchPaymentMethods } = usePaymentMethods(customerId);
-  const [loading, setLoading] = useState(false);
-  const [cardElementLoading, setCardElementLoading] = useState(true);
+export const EditCardForm = ({ cardId, customerId, onSuccess, onCancel }: EditCardFormProps) => {
+  const [card, setCard] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [stripe, setStripe] = useState<any>(null);
-  const [cardElement, setCardElement] = useState<any>(null);
-
   const [form, setForm] = useState({
     name: '',
+    exp_month: '',
+    exp_year: '',
     address_city: '',
     address_country: '',
     address_line1: '',
@@ -31,50 +27,41 @@ export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
     address_state: '',
     address_zip: '',
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-  // Initialize Stripe
   useEffect(() => {
-    const initStripe = async () => {
-      setCardElementLoading(true);
-      const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-
-      if (!publishableKey) {
-        setError('Stripe configuration is missing. Please check your environment variables.');
-        setCardElementLoading(false);
-        return;
-      }
-
-      const stripeInstance = await loadStripe(publishableKey);
-      setStripe(stripeInstance);
-
-      if (stripeInstance) {
-        const elementsInstance = stripeInstance.elements();
-
-        const card = elementsInstance.create('card', {
-          style: {
-            base: {
-              'fontSize': '16px',
-              'color': '#ffffff',
-              '::placeholder': {
-                color: '#aab7c4',
-              },
-            },
-            invalid: {
-              color: '#9e2146',
-            },
-          },
+    async function fetchCard() {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await fetch(`/api/payment-methods?cardId=${cardId}&customer_id=${customerId}`);
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to fetch card');
+        }
+        setCard(data.card);
+        setForm({
+          name: data.card.billing_details?.name || '',
+          exp_month: data.card.card?.exp_month?.toString() || '',
+          exp_year: data.card.card?.exp_year?.toString() || '',
+          address_city: data.card.billing_details?.address?.city || '',
+          address_country: data.card.billing_details?.address?.country || '',
+          address_line1: data.card.billing_details?.address?.line1 || '',
+          address_line2: data.card.billing_details?.address?.line2 || '',
+          address_state: data.card.billing_details?.address?.state || '',
+          address_zip: data.card.billing_details?.address?.postal_code || '',
         });
-
-        card.mount('#card-element');
-        setCardElement(card);
-        setCardElementLoading(false);
-      } else {
-        setCardElementLoading(false);
+      } catch (e) {
+        setError((e as Error).message);
+      } finally {
+        setLoading(false);
       }
-    };
-
-    initStripe();
-  }, []);
+    }
+    if (cardId && customerId) {
+      fetchCard();
+    }
+  }, [cardId, customerId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -82,80 +69,52 @@ export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     setError('');
-
     try {
-      if (!customerId || !stripe || !cardElement) {
-        throw new Error('Required dependencies not loaded');
+      if (!card) {
+        throw new Error('Card not loaded');
       }
-
-      // Create payment method using Stripe Elements
-      const { error: stripeError, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
-        billing_details: {
-          name: form.name,
-          address: {
-            city: form.address_city,
-            country: form.address_country,
-            line1: form.address_line1,
-            line2: form.address_line2,
-            state: form.address_state,
-            postal_code: form.address_zip,
-          },
-        },
-      });
-
-      if (stripeError) {
-        throw new Error(stripeError.message);
-      }
-
-      // Attach the payment method to the customer
-      const response = await fetch('/api/payment-methods', {
-        method: 'POST',
+      const res = await fetch('/api/payment-methods', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customerId,
-          paymentMethodId: paymentMethod.id,
-          billing_details: {
-            name: form.name,
-            address: {
-              city: form.address_city,
-              country: form.address_country,
-              line1: form.address_line1,
-              line2: form.address_line2,
-              state: form.address_state,
-              postal_code: form.address_zip,
-            },
-          },
+          cardId,
+          ...form,
+          customerId: card.customer,
         }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to add card');
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update card');
       }
-
       setSuccess(true);
-      await fetchPaymentMethods();
-
       if (onSuccess) {
         onSuccess();
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add card');
+    } catch (e) {
+      setError((e as Error).message);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return <FormSkeleton fieldCount={5} showButtons={true} />;
+  }
+  if (error) {
+    return <div className="p-8 text-center text-red-500">{error}</div>;
+  }
+  if (!card) {
+    return <div className="p-8 text-center">Card not found.</div>;
+  }
 
   if (success) {
     return (
       <div className={`${SPACING.md} text-center border border-green-500 rounded-lg ${COLORS.background.secondary}`}>
         <div className="text-green-500 text-4xl mb-3">✅</div>
-        <h3 className="text-green-500 font-semibold mb-2">Card Added Successfully!</h3>
-        <p className="text-grey-400 text-sm">Your new payment method has been added.</p>
+        <h3 className="text-green-500 font-semibold mb-2">Card Updated Successfully!</h3>
+        <p className="text-grey-400 text-sm">Your payment method has been updated.</p>
       </div>
     );
   }
@@ -176,23 +135,28 @@ export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
           value={form.name}
           onChange={handleChange}
           placeholder="First Last"
-          required
         />
-
-        <div>
-          <label htmlFor="card-element" className="block text-sm font-medium mb-1">
-            Card Details
-          </label>
-          <div className="flex">
-            <div
-              className={`rounded-md bg-surface-raised px-4 pb-2 pt-2.5 w-full min-h-10 ${
-                cardElementLoading ? 'animate-pulse bg-gray-900' : ''
-              }`}
-              id="card-element"
+        <div className="flex gap-2 mb-1">
+          <div className="flex-1">
+            <FormField
+              label="Exp Month"
+              id="exp_month"
+              name="exp_month"
+              value={form.exp_month}
+              readOnly
+            />
+          </div>
+          <div className="flex-1">
+            <FormField
+              label="Exp Year"
+              id="exp_year"
+              name="exp_year"
+              value={form.exp_year}
+              readOnly
             />
           </div>
         </div>
-
+        <div className="text-xs text-gray-500 mb-4">Expiration cannot be updated. To change expiration, add a new card.</div>
         <FormField
           label="Address Line 1"
           id="address_line1"
@@ -201,7 +165,6 @@ export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
           onChange={handleChange}
           placeholder="Street address, P.O. Box, company name, c/o"
         />
-
         <FormField
           label="Address Line 2"
           id="address_line2"
@@ -210,7 +173,6 @@ export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
           onChange={handleChange}
           placeholder="Apartment, suite, unit, building, floor, etc."
         />
-
         <div className="flex gap-2">
           <div className="flex-1">
             <FormField
@@ -233,7 +195,6 @@ export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
             />
           </div>
         </div>
-
         <div className="flex gap-2">
           <div className="flex-1">
             <FormField
@@ -256,20 +217,19 @@ export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
             />
           </div>
         </div>
-
         <div className="flex flex-col pt-4">
           <button
             type="submit"
-            disabled={loading || !stripe}
+            disabled={submitting}
             className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${COLORS.button.primary}`}
           >
-            {loading ? 'Adding Card...' : 'Add Card'}
+            {submitting ? 'Saving...' : 'Save Changes'}
           </button>
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              disabled={loading}
+              disabled={submitting}
               className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${COLORS.button.tertiary}`}
             >
               Cancel

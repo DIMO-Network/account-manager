@@ -18,12 +18,36 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customer_id');
+    const cardId = searchParams.get('cardId');
 
     if (!customerId) {
       return NextResponse.json(
         { error: 'Customer ID is required' },
         { status: 400 },
       );
+    }
+
+    // If cardId is provided, fetch specific payment method
+    if (cardId) {
+      try {
+        const paymentMethod = await stripe().paymentMethods.retrieve(cardId);
+
+        // Verify the payment method belongs to the customer
+        if (paymentMethod.customer !== customerId) {
+          return NextResponse.json(
+            { error: 'Payment method not found' },
+            { status: 404 },
+          );
+        }
+
+        return NextResponse.json({ card: paymentMethod });
+      } catch (error) {
+        console.error('Error fetching payment method:', error);
+        return NextResponse.json(
+          { error: 'Payment method not found' },
+          { status: 404 },
+        );
+      }
     }
 
     const paymentMethods = await stripe().paymentMethods.list({
@@ -62,6 +86,60 @@ export async function GET(request: NextRequest) {
     }
     return NextResponse.json(
       { error: 'Failed to fetch payment methods' },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    await authenticateUser(); // Verify user is authenticated
+
+    const {
+      cardId,
+      customerId,
+      name,
+      address_city,
+      address_country,
+      address_line1,
+      address_line2,
+      address_state,
+      address_zip,
+    } = await request.json();
+
+    if (!cardId || !customerId) {
+      return NextResponse.json(
+        { error: 'Card ID and Customer ID are required' },
+        { status: 400 },
+      );
+    }
+
+    // Update the payment method's billing details
+    await stripe().paymentMethods.update(cardId, {
+      billing_details: {
+        name: name || undefined,
+        address: {
+          city: address_city || undefined,
+          country: address_country || undefined,
+          line1: address_line1 || undefined,
+          line2: address_line2 || undefined,
+          state: address_state || undefined,
+          postal_code: address_zip || undefined,
+        },
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error updating payment method:', error);
+    if (error instanceof Error && error.message === 'User not authenticated') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 },
+      );
+    }
+    return NextResponse.json(
+      { error: 'Failed to update payment method' },
       { status: 500 },
     );
   }

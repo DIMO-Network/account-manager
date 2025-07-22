@@ -37,7 +37,7 @@ export function DefaultPaymentMethodCard({ paymentMethod }: DefaultPaymentMethod
         ••••
         {card.last4}
       </span>
-      <span className="text-xs text-grey-400">
+      <span className="text-xs text-grey-400 mt-1">
         Expires
         {' '}
         {String(card.exp_month).padStart(2, '0')}

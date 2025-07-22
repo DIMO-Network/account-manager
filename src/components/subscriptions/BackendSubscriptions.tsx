@@ -10,39 +10,43 @@ function BackendSubscriptionItem({ status, index }: { status: any; index: number
   const key = device?.tokenId ? `device-${device.tokenId}` : `status-${status.start_date}-${index}`;
 
   return (
-    <li key={key} className={`py-3 px-4 gap-2 ${BORDER_RADIUS.xl} bg-surface-raised hover:bg-dark-950 transition`}>
+    <li key={key} className={`gap-2 ${BORDER_RADIUS.xl} bg-surface-raised`}>
       <div className="block">
-        <div className="flex flex-row items-center justify-between gap-2 mb-2 border-b border-gray-700 pb-2">
-          <div className="flex flex-row items-center gap-2">
-            <ConnectionIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
-            <h3 className="text-base font-medium leading-6">
-              {device ? `${device.vehicle.definition.make} ${device.vehicle.definition.model}` : 'Unknown Device'}
-            </h3>
-          </div>
-          <div className={`text-sm font-medium ${statusDisplay.color}`}>
-            {statusDisplay.text}
+        <div className="border-b border-gray-700 pb-2">
+          <div className="flex flex-row items-center justify-between gap-2 px-4 pt-3 w-full">
+            <div className="flex flex-row items-center gap-2">
+              <ConnectionIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+              <h3 className="text-base font-medium leading-6">
+                {device ? `${device.vehicle.definition.make} ${device.vehicle.definition.model}` : 'Unknown Device'}
+              </h3>
+            </div>
+            <div className={`text-sm font-medium ${statusDisplay.color}`}>
+              {statusDisplay.text}
+            </div>
           </div>
         </div>
         {device && (
-          <div className="text-base font-medium leading-5 mb-2 mt-4">
-            {device.vehicle.definition.year}
-            {' '}
-            {device.vehicle.definition.make}
-            {' '}
-            {device.vehicle.definition.model}
-          </div>
-        )}
-        <div className="text-xs font-light leading-5 mt-2">
-          {device?.serial ? `Serial: ${device.serial}` : 'No serial number'}
-        </div>
-        <div className={`text-xs font-light leading-5 ${COLORS.text.secondary}`}>
-          {getBackendSubscriptionRenewalInfo(status).displayText}
-        </div>
-        {device?.connection && (
-          <div className="text-xs font-light leading-5 mt-1 text-blue-400">
-            Connected via
-            {' '}
-            {device.connection.name}
+          <div className="px-4 py-3">
+            <div className="text-base font-medium leading-5">
+              {device.vehicle.definition.year}
+              {' '}
+              {device.vehicle.definition.make}
+              {' '}
+              {device.vehicle.definition.model}
+            </div>
+            <div className="text-xs font-light leading-5 mt-1">
+              {device?.serial ? `Serial: ${device.serial}` : 'No serial number'}
+            </div>
+            <div className={`text-xs font-light leading-5 ${COLORS.text.secondary}`}>
+              {getBackendSubscriptionRenewalInfo(status).displayText}
+            </div>
+            {device?.connection && (
+              <div className="text-xs font-light leading-5 mt-1 text-blue-400">
+                Connected via
+                {' '}
+                {device.connection.name}
+              </div>
+            )}
           </div>
         )}
       </div>

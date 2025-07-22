@@ -41,7 +41,7 @@ export const FormField = ({
       placeholder={placeholder}
       required={required}
       maxLength={maxLength}
-      className={`flex flex-row rounded-md bg-surface-raised px-4 py-2 w-full ${readOnly ? 'bg-surface-sunken cursor-not-allowed text-gray-700' : ''} ${className}`}
+      className={`flex flex-row rounded-md bg-surface-raised px-4 py-2 w-full ${readOnly ? 'bg-surface-sunken cursor-not-allowed text-gray-700' : ''} ${className} placeholder:text-gray-600`}
     />
   </div>
 );

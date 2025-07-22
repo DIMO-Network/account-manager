@@ -3,6 +3,7 @@
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
 import React from 'react';
+import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
 
 type ConfirmationStepProps = {
@@ -27,26 +28,30 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
 
   const { displayText } = getSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
 
+  const labelStyle = 'font-medium text-base leading-5 px-4 mb-1';
+  const valueStyle = 'font-light text-xs leading-5 px-4 pb-3';
+  const borderStyle = 'border-b border-gray-700';
+
   return (
     <>
       <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">Are you sure?</h2>
-        <p className="text-sm text-gray-400 mb-4">
+        <h3 className="font-medium text-base leading-6">Are you sure?</h3>
+        <p className="text-sm text-gray-400 mt-1">
           This action will cancel your subscription. You'll continue to have access until the end of your current billing period.
         </p>
       </div>
 
-      <div className="mb-6">
-        <h3 className="font-medium text-base mb-3">Subscription Details</h3>
-        <div className="space-y-3 text-sm">
+      <div className="bg-surface-raised rounded-xl mb-4 pt-4 pb-1">
+        <div className="space-y-4">
+          {/* Connected To */}
           <div>
-            <span className="font-medium">Connected To:</span>
-            <div className="text-gray-400">
+            <div className={labelStyle}>Connected To</div>
+            <div className={`${valueStyle} ${borderStyle}`}>
               {vehicleInfo
                 ? (
                     <>
                       <div>{vehicleInfo.definition?.year && vehicleInfo.definition?.make && vehicleInfo.definition?.model ? `${vehicleInfo.definition.year} ${vehicleInfo.definition.make} ${vehicleInfo.definition.model}` : 'N/A'}</div>
-                      <div className="text-xs">{vehicleInfo.dcn?.name || vehicleInfo.name || 'N/A'}</div>
+                      <div className="text-xs text-gray-400">{vehicleInfo.dcn?.name || vehicleInfo.name || 'N/A'}</div>
                     </>
                   )
                 : (
@@ -54,32 +59,34 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
                   )}
             </div>
           </div>
+
+          {/* Type */}
           <div>
-            <span className="font-medium">Type:</span>
-            <span className="text-gray-400 ml-2">
+            <div className={labelStyle}>Type</div>
+            <div className={`${valueStyle} ${borderStyle}`}>
               {getSubscriptionTypeAndPrice(subscription).displayText}
-            </span>
+            </div>
           </div>
+
+          {/* Schedule */}
           <div>
-            <span className="font-medium">
-              Schedule:
-            </span>
-            <span className="text-gray-400 ml-2">{displayText}</span>
+            <div className={labelStyle}>Schedule</div>
+            <div className={valueStyle}>{displayText}</div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         <button
           onClick={onGoBackAction}
-          className="flex-1 py-2 px-4 rounded-full bg-gray-600 text-white hover:bg-gray-700 transition-colors"
+          className={`${RESPONSIVE.touch} ${COLORS.button.secondary} ${BORDER_RADIUS.full} font-medium w-full`}
           type="button"
         >
           Go Back
         </button>
         <button
           onClick={onProceedAction}
-          className="flex-1 py-2 px-4 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors"
+          className={`${RESPONSIVE.touch} ${COLORS.button.tertiary} ${BORDER_RADIUS.full} font-medium w-full`}
           type="button"
         >
           Proceed with cancellation

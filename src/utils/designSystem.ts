@@ -22,9 +22,20 @@ export const COLORS = {
 
   // Buttons
   button: {
-    primary: 'bg-primary-500 hover:bg-primary-600 text-white',
-    secondary: 'bg-cta-default hover:bg-grey-700 text-white',
+    primary: 'bg-cta-default text-white cursor-pointer',
+    secondary: 'bg-cta-default text-white cursor-pointer',
+    secondaryTransparent: 'bg-transparent border-2 border-surface-raised text-white cursor-pointer',
+    secondaryRed: 'bg-transparent border-2 border-surface-raised text-red-300 cursor-pointer',
+    tertiary: 'bg-transparent text-text-secondary cursor-pointer',
+    tertiaryRed: 'bg-transparent text-dimo-red cursor-pointer',
     disabled: 'bg-cta-disabled text-grey-400 cursor-not-allowed',
+    disabledTransparent: 'bg-transparent text-grey-400 cursor-not-allowed',
+    disabledTransparentRed: 'bg-transparent text-dimo-red cursor-not-allowed',
+    menu: {
+      default: 'text-text-secondary',
+      active: 'bg-surface-raised text-white font-bold',
+      disabled: 'text-gray-400 cursor-not-allowed',
+    },
   },
 
   // Feedback
@@ -72,15 +83,17 @@ export const RESPONSIVE = {
 
   // Touch-friendly
   touch: 'min-h-[44px] min-w-[44px]',
+  touchSmall: 'min-h-[36px] min-w-[36px]',
 } as const;
 
-// Breakpoint utilities
+// Breakpoint utilities - references CSS custom properties from theme.css
 export const BREAKPOINTS = {
-  'sm': '640px',
-  'md': '768px',
-  'lg': '1024px',
-  'xl': '1280px',
-  '2xl': '1536px',
+  'xs': 'var(--breakpoint-xs)',
+  'sm': 'var(--breakpoint-sm)',
+  'md': 'var(--breakpoint-md)',
+  'lg': 'var(--breakpoint-lg)',
+  'xl': 'var(--breakpoint-xl)',
+  '2xl': 'var(--breakpoint-2xl)',
 } as const;
 
 // Common responsive patterns
