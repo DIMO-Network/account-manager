@@ -18,9 +18,9 @@ export function PaymentMethodButtons() {
       <div className="mt-6 flex justify-center">
         <Link
           href="/payment-methods/add"
-          className="inline-flex flex-row items-center justify-center gap-2 rounded-full bg-surface-raised px-4 font-medium w-full h-10"
+          className="inline-flex flex-row items-center justify-center gap-2 rounded-full bg-surface-raised px-4 py-2 text-sm w-full"
         >
-          Add Card
+          Add a Card
         </Link>
       </div>
     );
@@ -30,7 +30,7 @@ export function PaymentMethodButtons() {
     <div className="mt-6 flex justify-center">
       <Link
         href="/payment-methods"
-        className="inline-flex flex-row items-center justify-center gap-2 rounded-full bg-surface-raised px-4 font-medium w-full h-10"
+        className="inline-flex flex-row items-center justify-center gap-2 rounded-full bg-surface-raised px-4 py-2 text-sm w-full"
       >
         Edit
       </Link>
