@@ -1,3 +1,11 @@
+# [2.14.0](https://github.com/DIMO-Network/account-manager/compare/v2.13.0...v2.14.0) (2025-07-23)
+
+
+### Features
+
+* hide vehicles and account on prod ([#39](https://github.com/DIMO-Network/account-manager/issues/39)) ([d83620f](https://github.com/DIMO-Network/account-manager/commit/d83620f947950884ccd5dac98ecf135f9a5bb100))
+* update web app assets ([#38](https://github.com/DIMO-Network/account-manager/issues/38)) ([60cb6d0](https://github.com/DIMO-Network/account-manager/commit/60cb6d0f4625b88ea071549abbb20af5e489623a))
+
 # [2.13.0](https://github.com/DIMO-Network/account-manager/compare/v2.12.0...v2.13.0) (2025-07-22)
 
 
