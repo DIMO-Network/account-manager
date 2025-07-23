@@ -6,7 +6,7 @@
 /* Euclid Circular Regular - Base font */
 @font-face {
   font-family: 'Euclid Circular A';
-  src: url('/fonts/EuclidCircularA-Regular.ttf') format('truetype');
+  src: url('/fonts/Euclid Circular A Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -15,7 +15,7 @@
 /* Euclid Circular Medium - Headings and emphasis */
 @font-face {
   font-family: 'Euclid Circular A';
-  src: url('/fonts/EuclidCircularA-Medium.ttf') format('truetype');
+  src: url('/fonts/Euclid Circular A Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -24,7 +24,7 @@
 /* Euclid Circular Semibold - Section headers */
 @font-face {
   font-family: 'Euclid Circular A';
-  src: url('/fonts/EuclidCircularA-Semibold.ttf') format('truetype');
+  src: url('/fonts/Euclid Circular A SemiBold.ttf') format('truetype');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -33,7 +33,7 @@
 /* Euclid Circular Bold - Main titles */
 @font-face {
   font-family: 'Euclid Circular A';
-  src: url('/fonts/EuclidCircularA-Bold.ttf') format('truetype');
+  src: url('/fonts/Euclid Circular A Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -42,7 +42,7 @@
 /* Euclid Circular Light - Secondary text */
 @font-face {
   font-family: 'Euclid Circular A';
-  src: url('/fonts/EuclidCircularA-Light.ttf') format('truetype');
+  src: url('/fonts/Euclid Circular A Light.ttf') format('truetype');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
