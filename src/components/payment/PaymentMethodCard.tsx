@@ -93,7 +93,7 @@ export const PaymentMethodCard = ({
           ••••
           {card.last4}
         </span>
-        <span className="text-xs text-white mt-1">
+        <span className="text-xs text-white mt-1 leading-4.5">
           Expires
           {' '}
           {String(card.exp_month).padStart(2, '0')}
@@ -101,7 +101,7 @@ export const PaymentMethodCard = ({
           {card.exp_year}
         </span>
         {paymentMethod.billing_details?.name && (
-          <span className="text-xs text-text-secondary">
+          <span className="text-xs text-text-secondary leading-4.5">
             {paymentMethod.billing_details.name}
           </span>
         )}
