@@ -21,8 +21,13 @@ export function usePaymentMethods(customerId: string | null) {
 
       const response = await fetch(`/api/payment-methods?customer_id=${customerId}`);
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch payment methods');
+        const contentType = response.headers.get('content-type');
+        if (contentType?.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch payment methods');
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
       }
       const data: PaymentMethodsResponse = await response.json();
       setPaymentMethods(data.paymentMethods);
