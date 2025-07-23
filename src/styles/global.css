@@ -63,3 +63,13 @@
     font-weight: 400; /* Regular weight as default */
   }
 }
+
+/*
+  Override LoginWithDimo .custom-button to be responsive
+  The SDK injects a fixed 375px width
+*/
+.custom-button {
+  width: 100% !important; /* Override the fixed 375px width */
+  max-width: 375px; /* Keep the original max-width for larger screens */
+  min-width: 280px; /* Ensure minimum usable width on small screens */
+}
