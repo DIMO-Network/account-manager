@@ -4,6 +4,7 @@ import { useSignIn, useUser } from '@clerk/nextjs';
 import { LoginWithDimo } from '@dimo-network/login-with-dimo';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { Loading } from '@/components/Loading';
 
 export const DimoSignIn = () => {
   const { signIn, setActive, isLoaded } = useSignIn();
@@ -97,13 +98,13 @@ export const DimoSignIn = () => {
 
   if (isLoading || isAutoSignIn) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 max-w-72 mx-auto">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <h3 className="text-lg font-medium mt-4">
+          <Loading className="mx-auto mb-4" />
+          <h3 className="text-base font-medium leading-5">
             Signing you in...
           </h3>
-          <p className="text-gray-600">
+          <p className="text-text-secondary leading-5 text-sm mt-1">
             Please wait while we complete your authentication.
           </p>
         </div>
@@ -112,7 +113,7 @@ export const DimoSignIn = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-72 mx-auto">
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded text-red-800 text-sm">
           {error}
@@ -120,10 +121,10 @@ export const DimoSignIn = () => {
       )}
 
       <div className="text-center">
-        <h3 className="text-lg font-medium">
+        <h3 className="text-base font-medium leading-5">
           Sign in with DIMO
         </h3>
-        <p className="text-gray-600">
+        <p className="text-sm text-text-secondary font-light leading-5 mt-1">
           Access your account using your DIMO credentials
         </p>
       </div>
