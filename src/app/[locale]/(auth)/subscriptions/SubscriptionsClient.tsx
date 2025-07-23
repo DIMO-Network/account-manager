@@ -49,13 +49,15 @@ export function SubscriptionsClient({ subscriptions }: SubscriptionsClientProps)
     fetchBackendData();
   }, []);
 
+  const showSkeleton = loading || (featureFlags.useBackendProxy && !useBackendData && !error);
+
   return (
     <div className="flex flex-1 flex-col gap-4">
       <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2">
         <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
         <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Subscriptions</h1>
       </div>
-      {loading
+      {showSkeleton
         ? (
             <SubscriptionSkeleton count={3} />
           )

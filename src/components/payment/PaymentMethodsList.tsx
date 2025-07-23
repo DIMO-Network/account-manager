@@ -1,12 +1,11 @@
 'use client';
 
-import Link from 'next/link';
 import { PaymentMethodCard } from '@/components/payment/PaymentMethodCard';
 import { PaymentMethodSkeleton } from '@/components/payment/PaymentMethodSkeleton';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
-import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
 
 export const PaymentMethodsList = () => {
   const { customerId, loading: customerLoading, error: customerError } = useStripeCustomer();
@@ -113,31 +112,21 @@ export const PaymentMethodsList = () => {
     );
   }
 
-  // Show loading state if we're still loading OR if we have a customerId but no payment methods yet
-  if (loading || (customerId && paymentMethods.length === 0 && !error)) {
+  if (loading) {
     return <PaymentMethodSkeleton count={2} showNote={true} />;
   }
 
   // Only show "No payment methods found" if we're not loading and have confirmed there are no payment methods
   if (paymentMethods.length === 0) {
     return (
-      <div className="space-y-4">
-        <div className={`${SPACING.lg} text-center border ${COLORS.border.default} rounded-lg ${COLORS.background.secondary}`}>
-          <div className="text-grey-400 text-4xl mb-3">💳</div>
-          <h3 className={`${RESPONSIVE.text.h3} font-medium ${COLORS.text.primary} mb-2`}>No payment methods found</h3>
-          <p className={`${RESPONSIVE.text.body} text-grey-400 mb-4`}>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col justify-between min-w-full bg-surface-default rounded-xl py-4 px-3">
+          <h3 className="font-medium text-base leading-6">No payment methods found</h3>
+          <p className="text-sm text-gray-400 mt-1">
             You haven't added any payment methods yet. Add one to get started.
           </p>
-          <Link
-            href="/payment-methods/add"
-            className={`${RESPONSIVE.touchSmall} px-4 py-2 text-sm ${COLORS.background.primary} ${BORDER_RADIUS.full}`}
-          >
-            Add a Card
-          </Link>
         </div>
-        <div className={`flex flex-col ${BORDER_RADIUS.lg} bg-surface-raised ${SPACING.xs} lg:block`}>
-          <PaymentMethodsNote />
-        </div>
+        <PaymentMethodsNote />
       </div>
     );
   }

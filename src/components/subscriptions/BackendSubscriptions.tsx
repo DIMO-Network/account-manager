@@ -17,7 +17,13 @@ function BackendSubscriptionItem({ status, index }: { status: any; index: number
             <div className="flex flex-row items-center gap-2">
               <ConnectionIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
               <h3 className="text-base font-medium leading-6">
-                {device ? `${device.vehicle.definition.make} ${device.vehicle.definition.model}` : 'Unknown Device'}
+                {device?.vehicle?.definition
+                  ? `${device.vehicle.definition.make} ${device.vehicle.definition.model}`
+                  : device?.manufacturer?.name === 'HashDog'
+                    ? 'Macaron'
+                    : device?.manufacturer?.name === 'Ruptela'
+                      ? 'R1'
+                      : device?.manufacturer?.name || 'Unknown Device'}
               </h3>
             </div>
             <div className={`text-sm font-medium ${statusDisplay.color}`}>
@@ -27,13 +33,27 @@ function BackendSubscriptionItem({ status, index }: { status: any; index: number
         </div>
         {device && (
           <div className="px-4 py-3">
-            <div className="text-base font-medium leading-5">
-              {device.vehicle.definition.year}
-              {' '}
-              {device.vehicle.definition.make}
-              {' '}
-              {device.vehicle.definition.model}
-            </div>
+            {device.vehicle?.definition
+              ? (
+                  <div className="text-base font-medium leading-5">
+                    {device.vehicle.definition.year}
+                    {' '}
+                    {device.vehicle.definition.make}
+                    {' '}
+                    {device.vehicle.definition.model}
+                  </div>
+                )
+              : (
+                  <div className="text-base font-medium leading-5">
+                    {device.manufacturer?.name === 'HashDog'
+                      ? 'Macaron'
+                      : device.manufacturer?.name === 'Ruptela'
+                        ? 'R1'
+                        : device.manufacturer?.name || 'Unknown Device'}
+                    {' '}
+                    (Detached)
+                  </div>
+                )}
             <div className="text-xs font-light leading-5 mt-1">
               {device?.serial ? `Serial: ${device.serial}` : 'No serial number'}
             </div>
@@ -56,8 +76,8 @@ function BackendSubscriptionItem({ status, index }: { status: any; index: number
 
 // Helper function for backend status display
 function getStatusDisplay(status: any) {
-  const isActive = status.status === 'active' || status.status === 'trialing';
-  const isTrialing = status.status === 'trialing';
+  const isActive = status.status === 'active' || status.status === 'trialing' || status.status === 'trialing_active';
+  const isTrialing = status.status === 'trialing' || status.status === 'trialing_active';
   const isIncomplete = status.new_status === 'trialing_incomplete';
 
   let statusText = status.new_status;
@@ -87,7 +107,7 @@ export function BackendSubscriptions({ statuses }: { statuses: AllSubscriptionSt
     : statuses;
 
   if (filteredStatuses.length === 0) {
-    return <p>No devices found.</p>;
+    return <p className="text-base font-medium leading-6">No devices found.</p>;
   }
 
   return (

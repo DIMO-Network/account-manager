@@ -208,6 +208,13 @@ export async function POST(request: NextRequest) {
 
     // Handle adding new payment method
     if (paymentMethodId && billing_details) {
+      const existingPaymentMethods = await stripe().paymentMethods.list({
+        customer: customerId,
+        type: 'card',
+      });
+
+      const isFirstPaymentMethod = existingPaymentMethods.data.length === 0;
+
       // Attach the payment method to the customer
       await stripe().paymentMethods.attach(paymentMethodId, {
         customer: customerId,
@@ -229,12 +236,7 @@ export async function POST(request: NextRequest) {
       });
 
       // Set as default if it's the first payment method
-      const existingPaymentMethods = await stripe().paymentMethods.list({
-        customer: customerId,
-        type: 'card',
-      });
-
-      if (existingPaymentMethods.data.length === 1) {
+      if (isFirstPaymentMethod) {
         await stripe().customers.update(customerId, {
           invoice_settings: {
             default_payment_method: paymentMethodId,
