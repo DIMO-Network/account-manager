@@ -22,6 +22,13 @@ const isProtectedRoute = createRouteMatcher([
   '/:locale/user-profile(.*)',
 ]);
 
+const isProductionRestrictedRoute = createRouteMatcher([
+  '/vehicles(.*)',
+  '/:locale/vehicles(.*)',
+  '/user-profile(.*)',
+  '/:locale/user-profile(.*)',
+]);
+
 const isAuthPage = createRouteMatcher([
   '/sign-in(.*)',
   '/:locale/sign-in(.*)',
@@ -54,6 +61,13 @@ export default async function middleware(
   request: NextRequest,
   event: NextFetchEvent,
 ) {
+  // If production mode and redirect from restricted routes
+  if (process.env.NEXT_PUBLIC_APP_VERSION === 'production' && isProductionRestrictedRoute(request)) {
+    const locale = request.nextUrl.pathname.match(/(\/.*)\/(vehicles|user-profile)/)?.at(1) ?? `/${AppConfig.defaultLocale}`;
+    const dashboardUrl = new URL(`${locale}/dashboard`, request.url);
+    return NextResponse.redirect(dashboardUrl);
+  }
+
   // Verify the request with Arcjet
   if (process.env.ARCJET_KEY) {
     const decision = await aj.protect(request);
