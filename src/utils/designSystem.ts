@@ -43,6 +43,11 @@ export const COLORS = {
     success: 'text-feedback-success',
     error: 'text-feedback-error',
   },
+
+  // Loader
+  loader: {
+    primary: 'bg-dimo-blue',
+  },
 } as const;
 
 export const SPACING = {
