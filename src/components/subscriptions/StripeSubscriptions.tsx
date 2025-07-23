@@ -37,7 +37,7 @@ function StripeSubscriptionItem({ subscription }: { subscription: EnhancedSubscr
 
 export function StripeSubscriptions({ subscriptions }: { subscriptions: EnhancedSubscription[] }) {
   if (!subscriptions || subscriptions.length === 0) {
-    return <p>No subscriptions found.</p>;
+    return <p className="text-base font-medium leading-6">No devices found.</p>;
   }
 
   return (

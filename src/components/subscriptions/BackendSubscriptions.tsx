@@ -107,7 +107,7 @@ export function BackendSubscriptions({ statuses }: { statuses: AllSubscriptionSt
     : statuses;
 
   if (filteredStatuses.length === 0) {
-    return <p>No devices found.</p>;
+    return <p className="text-base font-medium leading-6">No devices found.</p>;
   }
 
   return (
