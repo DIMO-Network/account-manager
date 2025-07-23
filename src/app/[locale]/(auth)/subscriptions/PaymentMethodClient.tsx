@@ -24,6 +24,14 @@ export function PaymentMethodClient() {
 
   const defaultPaymentMethod = paymentMethods.find(pm => pm.id === defaultPaymentMethodId);
 
+  if (paymentMethods.length === 0) {
+    return (
+      <div className="flex flex-col">
+        <h3 className="text-base font-medium leading-6">No payment method found</h3>
+      </div>
+    );
+  }
+
   return (
     <>
       {defaultPaymentMethod && <DefaultPaymentMethodCard paymentMethod={defaultPaymentMethod} />}
