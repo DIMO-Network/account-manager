@@ -1,3 +1,10 @@
+## [2.14.1](https://github.com/DIMO-Network/account-manager/compare/v2.14.0...v2.14.1) (2025-07-23)
+
+
+### Bug Fixes
+
+* initial states payment methods and subscription display ([#40](https://github.com/DIMO-Network/account-manager/issues/40)) ([2b1bc35](https://github.com/DIMO-Network/account-manager/commit/2b1bc35a9178c59559e9919117a11ab846deda24))
+
 # [2.14.0](https://github.com/DIMO-Network/account-manager/compare/v2.13.0...v2.14.0) (2025-07-23)
 
 
