@@ -4,6 +4,21 @@ import { ChevronRightIcon, ConnectionIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
 
+function SubscriptionRenewalInfo({ subscription }: { subscription: EnhancedSubscription }) {
+  const renewalInfo = getSubscriptionRenewalInfo(subscription, subscription.nextScheduledPrice, subscription.nextScheduledDate);
+
+  return (
+    <>
+      <div>{renewalInfo.displayText}</div>
+      {renewalInfo.secondaryText && (
+        <div className="text-xs text-text-secondary">
+          {renewalInfo.secondaryText}
+        </div>
+      )}
+    </>
+  );
+}
+
 function StripeSubscriptionItem({ subscription }: { subscription: EnhancedSubscription }) {
   return (
     <li key={subscription.id} className={`gap-2 ${BORDER_RADIUS.xl} bg-surface-raised`}>
@@ -27,7 +42,7 @@ function StripeSubscriptionItem({ subscription }: { subscription: EnhancedSubscr
             {getSubscriptionTypeAndPrice(subscription).displayText}
           </div>
           <div className={`text-xs font-light leading-5 ${COLORS.text.secondary}`}>
-            {getSubscriptionRenewalInfo(subscription, subscription.nextScheduledPrice, subscription.nextScheduledDate).displayText}
+            <SubscriptionRenewalInfo subscription={subscription} />
           </div>
         </div>
       </Link>

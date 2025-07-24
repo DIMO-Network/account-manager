@@ -289,6 +289,27 @@ export function getSubscriptionRenewalInfo(
       return { displayText: `Renews on ${scheduledChangeText}`, date: nextDate };
     } else if (status === SUBSCRIPTION_STATUSES.CANCELED) {
       return { displayText: `Cancels on ${scheduledChangeText}`, date: nextDate };
+    } else if (status === SUBSCRIPTION_STATUSES.TRIALING) {
+      // For trialing subscriptions with scheduled changes, show both trial end and plan change
+      const currentInterval = subscription.items?.data?.[0]?.price?.recurring?.interval;
+      const nextInterval = nextScheduledPrice.recurring?.interval;
+
+      // Check if this is an interval change (monthly to annual or vice versa)
+      if (currentInterval && nextInterval && currentInterval !== nextInterval) {
+        const intervalText = nextInterval === 'year' ? 'annual' : 'monthly';
+        return {
+          displayText: `Free until ${date}`,
+          secondaryText: `Your plan will switch to ${intervalText} and your payment method will be charged ${nextAmount} on ${nextDate}.`,
+          date: nextDate,
+        };
+      } else {
+        // For other scheduled changes during trial
+        return {
+          displayText: `Free until ${date}`,
+          secondaryText: `Your plan will change to ${nextAmount} on ${nextDate}.`,
+          date: nextDate,
+        };
+      }
     } else {
       return { displayText: scheduledChangeText, date: nextDate };
     }
@@ -301,6 +322,19 @@ export function getSubscriptionRenewalInfo(
   }
 
   if (status === SUBSCRIPTION_STATUSES.TRIALING) {
+    // Check if this is a trialing subscription that has been updated to a different interval
+    const currentPrice = subscription.items?.data?.[0]?.price;
+    if (currentPrice && currentPrice.recurring?.interval) {
+      const interval = currentPrice.recurring.interval;
+      const amount = formatPriceWithInterval(currentPrice.unit_amount, interval);
+      const intervalText = interval === 'year' ? 'annual' : 'monthly';
+
+      return {
+        displayText: `Free until ${date}`,
+        secondaryText: `Your plan will switch to ${intervalText} and your payment method will be charged ${amount} on ${date}`,
+        date,
+      };
+    }
     return { displayText: `Free until ${date}`, date };
   } else if (status === SUBSCRIPTION_STATUSES.ACTIVE) {
     return { displayText: `Renews on ${date}`, date };

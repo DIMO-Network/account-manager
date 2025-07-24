@@ -24,7 +24,7 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
 
   const isMarkedForCancellation = subscription.cancel_at_period_end && subscription.cancel_at;
 
-  const { displayText } = getSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
+  const renewalInfo = getSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
 
   // Reusable styles
   const labelStyle = 'font-medium text-base leading-5 px-4 mb-1';
@@ -53,8 +53,10 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
               {vehicleInfo
                 ? (
                     <>
-                      <div>{vehicleInfo.definition?.year && vehicleInfo.definition?.make && vehicleInfo.definition?.model ? `${vehicleInfo.definition.year} ${vehicleInfo.definition.make} ${vehicleInfo.definition.model}` : 'N/A'}</div>
-                      <div className="text-xs text-gray-400">{vehicleInfo.dcn?.name || vehicleInfo.name || 'N/A'}</div>
+                      <div>
+                        {vehicleInfo.definition?.year && vehicleInfo.definition?.make && vehicleInfo.definition?.model ? `${vehicleInfo.definition.year} ${vehicleInfo.definition.make} ${vehicleInfo.definition.model}` : 'N/A'}
+                      </div>
+                      <div className="text-xs text-text-secondary">{vehicleInfo.dcn?.name || vehicleInfo.name || 'N/A'}</div>
                     </>
                   )
                 : (
@@ -79,7 +81,14 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
           {/* Schedule */}
           <div>
             <div className={labelStyle}>Schedule</div>
-            <div className={valueStyle}>{displayText}</div>
+            <div className={valueStyle}>
+              <div>{renewalInfo.displayText}</div>
+              {renewalInfo.secondaryText && (
+                <div className="text-xs text-text-secondary">
+                  {renewalInfo.secondaryText}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
