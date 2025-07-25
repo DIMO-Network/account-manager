@@ -26,18 +26,43 @@ export type CanceledTrialPreview = {
   nextInterval: string;
 };
 
+export type ScheduledSubscriptionPreview = {
+  scheduledSubscription: true;
+  nextAmount: number;
+  nextInterval: string;
+  nextDate: number;
+};
+
 export async function getPreviewInvoice(
   subscriptionId: string,
   newPriceId: string,
-): Promise<PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | null> {
+): Promise<PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | null> {
   try {
     const subscription = await stripe().subscriptions.retrieve(subscriptionId, {
-      expand: ['items.data', 'items.data.price'],
+      expand: ['items.data', 'items.data.price', 'schedule'],
     });
 
     const subscriptionItemId = subscription.items.data[0]?.id;
     if (!subscriptionItemId) {
       return null;
+    }
+
+    // Check if subscription is managed by a schedule
+    const existingSchedule = subscription.schedule as Stripe.SubscriptionSchedule | null;
+    if (existingSchedule?.id) {
+      // For subscriptions managed by schedules, we can't create preview invoices
+      // Return scheduled subscription preview instead
+      const newPrice = await stripe().prices.retrieve(newPriceId);
+      const newAmount = newPrice?.unit_amount ?? 0;
+      const newInterval = newPrice?.recurring?.interval ?? 'month';
+      const currentPeriodEnd = subscription.items.data[0]?.current_period_end ?? 0;
+
+      return {
+        scheduledSubscription: true,
+        nextAmount: newAmount,
+        nextInterval: newInterval,
+        nextDate: currentPeriodEnd,
+      };
     }
 
     // Check if this is a canceled subscription with active trial

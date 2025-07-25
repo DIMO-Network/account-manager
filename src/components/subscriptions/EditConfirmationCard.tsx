@@ -2,7 +2,7 @@
 
 import type Stripe from 'stripe';
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
-import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview } from '@/app/actions/getPreviewInvoice';
+import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview, ScheduledSubscriptionPreview } from '@/app/actions/getPreviewInvoice';
 import type { ProductPrice } from '@/app/actions/getProductPrices';
 import type { StripeSubscription } from '@/types/subscription';
 import { useTranslations } from 'next-intl';
@@ -19,8 +19,8 @@ type EditConfirmationCardProps = {
   productName: string;
   vehicleDisplay: string;
   productPrices: ProductPrice[];
-  previewInvoice?: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview;
-  previewInvoiceMeta?: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview;
+  previewInvoice?: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview;
+  previewInvoiceMeta?: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview;
   nextScheduledDate?: number | null;
 };
 
@@ -131,13 +131,18 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   };
 
   // Type guard for PreviewInvoice
-  function isPreviewInvoice(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | undefined): obj is PreviewInvoice {
+  function isPreviewInvoice(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined): obj is PreviewInvoice {
     return !!obj && 'id' in obj && 'lines' in obj;
   }
 
   // Type guard for CanceledTrialPreview
-  function isCanceledTrialPreview(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | undefined): obj is CanceledTrialPreview {
+  function isCanceledTrialPreview(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined): obj is CanceledTrialPreview {
     return !!obj && 'canceledTrial' in obj;
+  }
+
+  // Type guard for ScheduledSubscriptionPreview
+  function isScheduledSubscriptionPreview(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined): obj is ScheduledSubscriptionPreview {
+    return !!obj && 'scheduledSubscription' in obj;
   }
 
   const nextChargeDate = isPreviewInvoice(previewInvoiceMeta) ? previewInvoiceMeta.chargeDate : undefined;
@@ -315,56 +320,77 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
                     </p>
                   </div>
                 )
-              : !isCanceledWithTrial && !isCanceledTrialPreview(previewInvoiceMeta) && previewInvoice && (
-                  <div className="border-t border-gray-700 mt-4 pt-4">
-                    <h3 className="font-medium text-base mb-3 px-4">Preview of Charges</h3>
-                    <div className="flex flex-col gap-1">
-                      {isPreviewInvoice(previewInvoice) && previewInvoice.lines?.data?.map((line: any) => (
-                        <div key={line.id} className="flex justify-between text-sm px-4">
-                          <span>{line.description}</span>
-                          <span className="ml-3">
-                            {line.amount < 0
-                              ? `($${Math.abs(line.amount / 100).toFixed(2)})`
-                              : `$${(line.amount / 100).toFixed(2)}`}
-                          </span>
-                        </div>
-                      ))}
-                      <div className="border-t border-gray-700 pt-4 mt-2">
-                        <div className="flex justify-between font-medium px-4">
-                          <span>Total</span>
-                          <span>
+              : !isCanceledWithTrial && !isCanceledTrialPreview(previewInvoiceMeta) && isScheduledSubscriptionPreview(previewInvoiceMeta)
+                  ? (
+                      <div className="border-t border-gray-700 mt-4 pt-4">
+                        <h3 className="text-base font-medium leading-6 px-4">Note</h3>
+                        <p className="text-sm leading-4.5 mt-1 text-text-secondary px-4">
+                          Your plan will switch to
+                          {' '}
+                          <span className="font-medium">
                             $
-                            {isPreviewInvoice(previewInvoice) ? (previewInvoice.total / 100).toFixed(2) : ''}
+                            {previewInvoiceMeta.nextAmount / 100}
+                            /
+                            {previewInvoiceMeta.nextInterval}
                           </span>
-                        </div>
+                          {' '}
+                          on
+                          {' '}
+                          <span className="font-medium">{formatDate(previewInvoiceMeta.nextDate)}</span>
+                          . You will not be charged until then.
+                        </p>
                       </div>
-                    </div>
+                    )
+                  : !isCanceledWithTrial && !isCanceledTrialPreview(previewInvoiceMeta) && !isScheduledSubscriptionPreview(previewInvoiceMeta) && previewInvoice && (
+                      <div className="border-t border-gray-700 mt-4 pt-4">
+                        <h3 className="font-medium text-base mb-3 px-4">Preview of Charges</h3>
+                        <div className="flex flex-col gap-1">
+                          {isPreviewInvoice(previewInvoice) && previewInvoice.lines?.data?.map((line: any) => (
+                            <div key={line.id} className="flex justify-between text-sm px-4">
+                              <span>{line.description}</span>
+                              <span className="ml-3">
+                                {line.amount < 0
+                                  ? `($${Math.abs(line.amount / 100).toFixed(2)})`
+                                  : `$${(line.amount / 100).toFixed(2)}`}
+                              </span>
+                            </div>
+                          ))}
+                          <div className="border-t border-gray-700 pt-4 mt-2">
+                            <div className="flex justify-between font-medium px-4">
+                              <span>Total</span>
+                              <span>
+                                $
+                                {isPreviewInvoice(previewInvoice) ? (previewInvoice.total / 100).toFixed(2) : ''}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
 
-                    {/* Charge Date */}
-                    {nextChargeDate
-                      ? (
-                          <div className="mt-4 pt-3 border-t border-gray-700 px-4">
-                            <p className="text-sm leading-4.5 text-text-secondary">
-                              After pressing confirm, your payment method will be charged on
-                              {' '}
-                              {new Date(nextChargeDate * 1000).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                              })}
-                              .
-                            </p>
-                          </div>
-                        )
-                      : (
-                          <div className="mt-4 pt-3 border-t border-gray-700 px-4">
-                            <p className="text-sm leading-4.5 text-text-secondary">
-                              Your payment method will be charged immediately after pressing confirm.
-                            </p>
-                          </div>
-                        )}
-                  </div>
-                )}
+                        {/* Charge Date */}
+                        {nextChargeDate
+                          ? (
+                              <div className="mt-4 pt-3 border-t border-gray-700 px-4">
+                                <p className="text-sm leading-4.5 text-text-secondary">
+                                  After pressing confirm, your payment method will be charged on
+                                  {' '}
+                                  {new Date(nextChargeDate * 1000).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                  })}
+                                  .
+                                </p>
+                              </div>
+                            )
+                          : (
+                              <div className="mt-4 pt-3 border-t border-gray-700 px-4">
+                                <p className="text-sm leading-4.5 text-text-secondary">
+                                  Your payment method will be charged immediately after pressing confirm.
+                                </p>
+                              </div>
+                            )}
+                      </div>
+                    )}
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview } from '@/app/actions/getPreviewInvoice';
+import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview, ScheduledSubscriptionPreview } from '@/app/actions/getPreviewInvoice';
 import { notFound } from 'next/navigation';
 import { getPreviewInvoice } from '@/app/actions/getPreviewInvoice';
 import { getProductPrices } from '@/app/actions/getProductPrices';
@@ -52,7 +52,7 @@ export default async function EditSubscriptionPage({
   const productPrices = productId ? await getProductPrices(productId) : [];
 
   // Get preview invoice if on confirm step
-  let previewInvoiceMeta: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | undefined;
+  let previewInvoiceMeta: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined;
   if (step === 'confirm' && priceId) {
     const meta = await getPreviewInvoice(subscriptionId, priceId);
     previewInvoiceMeta = meta ?? undefined;
