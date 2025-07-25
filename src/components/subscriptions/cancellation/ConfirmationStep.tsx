@@ -4,7 +4,8 @@ import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
 import React from 'react';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
+import { getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
+import { getStripeSubscriptionRenewalInfo } from '../utils/subscriptionDisplayHelpers';
 
 type ConfirmationStepProps = {
   subscription: StripeSubscription;
@@ -26,7 +27,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
   const metadata = subscription?.metadata || {};
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
 
-  const { displayText } = getSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
+  const renewalInfo = getStripeSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
 
   const labelStyle = 'font-medium text-base leading-5 px-4 mb-1';
   const valueStyle = 'font-light text-xs leading-5 px-4 pb-3';
@@ -71,7 +72,14 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
           {/* Schedule */}
           <div>
             <div className={labelStyle}>Schedule</div>
-            <div className={valueStyle}>{displayText}</div>
+            <div className={valueStyle}>
+              <div>{renewalInfo.displayText}</div>
+              {renewalInfo.secondaryText && (
+                <div className="text-xs text-text-secondary mt-1">
+                  {renewalInfo.secondaryText}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

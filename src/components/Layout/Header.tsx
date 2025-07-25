@@ -2,6 +2,7 @@
 
 import type { FC } from 'react';
 import { useUser } from '@clerk/nextjs';
+import Link from 'next/link';
 import { UserIcon } from '@/components/Icons/UserIcon';
 import { COLORS } from '@/utils/designSystem';
 
@@ -14,9 +15,9 @@ export const Header: FC = () => {
       rounded-2xl w-full
     `}
     >
-      <p className={`text-2xl font-black ${COLORS.text.primary}`}>
+      <Link href="/dashboard" className={`text-2xl font-black ${COLORS.text.primary}`}>
         Subscriptions
-      </p>
+      </Link>
       {user?.primaryEmailAddress?.emailAddress && (
         <span
           className={`flex items-center gap-2 rounded-full p-1 md:pr-3 ${COLORS.background.secondary}`}

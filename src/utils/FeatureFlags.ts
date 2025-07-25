@@ -16,21 +16,7 @@ const getEnvironment = (): Environment => {
 };
 
 const getBackendApiUrl = (): string => {
-  if (process.env.NEXT_PUBLIC_BACKEND_API_URL) {
-    return process.env.NEXT_PUBLIC_BACKEND_API_URL;
-  }
-
-  const env = getEnvironment();
-  switch (env) {
-    case 'development':
-      return 'https://api.dev.dimo.co';
-    case 'staging':
-      return 'https://api.dev.dimo.co';
-    case 'production':
-      return 'https://api.dimo.co';
-    default:
-      return 'https://api.dimo.co';
-  }
+  return process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001';
 };
 
 export const featureFlags: FeatureFlags = {
