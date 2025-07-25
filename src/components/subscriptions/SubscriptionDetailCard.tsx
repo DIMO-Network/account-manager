@@ -1,5 +1,6 @@
 'use client';
 
+import type Stripe from 'stripe';
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
 import { useRouter } from 'next/navigation';
@@ -12,7 +13,7 @@ import { getStripeSubscriptionRenewalInfo } from './utils/subscriptionDisplayHel
 type SubscriptionDetailCardProps = {
   subscription: StripeSubscription;
   vehicleInfo?: VehicleDetail;
-  nextScheduledPrice?: any;
+  nextScheduledPrice?: Stripe.Price | null;
   nextScheduledDate?: number | null;
 };
 
@@ -74,7 +75,7 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
               onClick={() => window.location.href = `/subscriptions/${subscription.id}/edit`}
               type="button"
             >
-              {getSubscriptionTypeAndPrice(subscription).displayText}
+              {getSubscriptionTypeAndPrice(subscription, nextScheduledPrice).displayText}
               <EditIcon className="w-4 h-4 text-gray-400" />
             </button>
           </div>

@@ -183,7 +183,7 @@ export async function fetchSubscriptionWithSchedule(subscriptionId: string): Pro
   nextScheduledDate: number | null;
 }> {
   const subscription = await stripe().subscriptions.retrieve(subscriptionId, {
-    expand: ['schedule'],
+    expand: ['schedule', 'items.data.price.product'],
   });
 
   // Serialize the subscription object to a plain object for Client Components
@@ -272,13 +272,43 @@ export function getSubscriptionTypeWithTranslation(subscription: Stripe.Subscrip
   return { type, interval };
 }
 
-export function getSubscriptionTypeAndPrice(subscription: Stripe.Subscription) {
+export function getSubscriptionTypeAndPrice(
+  subscription: Stripe.Subscription,
+  nextScheduledPrice?: Stripe.Price | null,
+) {
+  // If there's a scheduled price change, use that instead of current price
+  if (nextScheduledPrice) {
+    const scheduledInterval = nextScheduledPrice.recurring?.interval;
+    const scheduledPriceCents = nextScheduledPrice.unit_amount;
+
+    let type: string = SUBSCRIPTION_TYPES.N_A;
+    if (scheduledInterval === SUBSCRIPTION_INTERVALS.MONTH) {
+      type = SUBSCRIPTION_TYPES.MONTHLY;
+    } else if (scheduledInterval === SUBSCRIPTION_INTERVALS.YEAR) {
+      type = SUBSCRIPTION_TYPES.ANNUALLY;
+    }
+
+    const priceFormatted = formatPriceAmount(scheduledPriceCents);
+    return {
+      type,
+      priceFormatted,
+      displayText: `${type}${priceFormatted ? ` (${priceFormatted})` : ''}`,
+      isScheduled: true,
+    };
+  }
+
+  // Fall back to current subscription price
   const { type } = getSubscriptionType(subscription);
   const priceCents = subscription.items?.data?.[0]?.price?.unit_amount;
 
   const priceFormatted = formatPriceAmount(priceCents);
 
-  return { type, priceFormatted, displayText: `${type}${priceFormatted ? ` (${priceFormatted})` : ''}` };
+  return {
+    type,
+    priceFormatted,
+    displayText: `${type}${priceFormatted ? ` (${priceFormatted})` : ''}`,
+    isScheduled: false,
+  };
 }
 
 export function getCancellationFeedbackLabel(feedback: StripeCancellationFeedback): string {

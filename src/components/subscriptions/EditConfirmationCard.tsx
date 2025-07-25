@@ -1,5 +1,6 @@
 'use client';
 
+import type Stripe from 'stripe';
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview } from '@/app/actions/getPreviewInvoice';
 import type { ProductPrice } from '@/app/actions/getProductPrices';
@@ -20,6 +21,7 @@ type EditConfirmationCardProps = {
   productPrices: ProductPrice[];
   previewInvoice?: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview;
   previewInvoiceMeta?: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview;
+  nextScheduledDate?: number | null;
 };
 
 export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
@@ -30,6 +32,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   productPrices,
   previewInvoice,
   previewInvoiceMeta,
+  nextScheduledDate,
 }) => {
   const t = useTranslations('Subscriptions.interval');
   const router = useRouter();
@@ -41,6 +44,16 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   const currentPriceId = subscription?.items?.data?.[0]?.price?.id;
   const currentPrice = productPrices.find(price => price.id === currentPriceId);
   const selectedPrice = productPrices.find(price => price.id === selectedPriceId);
+
+  // Get the scheduled price if there's a scheduled change
+  const scheduledPrice = nextScheduledDate
+    ? productPrices.find(price =>
+        (subscription.schedule as Stripe.SubscriptionSchedule)?.phases?.some((phase: Stripe.SubscriptionSchedule.Phase) =>
+          phase.start_date > Math.floor(Date.now() / 1000)
+          && phase.items?.[0]?.price === price.id,
+        ),
+      )
+    : null;
 
   // Check if subscription is canceled with active trial
   const isCanceled = subscription.cancel_at !== null;
@@ -67,9 +80,9 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
     };
   };
 
-  const formatCanceledDate = (timestamp: number) => {
+  const formatDate = (timestamp: number): string => {
     return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-      month: '2-digit',
+      month: 'long',
       day: '2-digit',
       year: 'numeric',
     });
@@ -128,7 +141,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   }
 
   const nextChargeDate = isPreviewInvoice(previewInvoiceMeta) ? previewInvoiceMeta.chargeDate : undefined;
-  const showScheduledChange = previewInvoice && (previewInvoice as any).scheduledChange;
+  const showScheduledChange = previewInvoice && 'scheduledChange' in previewInvoice && previewInvoice.scheduledChange;
 
   if (!selectedPrice) {
     return (
@@ -190,31 +203,61 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
             connected to
             {' '}
             {vehicleDisplay}
+            {nextScheduledDate && !isCanceled && (
+              <>
+                {' '}
+                starting on
+                {' '}
+                {formatDate(nextScheduledDate)}
+              </>
+            )}
           </p>
         </div>
 
         {/* Current vs New Plan Comparison */}
         <div className="flex flex-col px-4 gap-6 mb-4">
-          <div className="relative border border-surface-raised rounded-xl bg-surface-raised p-4">
-            <div className="absolute -top-3 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-text-secondary bg-gray-700 uppercase tracking-wider">
-              {isCanceled ? 'Previous' : 'Current'}
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="flex flex-col">
-                <div className="font-medium text-base text-text-secondary">{currentFormatted?.displayText}</div>
-                <div className="text-sm text-text-secondary">
-                  {currentFormatted?.priceFormatted}
-                </div>
-                {isCanceled && subscription.canceled_at && (
-                  <div className="text-xs text-text-secondary">
-                    Canceled on
-                    {' '}
-                    {formatCanceledDate(subscription.canceled_at)}
+          {/* Only show current plan if there's no scheduled change */}
+          {!nextScheduledDate && (
+            <div className="relative border border-surface-raised rounded-xl bg-surface-raised p-4">
+              <div className="absolute -top-3 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-text-secondary bg-gray-700 uppercase tracking-wider">
+                {isCanceled ? 'Previous' : 'Current'}
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="flex flex-col">
+                  <div className="font-medium text-base text-text-secondary">{currentFormatted?.displayText}</div>
+                  <div className="text-sm text-text-secondary">
+                    {currentFormatted?.priceFormatted}
                   </div>
-                )}
+                  {isCanceled && subscription.canceled_at && (
+                    <div className="text-xs text-text-secondary">
+                      Canceled on
+                      {' '}
+                      {formatDate(subscription.canceled_at)}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Show scheduled plan if there's a scheduled change */}
+          {nextScheduledDate && !isCanceled && scheduledPrice && (
+            <div className="relative border border-surface-raised rounded-xl bg-surface-raised p-4">
+              <div className="absolute -top-3 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-text-secondary bg-gray-700 uppercase tracking-wider">
+                Current
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="flex flex-col">
+                  <div className="font-medium text-base text-text-secondary">
+                    {formatPrice(scheduledPrice).displayText}
+                  </div>
+                  <div className="text-sm text-text-secondary">
+                    {formatPrice(scheduledPrice).priceFormatted}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="relative border border-surface-raised rounded-xl bg-surface-raised py-4">
             <div className="absolute -top-3 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider">
@@ -260,14 +303,14 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
                       {' '}
                       <span className="font-medium">
                         $
-                        {(previewInvoice as any).nextAmount / 100}
+                        {(previewInvoice as ScheduledChangePreview).nextAmount / 100}
                         /
-                        {(previewInvoice as any).nextInterval}
+                        {(previewInvoice as ScheduledChangePreview).nextInterval}
                       </span>
                       {' '}
                       on
                       {' '}
-                      <span className="font-medium">{new Date((previewInvoice as any).nextDate * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                      <span className="font-medium">{formatDate((previewInvoice as ScheduledChangePreview).nextDate)}</span>
                       . You will not be charged until then.
                     </p>
                   </div>

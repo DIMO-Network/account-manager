@@ -1,5 +1,6 @@
 'use client';
 
+import type Stripe from 'stripe';
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { ProductPrice } from '@/app/actions/getProductPrices';
 import type { StripeSubscription } from '@/types/subscription';
@@ -16,6 +17,8 @@ type EditSubscriptionCardProps = {
   productName: string;
   vehicleDisplay: string;
   productPrices: ProductPrice[];
+  nextScheduledPrice?: Stripe.Price | null;
+  nextScheduledDate?: number | null;
 };
 
 export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
@@ -24,20 +27,24 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
   productName,
   vehicleDisplay,
   productPrices,
+  nextScheduledPrice,
+  nextScheduledDate,
 }) => {
   const t = useTranslations('Subscriptions.interval');
   const router = useRouter();
 
   const currentPriceId = subscription?.items?.data?.[0]?.price?.id;
-  const [selectedPriceId, setSelectedPriceId] = useState<string | null>(currentPriceId || null);
+  // If there's a scheduled price, use that as the default selection
+  const defaultPriceId = nextScheduledPrice?.id || currentPriceId;
+  const [selectedPriceId, setSelectedPriceId] = useState<string | null>(defaultPriceId || null);
   const isCanceled = subscription.cancel_at !== null;
 
-  // Sort productPrices so current subscription is always first
+  // Sort productPrices so scheduled price (or current subscription) is always first
   const sortedProductPrices = [...productPrices].sort((a, b) => {
-    if (a.id === currentPriceId) {
+    if (a.id === defaultPriceId) {
       return -1;
     }
-    if (b.id === currentPriceId) {
+    if (b.id === defaultPriceId) {
       return 1;
     }
     return 0;
@@ -64,6 +71,14 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
     };
   };
 
+  const formatDate = (timestamp: number): string => {
+    return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+      month: 'long',
+      day: '2-digit',
+      year: 'numeric',
+    });
+  };
+
   const handlePriceSelect = (priceId: string) => {
     setSelectedPriceId(priceId);
   };
@@ -77,8 +92,14 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
     }
   };
 
-  // For canceled subscriptions, allow any selection. For active subscriptions, require different selection
-  const hasValidSelection = selectedPriceId && (isCanceled || selectedPriceId !== currentPriceId);
+  // For canceled subscriptions, allow any selection.
+  // For active subscriptions with scheduled changes, require different selection
+  // For active subscriptions without scheduled changes, require different selection
+  const effectiveCurrentPriceId = nextScheduledPrice?.id || currentPriceId;
+  const hasValidSelection = selectedPriceId && (
+    isCanceled
+    || selectedPriceId !== effectiveCurrentPriceId
+  );
 
   return (
     <>
@@ -96,12 +117,21 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
             connected to
             {' '}
             {vehicleDisplay}
+            {nextScheduledDate && !isCanceled && (
+              <>
+                {' '}
+                starting on
+                {' '}
+                {formatDate(nextScheduledDate)}
+              </>
+            )}
           </h3>
         </div>
         <div className="flex flex-col px-4 gap-3 mb-4">
           {sortedProductPrices.map((price) => {
             const { displayText, priceFormatted, isCurrent } = formatPrice(price);
             const isSelected = price.id === selectedPriceId;
+            const isScheduled = nextScheduledPrice?.id === price.id;
 
             return (
               <button
@@ -122,7 +152,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                 aria-pressed={isSelected}
                 aria-describedby={isCurrent ? 'current-plan' : undefined}
               >
-                {isCurrent && !isCanceled && (
+                {isCurrent && !isCanceled && isScheduled && (
                   <div
                     id="current-plan"
                     className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
@@ -130,11 +160,18 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                     Current
                   </div>
                 )}
-                {isCurrent && isCanceled && (
+                {isCurrent && isCanceled && !isScheduled && (
                   <div
                     className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
                   >
                     Previous
+                  </div>
+                )}
+                {isScheduled && (
+                  <div
+                    className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
+                  >
+                    Scheduled
                   </div>
                 )}
 
