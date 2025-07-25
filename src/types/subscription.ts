@@ -16,7 +16,7 @@ export type DeviceInfo = {
   address: string;
   tokenId: number;
   tokenDID: string;
-  serial: string;
+  serial?: string;
   vehicle: {
     tokenId: number;
     definition: {
@@ -36,12 +36,13 @@ export type DeviceInfo = {
   };
 };
 
-export type SubscriptionStatusV2 = {
+export type BackendSubscription = {
+  stripe_id?: string | null;
   device: DeviceInfo | null;
   status: string;
   new_status: string;
   plan: string | null;
-  price: string | null;
+  price: number | null;
   start_date: string;
   trial_end: string | null;
   next_renewal_date: string | null;
@@ -49,22 +50,8 @@ export type SubscriptionStatusV2 = {
   cancel_at: string | null;
 };
 
-export type AllSubscriptionStatusesResponse = SubscriptionStatusV2[];
-
 export type StripeSubscription = Stripe.Subscription;
 export type StripeSubscriptionSchedule = Stripe.SubscriptionSchedule;
-
-export type LocalSubscription = {
-  id: number;
-  connectionId: string;
-  stripeCustomerId: string | null;
-  stripeSubscriptionId: string | null;
-  subscriptionStatus: string | null;
-  planType: string | null;
-  isActive: boolean | null;
-  updatedAt: Date;
-  createdAt: Date;
-};
 
 // Helper type for active subscription statuses
 export const ACTIVE_SUBSCRIPTION_STATUSES = ['active', 'trialing'] as const;

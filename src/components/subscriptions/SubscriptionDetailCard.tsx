@@ -23,7 +23,7 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
   const serialNumber = vehicleInfo?.aftermarketDevice?.serial || connectionId;
 
-  const isMarkedForCancellation = subscription.cancel_at_period_end && subscription.cancel_at;
+  const isMarkedForCancellation = subscription.cancel_at_period_end || subscription.cancel_at;
 
   const renewalInfo = getStripeSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
 

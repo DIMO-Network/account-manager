@@ -1,4 +1,5 @@
 import type Stripe from 'stripe';
+import type { BackendSubscription } from '@/types/subscription';
 import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import { stripe } from '@/libs/Stripe';
 
@@ -36,7 +37,7 @@ export const STRIPE_CANCELLATION_FEEDBACK = {
 
 export type StripeCancellationFeedback = keyof typeof STRIPE_CANCELLATION_FEEDBACK;
 
-export type EnhancedSubscription = Stripe.Subscription & {
+export type StripeEnhancedSubscription = Stripe.Subscription & {
   productName: string;
   vehicleDisplay: string;
   nextScheduledPrice?: Stripe.Price | null;
@@ -101,7 +102,7 @@ async function getProductInfo(productId: string): Promise<{ name: string } | nul
   }
 }
 
-export async function fetchEnhancedSubscriptions(customerId: string): Promise<EnhancedSubscription[]> {
+export async function fetchEnhancedSubscriptions(customerId: string): Promise<StripeEnhancedSubscription[]> {
   const subs = await stripe().subscriptions.list({
     customer: customerId,
     expand: ['data.items.data.price'],
@@ -172,7 +173,7 @@ export async function fetchEnhancedSubscriptions(customerId: string): Promise<En
     nextScheduledDate: sub.nextScheduledDate,
   }));
 
-  return simplifiedSubscriptions as unknown as EnhancedSubscription[];
+  return simplifiedSubscriptions as unknown as StripeEnhancedSubscription[];
 }
 
 export async function fetchSubscriptionWithSchedule(subscriptionId: string): Promise<{
@@ -273,7 +274,6 @@ export function getSubscriptionTypeWithTranslation(subscription: Stripe.Subscrip
 
 export function getSubscriptionTypeAndPrice(subscription: Stripe.Subscription) {
   const { type } = getSubscriptionType(subscription);
-  console.warn('subscription', subscription);
   const priceCents = subscription.items?.data?.[0]?.price?.unit_amount;
 
   const priceFormatted = formatPriceAmount(priceCents);
@@ -283,4 +283,32 @@ export function getSubscriptionTypeAndPrice(subscription: Stripe.Subscription) {
 
 export function getCancellationFeedbackLabel(feedback: StripeCancellationFeedback): string {
   return STRIPE_CANCELLATION_FEEDBACK[feedback];
+}
+
+// ============================================================================
+// BACKEND SUBSCRIPTION HELPERS
+// ============================================================================
+
+export async function fetchBackendSubscriptions(dimoToken: string): Promise<BackendSubscription[] | null> {
+  try {
+    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/subscription/status/all`;
+    const response = await fetch(backendUrl, {
+      headers: {
+        'Authorization': `Bearer ${dimoToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Failed to fetch backend data:', response.status, response.statusText, errorText);
+      return null;
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching backend subscription statuses:', error);
+    return null;
+  }
 }
