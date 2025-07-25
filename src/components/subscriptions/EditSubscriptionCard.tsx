@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
+import { formatProductName } from './utils/subscriptionDisplayHelpers';
 
 type EditSubscriptionCardProps = {
   subscription: StripeSubscription;
@@ -29,6 +30,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
 
   const currentPriceId = subscription?.items?.data?.[0]?.price?.id;
   const [selectedPriceId, setSelectedPriceId] = useState<string | null>(currentPriceId || null);
+  const isCanceled = subscription.cancel_at !== null;
 
   // Sort productPrices so current subscription is always first
   const sortedProductPrices = [...productPrices].sort((a, b) => {
@@ -67,7 +69,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
   };
 
   const handleContinue = () => {
-    if (selectedPriceId && selectedPriceId !== currentPriceId) {
+    if (selectedPriceId) {
       const url = new URL(window.location.href);
       url.searchParams.set('step', 'confirm');
       url.searchParams.set('priceId', selectedPriceId);
@@ -75,7 +77,8 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
     }
   };
 
-  const hasValidSelection = selectedPriceId && selectedPriceId !== currentPriceId;
+  // For canceled subscriptions, allow any selection. For active subscriptions, require different selection
+  const hasValidSelection = selectedPriceId && (isCanceled || selectedPriceId !== currentPriceId);
 
   return (
     <>
@@ -86,9 +89,9 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="mb-8 px-4">
           <h3 className="font-medium text-base leading-6">
-            Select your renewal plan for
+            {isCanceled ? 'Reactivate your subscription for' : 'Select your renewal plan for'}
             {' '}
-            {productName}
+            {formatProductName(productName)}
             {' '}
             connected to
             {' '}
@@ -119,12 +122,19 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                 aria-pressed={isSelected}
                 aria-describedby={isCurrent ? 'current-plan' : undefined}
               >
-                {isCurrent && (
+                {isCurrent && !isCanceled && (
                   <div
                     id="current-plan"
                     className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
                   >
                     Current
+                  </div>
+                )}
+                {isCurrent && isCanceled && (
+                  <div
+                    className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
+                  >
+                    Previous
                   </div>
                 )}
 
