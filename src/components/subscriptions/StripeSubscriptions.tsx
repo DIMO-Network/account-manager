@@ -1,10 +1,26 @@
-import type { EnhancedSubscription } from '@/utils/subscriptionHelpers';
+import type { StripeEnhancedSubscription } from '@/utils/subscriptionHelpers';
 import Link from 'next/link';
 import { ChevronRightIcon, ConnectionIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
-import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
+import { getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
+import { getStripeSubscriptionRenewalInfo } from './utils/subscriptionDisplayHelpers';
 
-function StripeSubscriptionItem({ subscription }: { subscription: EnhancedSubscription }) {
+function SubscriptionRenewalInfo({ subscription }: { subscription: StripeEnhancedSubscription }) {
+  const renewalInfo = getStripeSubscriptionRenewalInfo(subscription, subscription.nextScheduledPrice, subscription.nextScheduledDate);
+
+  return (
+    <>
+      <div>{renewalInfo.displayText}</div>
+      {renewalInfo.secondaryText && (
+        <div className="text-xs text-text-secondary">
+          {renewalInfo.secondaryText}
+        </div>
+      )}
+    </>
+  );
+}
+
+function StripeSubscriptionItem({ subscription }: { subscription: StripeEnhancedSubscription }) {
   return (
     <li key={subscription.id} className={`gap-2 ${BORDER_RADIUS.xl} bg-surface-raised`}>
       <Link href={`/subscriptions/${subscription.id}`} className="block">
@@ -27,7 +43,7 @@ function StripeSubscriptionItem({ subscription }: { subscription: EnhancedSubscr
             {getSubscriptionTypeAndPrice(subscription).displayText}
           </div>
           <div className={`text-xs font-light leading-5 ${COLORS.text.secondary}`}>
-            {getSubscriptionRenewalInfo(subscription, subscription.nextScheduledPrice, subscription.nextScheduledDate).displayText}
+            <SubscriptionRenewalInfo subscription={subscription} />
           </div>
         </div>
       </Link>
@@ -35,7 +51,7 @@ function StripeSubscriptionItem({ subscription }: { subscription: EnhancedSubscr
   );
 }
 
-export function StripeSubscriptions({ subscriptions }: { subscriptions: EnhancedSubscription[] }) {
+export function StripeSubscriptions({ subscriptions }: { subscriptions: StripeEnhancedSubscription[] }) {
   if (!subscriptions || subscriptions.length === 0) {
     return <p className="text-base font-medium leading-6">No devices found.</p>;
   }

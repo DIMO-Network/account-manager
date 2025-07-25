@@ -88,7 +88,7 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
           preserve_cancel_date: true,
         });
         if (result.success) {
-          router.push('/subscriptions');
+          router.push(`/subscriptions/${subscription.id}`);
         }
         return;
       }

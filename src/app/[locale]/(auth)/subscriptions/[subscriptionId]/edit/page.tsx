@@ -1,11 +1,10 @@
-import type { PreviewInvoice, ScheduledChangePreview } from '@/app/actions/getPreviewInvoice';
+import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview, ScheduledSubscriptionPreview } from '@/app/actions/getPreviewInvoice';
 import { notFound } from 'next/navigation';
-import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import { getPreviewInvoice } from '@/app/actions/getPreviewInvoice';
 import { getProductPrices } from '@/app/actions/getProductPrices';
 import { EditConfirmationCard } from '@/components/subscriptions/EditConfirmationCard';
 import { EditSubscriptionCard } from '@/components/subscriptions/EditSubscriptionCard';
-import { stripe } from '@/libs/Stripe';
+import { fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 export default async function EditSubscriptionPage({
@@ -23,24 +22,23 @@ export default async function EditSubscriptionPage({
   }
 
   let subscription = null;
+  let vehicleInfo;
+  let nextScheduledPrice = null;
+  let nextScheduledDate = null;
+
   try {
-    subscription = await stripe().subscriptions.retrieve(subscriptionId, {
-      expand: ['items.data.price.product'],
-    });
+    // Use fetchSubscriptionWithSchedule to get subscription with schedule info
+    const { subscription: subscriptionWithSchedule, vehicleInfo: fetchedVehicleInfo, nextScheduledPrice: scheduledPrice, nextScheduledDate: scheduledDate } = await fetchSubscriptionWithSchedule(subscriptionId);
+    subscription = subscriptionWithSchedule;
+    vehicleInfo = fetchedVehicleInfo;
+    nextScheduledPrice = scheduledPrice;
+    nextScheduledDate = scheduledDate;
   } catch {
     notFound();
   }
 
   // Serialize the subscription object to a plain object for Client Components
   const subscriptionData = JSON.parse(JSON.stringify(subscription));
-
-  // Get vehicleTokenId from subscription metadata
-  const vehicleTokenId = subscription?.metadata?.vehicleTokenId;
-  let vehicleInfo;
-  if (vehicleTokenId) {
-    const { vehicle } = await getDimoVehicleDetails(vehicleTokenId);
-    vehicleInfo = vehicle;
-  }
 
   // Get product name and vehicle display
   const product = subscription?.items?.data?.[0]?.price?.product;
@@ -54,7 +52,7 @@ export default async function EditSubscriptionPage({
   const productPrices = productId ? await getProductPrices(productId) : [];
 
   // Get preview invoice if on confirm step
-  let previewInvoiceMeta: PreviewInvoice | ScheduledChangePreview | undefined;
+  let previewInvoiceMeta: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined;
   if (step === 'confirm' && priceId) {
     const meta = await getPreviewInvoice(subscriptionId, priceId);
     previewInvoiceMeta = meta ?? undefined;
@@ -73,6 +71,7 @@ export default async function EditSubscriptionPage({
                 productPrices={productPrices}
                 previewInvoiceMeta={previewInvoiceMeta}
                 previewInvoice={previewInvoiceMeta}
+                nextScheduledDate={nextScheduledDate}
               />
             )
           : (
@@ -82,6 +81,8 @@ export default async function EditSubscriptionPage({
                 productName={productName}
                 vehicleDisplay={vehicleDisplay}
                 productPrices={productPrices}
+                nextScheduledPrice={nextScheduledPrice}
+                nextScheduledDate={nextScheduledDate}
               />
             )}
       </div>

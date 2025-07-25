@@ -1,5 +1,6 @@
 'use client';
 
+import type Stripe from 'stripe';
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { ProductPrice } from '@/app/actions/getProductPrices';
 import type { StripeSubscription } from '@/types/subscription';
@@ -8,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
+import { formatProductName } from './utils/subscriptionDisplayHelpers';
 
 type EditSubscriptionCardProps = {
   subscription: StripeSubscription;
@@ -15,6 +17,8 @@ type EditSubscriptionCardProps = {
   productName: string;
   vehicleDisplay: string;
   productPrices: ProductPrice[];
+  nextScheduledPrice?: Stripe.Price | null;
+  nextScheduledDate?: number | null;
 };
 
 export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
@@ -23,19 +27,24 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
   productName,
   vehicleDisplay,
   productPrices,
+  nextScheduledPrice,
+  nextScheduledDate,
 }) => {
   const t = useTranslations('Subscriptions.interval');
   const router = useRouter();
 
   const currentPriceId = subscription?.items?.data?.[0]?.price?.id;
-  const [selectedPriceId, setSelectedPriceId] = useState<string | null>(currentPriceId || null);
+  // If there's a scheduled price, use that as the default selection
+  const defaultPriceId = nextScheduledPrice?.id || currentPriceId;
+  const [selectedPriceId, setSelectedPriceId] = useState<string | null>(defaultPriceId || null);
+  const isCanceled = subscription.cancel_at !== null;
 
-  // Sort productPrices so current subscription is always first
+  // Sort productPrices so scheduled price (or current subscription) is always first
   const sortedProductPrices = [...productPrices].sort((a, b) => {
-    if (a.id === currentPriceId) {
+    if (a.id === defaultPriceId) {
       return -1;
     }
-    if (b.id === currentPriceId) {
+    if (b.id === defaultPriceId) {
       return 1;
     }
     return 0;
@@ -62,12 +71,20 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
     };
   };
 
+  const formatDate = (timestamp: number): string => {
+    return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+      month: 'long',
+      day: '2-digit',
+      year: 'numeric',
+    });
+  };
+
   const handlePriceSelect = (priceId: string) => {
     setSelectedPriceId(priceId);
   };
 
   const handleContinue = () => {
-    if (selectedPriceId && selectedPriceId !== currentPriceId) {
+    if (selectedPriceId) {
       const url = new URL(window.location.href);
       url.searchParams.set('step', 'confirm');
       url.searchParams.set('priceId', selectedPriceId);
@@ -75,7 +92,14 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
     }
   };
 
-  const hasValidSelection = selectedPriceId && selectedPriceId !== currentPriceId;
+  // For canceled subscriptions, allow any selection.
+  // For active subscriptions with scheduled changes, require different selection
+  // For active subscriptions without scheduled changes, require different selection
+  const effectiveCurrentPriceId = nextScheduledPrice?.id || currentPriceId;
+  const hasValidSelection = selectedPriceId && (
+    isCanceled
+    || selectedPriceId !== effectiveCurrentPriceId
+  );
 
   return (
     <>
@@ -86,19 +110,28 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="mb-8 px-4">
           <h3 className="font-medium text-base leading-6">
-            Select your renewal plan for
+            {isCanceled ? 'Reactivate your subscription for' : 'Select your renewal plan for'}
             {' '}
-            {productName}
+            {formatProductName(productName)}
             {' '}
             connected to
             {' '}
             {vehicleDisplay}
+            {nextScheduledDate && !isCanceled && (
+              <>
+                {' '}
+                starting on
+                {' '}
+                {formatDate(nextScheduledDate)}
+              </>
+            )}
           </h3>
         </div>
         <div className="flex flex-col px-4 gap-3 mb-4">
           {sortedProductPrices.map((price) => {
             const { displayText, priceFormatted, isCurrent } = formatPrice(price);
             const isSelected = price.id === selectedPriceId;
+            const isScheduled = nextScheduledPrice?.id === price.id;
 
             return (
               <button
@@ -119,12 +152,26 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                 aria-pressed={isSelected}
                 aria-describedby={isCurrent ? 'current-plan' : undefined}
               >
-                {isCurrent && (
+                {isCurrent && !isCanceled && isScheduled && (
                   <div
                     id="current-plan"
                     className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
                   >
                     Current
+                  </div>
+                )}
+                {isCurrent && isCanceled && !isScheduled && (
+                  <div
+                    className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
+                  >
+                    Previous
+                  </div>
+                )}
+                {isScheduled && (
+                  <div
+                    className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
+                  >
+                    Scheduled
                   </div>
                 )}
 
