@@ -1,12 +1,13 @@
+import type { BackendSubscription, DeviceInfo } from '@/types/subscription';
 import { COLORS } from '@/utils/designSystem';
-import { getBackendSubscriptionRenewalInfo, getDeviceDisplayName, getStatusDisplay } from './utils/subscriptionDisplayHelpers';
+import { getBackendSubscriptionRenewalInfo, getDeviceDisplayName, getStatusDisplay } from '../utils/subscriptionDisplayHelpers';
 
-type SubscriptionItemDetailsProps = {
-  status: any;
-  device: any;
+type BackendSubscriptionDetailsProps = {
+  status: BackendSubscription;
+  device: DeviceInfo | null;
 };
 
-export function SubscriptionItemDetails({ status, device }: SubscriptionItemDetailsProps) {
+export function BackendSubscriptionDetails({ status, device }: BackendSubscriptionDetailsProps) {
   if (!device) {
     return null;
   }

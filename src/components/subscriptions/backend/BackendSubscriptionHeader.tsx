@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { ChevronRightIcon, ConnectionIcon } from '@/components/Icons';
 import { COLORS } from '@/utils/designSystem';
-import { formatProductName, getDeviceHeaderName } from './utils/subscriptionDisplayHelpers';
+import { formatProductName, getDeviceHeaderName } from '../utils/subscriptionDisplayHelpers';
 
-type SubscriptionItemHeaderProps = {
+type BackendSubscriptionHeaderProps = {
   stripeId: string | null;
   productName: string | null;
   loading: boolean;
@@ -11,13 +11,13 @@ type SubscriptionItemHeaderProps = {
   children?: React.ReactNode;
 };
 
-export function SubscriptionItemHeader({
+export function BackendSubscriptionHeader({
   stripeId,
   productName,
   loading,
   device,
   children,
-}: SubscriptionItemHeaderProps) {
+}: BackendSubscriptionHeaderProps) {
   const headerContent = (
     <div className="border-b border-gray-700 pb-2">
       <div className="flex flex-row items-center justify-between gap-2 px-4 pt-3 w-full">

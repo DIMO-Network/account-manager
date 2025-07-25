@@ -3,7 +3,7 @@
 import type { BackendSubscription } from '@/types/subscription';
 import type { StripeEnhancedSubscription } from '@/utils/subscriptionHelpers';
 import { CarIcon } from '@/components/Icons';
-import { BackendSubscriptions } from '@/components/subscriptions/BackendSubscriptions';
+import { BackendSubscriptions } from '@/components/subscriptions/backend';
 import { StripeSubscriptions } from '@/components/subscriptions/StripeSubscriptions';
 import { COLORS } from '@/utils/designSystem';
 
