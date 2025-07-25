@@ -75,7 +75,6 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
 
     setIsUpdating(true);
     try {
-      // Use backend proxy endpoint if enabled, otherwise use direct Stripe endpoint
       const endpoint = featureFlags.useBackendProxy
         ? '/api/subscriptions/update-plan'
         : '/api/stripe/update-subscription';
