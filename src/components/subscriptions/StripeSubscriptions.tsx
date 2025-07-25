@@ -2,10 +2,11 @@ import type { EnhancedSubscription } from '@/utils/subscriptionHelpers';
 import Link from 'next/link';
 import { ChevronRightIcon, ConnectionIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
-import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
+import { getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
+import { getStripeSubscriptionRenewalInfo } from './utils/subscriptionDisplayHelpers';
 
 function SubscriptionRenewalInfo({ subscription }: { subscription: EnhancedSubscription }) {
-  const renewalInfo = getSubscriptionRenewalInfo(subscription, subscription.nextScheduledPrice, subscription.nextScheduledDate);
+  const renewalInfo = getStripeSubscriptionRenewalInfo(subscription, subscription.nextScheduledPrice, subscription.nextScheduledDate);
 
   return (
     <>

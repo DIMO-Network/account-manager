@@ -44,6 +44,50 @@ export type EnhancedSubscription = Stripe.Subscription & {
 };
 
 // ============================================================================
+// SHARED UTILITY FUNCTIONS
+// ============================================================================
+
+export function formatPriceAmount(amountCents: number | null | undefined): string {
+  if (typeof amountCents === 'number') {
+    return `$${(amountCents / 100).toFixed(2)}`;
+  }
+  return '';
+}
+
+export function formatPriceWithInterval(amountCents: number | null | undefined, interval?: string): string {
+  const formattedAmount = formatPriceAmount(amountCents);
+  if (!formattedAmount) {
+    return '';
+  }
+
+  const intervalSuffix = interval === 'month' ? '/month' : interval === 'year' ? '/year' : '';
+  return `${formattedAmount}${intervalSuffix}`;
+}
+
+export function getVehicleDisplay(vehicleInfo?: any, vehicleTokenId?: string): string {
+  if (vehicleInfo?.definition?.year && vehicleInfo?.definition?.make && vehicleInfo?.definition?.model) {
+    return `${vehicleInfo.definition.year} ${vehicleInfo.definition.make} ${vehicleInfo.definition.model}`;
+  }
+  return vehicleTokenId || 'N/A';
+}
+
+export async function withStripeErrorHandling<T>(
+  operation: () => Promise<T>,
+  errorMessage: string = 'Stripe operation failed',
+): Promise<{ success: boolean; data?: T; error?: string }> {
+  try {
+    const result = await operation();
+    return { success: true, data: result };
+  } catch (error) {
+    console.error(errorMessage, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+// ============================================================================
 // STRIPE SUBSCRIPTION HELPERS
 // ============================================================================
 
@@ -229,6 +273,7 @@ export function getSubscriptionTypeWithTranslation(subscription: Stripe.Subscrip
 
 export function getSubscriptionTypeAndPrice(subscription: Stripe.Subscription) {
   const { type } = getSubscriptionType(subscription);
+  console.warn('subscription', subscription);
   const priceCents = subscription.items?.data?.[0]?.price?.unit_amount;
 
   const priceFormatted = formatPriceAmount(priceCents);
@@ -236,170 +281,6 @@ export function getSubscriptionTypeAndPrice(subscription: Stripe.Subscription) {
   return { type, priceFormatted, displayText: `${type}${priceFormatted ? ` (${priceFormatted})` : ''}` };
 }
 
-export function getVehicleDisplay(vehicleInfo?: any, vehicleTokenId?: string): string {
-  if (vehicleInfo?.definition?.year && vehicleInfo?.definition?.make && vehicleInfo?.definition?.model) {
-    return `${vehicleInfo.definition.year} ${vehicleInfo.definition.make} ${vehicleInfo.definition.model}`;
-  }
-  return vehicleTokenId || 'N/A';
-}
-
-export function formatPriceAmount(amountCents: number | null | undefined): string {
-  if (typeof amountCents === 'number') {
-    return `$${(amountCents / 100).toFixed(2)}`;
-  }
-  return '';
-}
-
-export function formatPriceWithInterval(amountCents: number | null | undefined, interval?: string): string {
-  const formattedAmount = formatPriceAmount(amountCents);
-  if (!formattedAmount) {
-    return '';
-  }
-
-  const intervalSuffix = interval === 'month' ? '/month' : interval === 'year' ? '/year' : '';
-  return `${formattedAmount}${intervalSuffix}`;
-}
-
-export function getSubscriptionRenewalInfo(
-  subscription: Stripe.Subscription,
-  nextScheduledPrice?: Stripe.Price | null,
-  nextScheduledDate?: number | null,
-) {
-  const currentPeriodEnd = subscription.items?.data?.[0]?.current_period_end;
-  const status = subscription.status;
-  const cancelAtPeriodEnd = subscription.cancel_at_period_end;
-  const cancelAt = subscription.cancel_at;
-
-  if (!currentPeriodEnd) {
-    return { displayText: 'N/A', date: undefined };
-  }
-
-  const date = new Date(currentPeriodEnd * 1000).toLocaleDateString();
-
-  // Handle scheduled changes first
-  if (nextScheduledPrice && nextScheduledDate) {
-    const nextDate = new Date(nextScheduledDate * 1000).toLocaleDateString();
-    const nextAmount = formatPriceWithInterval(nextScheduledPrice.unit_amount, nextScheduledPrice.recurring?.interval);
-    const scheduledChangeText = `${nextDate} at ${nextAmount}`;
-
-    // Determine the appropriate label based on subscription status
-    if (cancelAtPeriodEnd && cancelAt) {
-      return { displayText: `Cancels on ${scheduledChangeText}`, date: nextDate };
-    } else if (status === SUBSCRIPTION_STATUSES.ACTIVE) {
-      return { displayText: `Renews on ${scheduledChangeText}`, date: nextDate };
-    } else if (status === SUBSCRIPTION_STATUSES.CANCELED) {
-      return { displayText: `Cancels on ${scheduledChangeText}`, date: nextDate };
-    } else if (status === SUBSCRIPTION_STATUSES.TRIALING) {
-      // For trialing subscriptions with scheduled changes, show both trial end and plan change
-      const currentInterval = subscription.items?.data?.[0]?.price?.recurring?.interval;
-      const nextInterval = nextScheduledPrice.recurring?.interval;
-
-      // Check if this is an interval change (monthly to annual or vice versa)
-      if (currentInterval && nextInterval && currentInterval !== nextInterval) {
-        const intervalText = nextInterval === 'year' ? 'annual' : 'monthly';
-        return {
-          displayText: `Free until ${date}`,
-          secondaryText: `Your plan will switch to ${intervalText} and your payment method will be charged ${nextAmount} on ${nextDate}.`,
-          date: nextDate,
-        };
-      } else {
-        // For other scheduled changes during trial
-        return {
-          displayText: `Free until ${date}`,
-          secondaryText: `Your plan will change to ${nextAmount} on ${nextDate}.`,
-          date: nextDate,
-        };
-      }
-    } else {
-      return { displayText: scheduledChangeText, date: nextDate };
-    }
-  }
-
-  // Fall back to regular renewal/cancellation logic
-  if (cancelAtPeriodEnd && cancelAt) {
-    const cancelDate = new Date(cancelAt * 1000).toLocaleDateString();
-    return { displayText: `Cancels on ${cancelDate}`, date: cancelDate };
-  }
-
-  if (status === SUBSCRIPTION_STATUSES.TRIALING) {
-    // Check if this is a trialing subscription that has been updated to a different interval
-    const currentPrice = subscription.items?.data?.[0]?.price;
-    if (currentPrice && currentPrice.recurring?.interval) {
-      const interval = currentPrice.recurring.interval;
-      const amount = formatPriceWithInterval(currentPrice.unit_amount, interval);
-      const intervalText = interval === 'year' ? 'annual' : 'monthly';
-
-      return {
-        displayText: `Free until ${date}`,
-        secondaryText: `Your plan will switch to ${intervalText} and your payment method will be charged ${amount} on ${date}`,
-        date,
-      };
-    }
-    return { displayText: `Free until ${date}`, date };
-  } else if (status === SUBSCRIPTION_STATUSES.ACTIVE) {
-    return { displayText: `Renews on ${date}`, date };
-  } else if (status === SUBSCRIPTION_STATUSES.CANCELED) {
-    return { displayText: `Cancels on ${date}`, date };
-  } else {
-    return { displayText: date, date };
-  }
-}
-
-export async function withStripeErrorHandling<T>(
-  operation: () => Promise<T>,
-  errorMessage: string = 'Stripe operation failed',
-): Promise<{ success: boolean; data?: T; error?: string }> {
-  try {
-    const result = await operation();
-    return { success: true, data: result };
-  } catch (error) {
-    console.error(errorMessage, error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-}
-
 export function getCancellationFeedbackLabel(feedback: StripeCancellationFeedback): string {
   return STRIPE_CANCELLATION_FEEDBACK[feedback];
-}
-
-// ============================================================================
-// BACKEND SUBSCRIPTION HELPERS
-// ============================================================================
-
-export function getBackendSubscriptionRenewalInfo(status: {
-  new_status: string;
-  cancel_at: string | null;
-  next_renewal_date: string | null;
-  trial_end: string | null;
-}) {
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) {
-      return 'N/A';
-    }
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  // For trialing_incomplete status, show trial_end if cancel_at is null
-  if (status.new_status === 'trialing_incomplete') {
-    if (status.cancel_at) {
-      return { displayText: `Cancels on ${formatDate(status.cancel_at)}`, date: formatDate(status.cancel_at) };
-    }
-    if (status.trial_end) {
-      return { displayText: `Trial ends on ${formatDate(status.trial_end)}`, date: formatDate(status.trial_end) };
-    }
-  }
-
-  if (status.cancel_at) {
-    return { displayText: `Cancels on ${formatDate(status.cancel_at)}`, date: formatDate(status.cancel_at) };
-  }
-  if (status.next_renewal_date) {
-    return { displayText: `Renews on ${formatDate(status.next_renewal_date)}`, date: formatDate(status.next_renewal_date) };
-  }
-  if (status.trial_end) {
-    return { displayText: `Trial ends on ${formatDate(status.trial_end)}`, date: formatDate(status.trial_end) };
-  }
-  return { displayText: 'N/A', date: undefined };
 }

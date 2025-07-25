@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
+import { featureFlags } from '@/utils/FeatureFlags';
 
 type EditConfirmationCardProps = {
   subscription: StripeSubscription;
@@ -74,7 +75,12 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
 
     setIsUpdating(true);
     try {
-      const res = await fetch('/api/stripe/update-subscription', {
+      // Use backend proxy endpoint if enabled, otherwise use direct Stripe endpoint
+      const endpoint = featureFlags.useBackendProxy
+        ? '/api/subscriptions/update-plan'
+        : '/api/stripe/update-subscription';
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

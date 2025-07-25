@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { CarIcon, EditIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { getSubscriptionRenewalInfo, getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
+import { getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
+import { getStripeSubscriptionRenewalInfo } from './utils/subscriptionDisplayHelpers';
 
 type SubscriptionDetailCardProps = {
   subscription: StripeSubscription;
@@ -24,7 +25,7 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
 
   const isMarkedForCancellation = subscription.cancel_at_period_end && subscription.cancel_at;
 
-  const renewalInfo = getSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
+  const renewalInfo = getStripeSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
 
   // Reusable styles
   const labelStyle = 'font-medium text-base leading-5 px-4 mb-1';

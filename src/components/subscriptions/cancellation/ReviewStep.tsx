@@ -4,7 +4,8 @@ import type { StripeSubscription } from '@/types/subscription';
 import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import React from 'react';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { getCancellationFeedbackLabel, getSubscriptionRenewalInfo } from '@/utils/subscriptionHelpers';
+import { getCancellationFeedbackLabel } from '@/utils/subscriptionHelpers';
+import { getStripeSubscriptionRenewalInfo } from '../utils/subscriptionDisplayHelpers';
 
 type ReviewStepProps = {
   subscription: StripeSubscription;
@@ -23,7 +24,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   onCancelSubscriptionAction,
   canceling,
 }) => {
-  const { date } = getSubscriptionRenewalInfo(subscription);
+  const { date } = getStripeSubscriptionRenewalInfo(subscription);
 
   const getReasonLabel = (reason: StripeCancellationFeedback) => {
     return getCancellationFeedbackLabel(reason);

@@ -1,6 +1,5 @@
 import { COLORS } from '@/utils/designSystem';
-import { getBackendSubscriptionRenewalInfo } from '@/utils/subscriptionHelpers';
-import { getDeviceDisplayName, getStatusDisplay } from './utils/subscriptionDisplayHelpers';
+import { getBackendSubscriptionRenewalInfo, getDeviceDisplayName, getStatusDisplay } from './utils/subscriptionDisplayHelpers';
 
 type SubscriptionItemDetailsProps = {
   status: any;
