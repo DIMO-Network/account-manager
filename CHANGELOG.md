@@ -1,3 +1,10 @@
+# [2.15.0](https://github.com/DIMO-Network/account-manager/compare/v2.14.1...v2.15.0) (2025-07-26)
+
+
+### Features
+
+* migrate plan editing workflows to use backend proxy calls ([#41](https://github.com/DIMO-Network/account-manager/issues/41)) ([2758f62](https://github.com/DIMO-Network/account-manager/commit/2758f62176e9353087e940f605320f74b1748cc2))
+
 ## [2.14.1](https://github.com/DIMO-Network/account-manager/compare/v2.14.0...v2.14.1) (2025-07-23)
 
 
