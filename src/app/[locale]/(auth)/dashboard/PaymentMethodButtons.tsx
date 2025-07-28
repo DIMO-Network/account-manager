@@ -8,7 +8,7 @@ export function PaymentMethodButtons() {
   const buttonStyle = 'inline-flex flex-row items-center justify-center gap-2 rounded-full bg-surface-raised px-4 py-2 text-sm w-full';
 
   const { customerId } = useStripeCustomer();
-  const { paymentMethods, loading } = usePaymentMethods(customerId);
+  const { paymentMethods, defaultPaymentMethodId, loading } = usePaymentMethods(customerId);
 
   if (loading || !customerId) {
     return (
@@ -16,6 +16,11 @@ export function PaymentMethodButtons() {
         <div className="animate-pulse bg-surface-sunken h-6 w-full rounded" />
       </div>
     );
+  }
+
+  // If there are payment methods but no default, don't render anything
+  if (paymentMethods.length > 0 && !defaultPaymentMethodId) {
+    return null;
   }
 
   return (
@@ -26,11 +31,13 @@ export function PaymentMethodButtons() {
               Add a Card
             </Link>
           )
-        : (
-            <Link href="/payment-methods" className={buttonStyle}>
-              Edit
-            </Link>
-          )}
+        : defaultPaymentMethodId
+          ? (
+              <Link href="/payment-methods" className={buttonStyle}>
+                Edit
+              </Link>
+            )
+          : null}
     </div>
   );
 }
