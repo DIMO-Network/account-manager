@@ -166,7 +166,12 @@ export function getStripeSubscriptionRenewalInfo(
     } else if (status === 'active') {
       return { displayText: `Renews on ${scheduledChangeText}`, date: nextDate };
     } else if (status === 'canceled') {
-      return { displayText: `Cancels on ${scheduledChangeText}`, date: nextDate };
+      const canceledAt = subscription.canceled_at;
+      if (canceledAt) {
+        const canceledDate = new Date(canceledAt * 1000).toLocaleDateString();
+        return { displayText: `Canceled on ${canceledDate}`, date: canceledDate };
+      }
+      return { displayText: `Canceled`, date: nextDate };
     } else if (status === 'trialing') {
       // For trialing subscriptions with scheduled changes, show both trial end and plan change
       const currentInterval = subscription.items?.data?.[0]?.price?.recurring?.interval;
@@ -223,7 +228,12 @@ export function getStripeSubscriptionRenewalInfo(
   } else if (status === 'active') {
     return { displayText: `Renews on ${date}`, date };
   } else if (status === 'canceled') {
-    return { displayText: `Cancels on ${date}`, date };
+    const canceledAt = subscription.canceled_at;
+    if (canceledAt) {
+      const canceledDate = new Date(canceledAt * 1000).toLocaleDateString();
+      return { displayText: `Canceled on ${canceledDate}`, date: canceledDate };
+    }
+    return { displayText: `Canceled`, date };
   } else {
     return { displayText: date, date };
   }

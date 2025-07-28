@@ -24,7 +24,9 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
   const serialNumber = vehicleInfo?.aftermarketDevice?.serial || connectionId;
 
-  const isMarkedForCancellation = subscription.cancel_at_period_end || subscription.cancel_at;
+  const isMarkedForCancellation = subscription.cancel_at_period_end || !!subscription.cancel_at;
+  const isCanceled = subscription.status === 'canceled';
+  const shouldDisableCancel = isMarkedForCancellation || isCanceled;
 
   const renewalInfo = getStripeSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
 
@@ -104,15 +106,15 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
           </button>
           <button
             className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
-              isMarkedForCancellation
+              shouldDisableCancel
                 ? COLORS.button.disabledTransparent
                 : `${COLORS.button.tertiary}`
             }`}
             type="button"
             onClick={() => window.location.href = `/subscriptions/${subscription.id}/cancel`}
-            disabled={!!isMarkedForCancellation}
+            disabled={shouldDisableCancel}
           >
-            {isMarkedForCancellation ? 'Subscription Canceled' : 'Cancel Subscription'}
+            {shouldDisableCancel ? 'Subscription Canceled' : 'Cancel Subscription'}
           </button>
         </div>
       </div>
