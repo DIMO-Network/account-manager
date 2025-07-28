@@ -156,6 +156,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Immediate update with proration (only for subscriptions not managed by schedules)
+    const currentPriceId = subscription.items.data[0]?.price?.id;
+    const isSamePlan = newPriceId === currentPriceId;
+
     const updateParams: any = {
       items: [
         {
@@ -163,11 +166,15 @@ export async function POST(req: NextRequest) {
           price: newPriceId,
         },
       ],
-      proration_behavior: 'create_prorations',
       cancel_at_period_end: false,
     };
-    if (prorationDate) {
-      updateParams.proration_date = prorationDate;
+
+    // If it's the same plan, don't create prorations (reactivation without charge)
+    if (!isSamePlan) {
+      updateParams.proration_behavior = 'create_prorations';
+      if (prorationDate) {
+        updateParams.proration_date = prorationDate;
+      }
     }
     await stripe().subscriptions.update(subscriptionId, updateParams);
     return NextResponse.json({ success: true, scheduled: false });
