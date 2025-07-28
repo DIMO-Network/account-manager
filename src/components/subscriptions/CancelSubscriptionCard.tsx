@@ -1,13 +1,14 @@
 'use client';
 
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
-import type { StripeSubscription, StripeSubscriptionSchedule } from '@/types/subscription';
+import type { StripeSubscription } from '@/types/subscription';
 import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
 import { CarIcon } from '@/components/Icons';
-import { useSubscriptionActions } from '@/hooks/useSubscriptionActions';
+
 import { COLORS, SPACING } from '@/utils/designSystem';
+import { featureFlags } from '@/utils/FeatureFlags';
 import {
   ConfirmationStep,
   ReasonsStep,
@@ -29,25 +30,13 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
   nextScheduledPrice,
   nextScheduledDate,
 }) => {
-  const { cancelSubscription, releaseSubscriptionSchedule, canceling, cancelingSchedule, error } = useSubscriptionActions();
+  const [canceling, setCanceling] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedReason, setSelectedReason] = useState<CancellationReason | ''>('');
   const [customComment, setCustomComment] = useState<string>('');
-
   const step = searchParams.get('step') || 'confirm';
-
-  // Helper function to determine if subscription has a schedule
-  const hasSchedule = (): boolean => {
-    const schedule = subscription.schedule as StripeSubscriptionSchedule | null;
-    return !!(schedule && schedule.id && (schedule.status === 'not_started' || schedule.status === 'active'));
-  };
-
-  // Helper function to get schedule ID
-  const getScheduleId = (): string | null => {
-    const schedule = subscription.schedule as StripeSubscriptionSchedule | null;
-    return schedule?.id || null;
-  };
 
   const handleProceedToReasons = () => {
     router.push(`/subscriptions/${subscription.id}/cancel?step=reasons`);
@@ -79,25 +68,39 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
       comment: customComment || undefined,
     };
 
-    // Check if this is a scheduled subscription
-    if (hasSchedule()) {
-      const scheduleId = getScheduleId();
-      if (scheduleId) {
-        // Release the subscription schedule
-        const result = await releaseSubscriptionSchedule(scheduleId, {
-          preserve_cancel_date: true,
-        });
-        if (result.success) {
-          router.push(`/subscriptions/${subscription.id}`);
-        }
-        return;
-      }
-    }
+    setCanceling(true);
+    setError(null);
 
-    // Fall back to regular subscription cancellation
-    const result = await cancelSubscription(subscription.id, cancellationDetails);
-    if (result.success) {
-      router.push(`/subscriptions/${subscription.id}`);
+    // Use the new unified cancellation endpoint
+    const endpoint = featureFlags.useBackendProxy
+      ? '/api/subscriptions/cancel-subscription'
+      : '/api/subscriptions/cancel';
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subscriptionId: subscription.id,
+          cancellationDetails,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        router.push(`/subscriptions/${subscription.id}`);
+      } else {
+        console.error('Failed to cancel subscription:', result.error);
+        setError(result.error || 'Failed to cancel subscription');
+        setCanceling(false);
+      }
+    } catch (error) {
+      console.error('Error canceling subscription:', error);
+      setError('Failed to cancel subscription');
+      setCanceling(false);
     }
   };
 
@@ -118,7 +121,7 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
             customComment={customComment}
             onKeepSubscriptionAction={handleKeepSubscription}
             onCancelSubscriptionAction={handleFinalCancel}
-            canceling={canceling || cancelingSchedule}
+            canceling={canceling}
           />
         );
       default:

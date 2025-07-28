@@ -122,9 +122,38 @@ export class SubscriptionService {
           }
         : undefined;
 
-      await stripe().subscriptions.cancel(subscriptionId, {
-        cancellation_details: stripeCancellationDetails,
-      });
+      // First, retrieve the subscription to check its status and schedule
+      const subscription = await stripe().subscriptions.retrieve(subscriptionId);
+
+      // Check if subscription has a schedule
+      if (subscription.schedule) {
+        // For scheduled subscriptions, cancel the schedule at the end of the trial period
+        const scheduleId = typeof subscription.schedule === 'string'
+          ? subscription.schedule
+          : subscription.schedule.id;
+
+        if (subscription.status === 'trialing') {
+          // Cancel the schedule at the end of the trial period
+          await stripe().subscriptionSchedules.update(scheduleId, {
+            end_behavior: 'cancel',
+          });
+        } else {
+          // Cancel the schedule immediately for non-trialing subscriptions
+          await stripe().subscriptionSchedules.cancel(scheduleId);
+        }
+      } else if (subscription.status === 'trialing') {
+        // For trialing subscriptions without schedule, cancel at period end (after trial)
+        await stripe().subscriptions.update(subscriptionId, {
+          cancel_at_period_end: true,
+          cancellation_details: stripeCancellationDetails,
+        });
+      } else {
+        // For active subscriptions, cancel at period end
+        await stripe().subscriptions.update(subscriptionId, {
+          cancel_at_period_end: true,
+          cancellation_details: stripeCancellationDetails,
+        });
+      }
 
       return { success: true };
     } catch (error) {

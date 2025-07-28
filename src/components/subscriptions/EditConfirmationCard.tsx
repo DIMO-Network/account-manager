@@ -299,7 +299,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
             )}
 
             {/* Preview Charges for non-canceled subscriptions */}
-            {!isCanceledWithTrial && !isCanceledTrialPreview(previewInvoiceMeta) && showScheduledChange
+            {!isCanceledWithTrial && !isCanceledTrialPreview(previewInvoiceMeta) && showScheduledChange && !isCanceled
               ? (
                   <div className="border-t border-gray-700 mt-4 pt-4">
                     <h3 className="text-base font-medium leading-6 px-4">Note</h3>
@@ -341,7 +341,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
                         </p>
                       </div>
                     )
-                  : !isCanceledWithTrial && !isCanceledTrialPreview(previewInvoiceMeta) && !isScheduledSubscriptionPreview(previewInvoiceMeta) && previewInvoice && (
+                  : !isCanceledWithTrial && !isCanceledTrialPreview(previewInvoiceMeta) && !isScheduledSubscriptionPreview(previewInvoiceMeta) && previewInvoice && !isCanceled && (
                       <div className="border-t border-gray-700 mt-4 pt-4">
                         <h3 className="font-medium text-base mb-3 px-4">Preview of Charges</h3>
                         <div className="flex flex-col gap-1">
@@ -391,6 +391,39 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
                             )}
                       </div>
                     )}
+
+            {/* Special handling for canceled subscriptions being reactivated */}
+            {isCanceled && !isCanceledWithTrial && !isCanceledTrialPreview(previewInvoiceMeta) && (
+              <div className="border-t border-gray-700 mt-4 pt-4">
+                <h3 className="text-base font-medium leading-6 px-4">Note</h3>
+                <p className="text-sm leading-4.5 mt-1 text-text-secondary px-4">
+                  {selectedPriceId === currentPriceId
+                    ? (
+                        <>
+                          Your subscription will be reactivated and continue normally. You will not be charged again until your next billing date
+                          {subscription.items?.data?.[0]?.current_period_end && (
+                            <>
+                              {' '}
+                              on
+                              {' '}
+                              <span className="font-medium">{formatDate(subscription.items.data[0].current_period_end)}</span>
+                            </>
+                          )}
+                          .
+                        </>
+                      )
+                    : (
+                        <>
+                          Your subscription will be reactivated and you will be charged
+                          {' '}
+                          <span className="font-medium">{selectedFormatted.priceFormatted}</span>
+                          {' '}
+                          immediately. Your subscription will then renew on the same schedule.
+                        </>
+                      )}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

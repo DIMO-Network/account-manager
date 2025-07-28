@@ -38,7 +38,7 @@ export async function getPreviewInvoice(
   newPriceId: string,
 ): Promise<PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | null> {
   try {
-    const subscription = await stripe().subscriptions.retrieve(subscriptionId, {
+    const subscription: Stripe.Subscription = await stripe().subscriptions.retrieve(subscriptionId, {
       expand: ['items.data', 'items.data.price', 'schedule'],
     });
 
@@ -81,6 +81,34 @@ export async function getPreviewInvoice(
         trialEndDate: subscription.trial_end ?? 0,
         nextAmount: newAmount,
         nextInterval: newInterval,
+      };
+    }
+
+    // For canceled subscriptions that are not in trial, we can't create preview invoices
+    // because they're scheduled for cancellation. However, if the user is changing to the same plan,
+    // we should allow them to reactivate without charging.
+    if (isCanceled) {
+      const newPrice = await stripe().prices.retrieve(newPriceId);
+      const newAmount = newPrice?.unit_amount ?? 0;
+      const newInterval = newPrice?.recurring?.interval ?? 'month';
+      const currentPriceId = subscription.items.data[0]?.price?.id;
+
+      // If changing to the same price, this is a reactivation without charge
+      if (newPriceId === currentPriceId) {
+        return {
+          scheduledChange: true,
+          nextInterval: newInterval,
+          nextAmount: newAmount,
+          nextDate: subscription.items.data[0]?.current_period_end ?? 0,
+        };
+      }
+
+      // If changing to a different price, show the cancellation date
+      return {
+        scheduledChange: true,
+        nextInterval: newInterval,
+        nextAmount: newAmount,
+        nextDate: subscription.cancel_at ?? 0,
       };
     }
 
