@@ -1,3 +1,10 @@
+# [2.16.0](https://github.com/DIMO-Network/account-manager/compare/v2.15.0...v2.16.0) (2025-07-28)
+
+
+### Features
+
+* migrate cancellation workflows to use backend proxy calls ([#42](https://github.com/DIMO-Network/account-manager/issues/42)) ([35cebd5](https://github.com/DIMO-Network/account-manager/commit/35cebd5fcd5078f57c7e4d75d055a25ec77ea839))
+
 # [2.15.0](https://github.com/DIMO-Network/account-manager/compare/v2.14.1...v2.15.0) (2025-07-26)
 
 
