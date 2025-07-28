@@ -20,9 +20,17 @@ type SubscriptionDetailCardProps = {
 export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ subscription, vehicleInfo, nextScheduledPrice, nextScheduledDate }) => {
   const router = useRouter();
   const metadata = subscription?.metadata || {};
-  const connectionId = metadata.connectionId || 'N/A';
   const vehicleTokenId = metadata.vehicleTokenId || 'N/A';
-  const serialNumber = vehicleInfo?.aftermarketDevice?.serial || connectionId;
+  const hasSerial = !!vehicleInfo?.aftermarketDevice?.serial;
+  const hasVehicleToken = vehicleTokenId !== 'N/A';
+
+  const serialNumber = hasSerial
+    ? `${vehicleInfo?.aftermarketDevice?.serial || 'N/A'}`
+    : hasVehicleToken
+      ? `${vehicleTokenId}`
+      : 'N/A';
+
+  const serialLabel = hasSerial ? 'Serial Number' : hasVehicleToken ? 'Vehicle Token ID' : 'Serial Number';
 
   const isMarkedForCancellation = subscription.cancel_at_period_end || !!subscription.cancel_at;
   const isCanceled = subscription.status === 'canceled';
@@ -44,9 +52,9 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
       </div>
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="space-y-4">
-          {/* Serial Number */}
+          {/* Serial Number / Vehicle Token ID */}
           <div>
-            <div className={labelStyle}>Serial Number</div>
+            <div className={labelStyle}>{serialLabel}</div>
             <div className={`${valueStyle} ${borderStyle}`}>{serialNumber}</div>
           </div>
 
