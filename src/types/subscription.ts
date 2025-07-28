@@ -24,7 +24,7 @@ export type DeviceInfo = {
       model: string;
       year: number;
     };
-  };
+  } | null;
   claimedAt?: string;
   mintedAt?: string;
   manufacturer?: {

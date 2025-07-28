@@ -216,12 +216,16 @@ export async function getScheduledPriceInfo(subscription: Stripe.Subscription): 
   let nextScheduledDate: number | null = null;
 
   const schedule = subscription.schedule as Stripe.SubscriptionSchedule | null;
-  if (schedule && schedule.phases && Array.isArray(schedule.phases) && schedule.phases.length > 1) {
+  if (schedule && schedule.phases && Array.isArray(schedule.phases) && schedule.phases.length > 0) {
     const now = Math.floor(Date.now() / 1000);
+
+    // For trial subscriptions, we want to show the price that will be active after the trial
+    // Find the next phase that will be active (not the current trial phase)
     const nextPhase = schedule.phases.find((phase: Stripe.SubscriptionSchedule.Phase) => phase.start_date > now);
-    if (nextPhase) {
+
+    if (nextPhase && nextPhase.items && nextPhase.items.length > 0) {
       nextScheduledDate = nextPhase.start_date;
-      const nextPriceId = nextPhase.items?.[0]?.price;
+      const nextPriceId = nextPhase.items[0]?.price;
       if (nextPriceId && typeof nextPriceId === 'string') {
         const result = await withStripeErrorHandling(
           () => stripe().prices.retrieve(nextPriceId),
@@ -276,6 +280,7 @@ export function getSubscriptionTypeAndPrice(
   subscription: Stripe.Subscription,
   nextScheduledPrice?: Stripe.Price | null,
 ) {
+  // For trial subscriptions, prioritize showing the scheduled price that will be active after trial
   // If there's a scheduled price change, use that instead of current price
   if (nextScheduledPrice) {
     const scheduledInterval = nextScheduledPrice.recurring?.interval;

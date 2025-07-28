@@ -40,7 +40,7 @@ function StripeSubscriptionItem({ subscription }: { subscription: StripeEnhanced
             {subscription.vehicleDisplay}
           </div>
           <div className="text-xs font-light leading-5 mt-1">
-            {getSubscriptionTypeAndPrice(subscription).displayText}
+            {getSubscriptionTypeAndPrice(subscription, subscription.nextScheduledPrice).displayText}
           </div>
           <div className={`text-xs font-light leading-5 ${COLORS.text.secondary}`}>
             <SubscriptionRenewalInfo subscription={subscription} />

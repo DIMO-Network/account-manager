@@ -65,7 +65,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
           <div>
             <div className={labelStyle}>Type</div>
             <div className={`${valueStyle} ${borderStyle}`}>
-              {getSubscriptionTypeAndPrice(subscription).displayText}
+              {getSubscriptionTypeAndPrice(subscription, nextScheduledPrice).displayText}
             </div>
           </div>
 
@@ -75,7 +75,7 @@ export const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
             <div className={valueStyle}>
               <div>{renewalInfo.displayText}</div>
               {renewalInfo.secondaryText && (
-                <div className="text-xs text-text-secondary mt-1">
+                <div className="text-xs text-text-secondary">
                   {renewalInfo.secondaryText}
                 </div>
               )}

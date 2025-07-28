@@ -32,25 +32,42 @@ export function BackendSubscriptionDetails({ status, device }: BackendSubscripti
             <div className="text-base font-medium leading-5">
               {getDeviceDisplayName(device)}
               {' '}
-              (Detached)
+              {device.vehicle ? '(Detached)' : '(No Vehicle)'}
             </div>
           )}
 
-      <div className="text-xs font-light leading-5 mt-1">
-        {device?.serial ? `Serial: ${device.serial}` : 'No serial number'}
+      <div className="text-xs text-text-secondary mt-1">
+        {device?.serial
+          ? `Serial: ${device.serial}`
+          : device.vehicle?.tokenId
+            ? `Vehicle ID: ${device.vehicle.tokenId}`
+            : 'N/A'}
       </div>
 
-      <div className={`text-xs font-light leading-5 ${COLORS.text.secondary}`}>
+      {/* Show connection info only when there's an active vehicle connection */}
+      {device.vehicle?.definition && (
+        device?.connection
+          ? (
+              <div className="text-xs text-text-secondary">
+                Connected via
+                {' '}
+                {device.connection.name}
+              </div>
+            )
+          : device?.manufacturer?.name
+            ? (
+                <div className="text-xs text-text-secondary">
+                  Connected via
+                  {' '}
+                  {device.manufacturer.name}
+                </div>
+              )
+            : null
+      )}
+
+      <div className={`text-xs text-text-secondary ${COLORS.text.secondary}`}>
         {getBackendSubscriptionRenewalInfo(status).displayText}
       </div>
-
-      {device?.connection && (
-        <div className="text-xs font-light leading-5 mt-1 text-blue-400">
-          Connected via
-          {' '}
-          {device.connection.name}
-        </div>
-      )}
     </div>
   );
 }
