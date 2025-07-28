@@ -68,9 +68,9 @@ export function getBackendSubscriptionRenewalInfo(status: {
     if (!dateString) {
       return 'N/A';
     }
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      day: '2-digit',
+    return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
+      day: '2-digit',
       year: 'numeric',
     });
   };
