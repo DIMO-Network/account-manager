@@ -33,10 +33,20 @@ export function BackendSubscriptionHeader({
                 )}
           </h3>
         </div>
-        {stripeId && <ChevronRightIcon className={`w-2 h-3 ${COLORS.text.secondary}`} />}
+        {(stripeId || device?.tokenId) && <ChevronRightIcon className={`w-2 h-3 ${COLORS.text.secondary}`} />}
       </div>
     </div>
   );
+
+  // For grandfathered devices (no stripeId), link to device tokenId
+  if (!stripeId && device?.tokenId) {
+    return (
+      <Link href={`/subscriptions/device/${device.tokenId}`} className="block">
+        {headerContent}
+        {children}
+      </Link>
+    );
+  }
 
   if (stripeId) {
     return (
