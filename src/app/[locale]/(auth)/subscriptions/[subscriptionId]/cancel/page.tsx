@@ -58,7 +58,7 @@ export default async function CancelSubscriptionPage({ params }: { params: Promi
   const jwtToken = (await cookies()).get('dimo_jwt')?.value;
   const authResult = await authorizeSubscriptionAccess(subscriptionId, dimoToken, jwtToken);
   if (!authResult.authorized) {
-    notFound();
+    redirect('/dashboard');
   }
 
   try {

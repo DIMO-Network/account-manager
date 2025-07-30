@@ -1,7 +1,7 @@
 import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview, ScheduledSubscriptionPreview } from '@/app/actions/getPreviewInvoice';
 import { currentUser } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getPreviewInvoice } from '@/app/actions/getPreviewInvoice';
 import { getProductPrices } from '@/app/actions/getProductPrices';
 import { EditConfirmationCard } from '@/components/subscriptions/EditConfirmationCard';
@@ -33,7 +33,7 @@ export default async function EditSubscriptionPage({
   const jwtToken = (await cookies()).get('dimo_jwt')?.value;
   const authResult = await authorizeSubscriptionAccess(subscriptionId, dimoToken, jwtToken);
   if (!authResult.authorized) {
-    notFound();
+    redirect('/dashboard');
   }
 
   let subscription = null;

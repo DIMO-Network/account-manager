@@ -1,6 +1,6 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import SubscriptionDetailCard from '@/components/subscriptions/SubscriptionDetailCard';
 import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
 import { PaymentMethodSection } from '../PaymentMethodSection';
@@ -22,7 +22,7 @@ export default async function SubscriptionDetailPage({ params }: { params: Promi
   const jwtToken = (await cookies()).get('dimo_jwt')?.value;
   const authResult = await authorizeSubscriptionAccess(subscriptionId, dimoToken, jwtToken);
   if (!authResult.authorized) {
-    notFound();
+    redirect('/dashboard');
   }
 
   try {
