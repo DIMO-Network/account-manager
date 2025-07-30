@@ -1,10 +1,12 @@
 import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview, ScheduledSubscriptionPreview } from '@/app/actions/getPreviewInvoice';
-import { notFound } from 'next/navigation';
+import { currentUser } from '@clerk/nextjs/server';
+import { cookies } from 'next/headers';
+import { notFound, redirect } from 'next/navigation';
 import { getPreviewInvoice } from '@/app/actions/getPreviewInvoice';
 import { getProductPrices } from '@/app/actions/getProductPrices';
 import { EditConfirmationCard } from '@/components/subscriptions/EditConfirmationCard';
 import { EditSubscriptionCard } from '@/components/subscriptions/EditSubscriptionCard';
-import { fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
+import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 export default async function EditSubscriptionPage({
@@ -19,6 +21,19 @@ export default async function EditSubscriptionPage({
 
   if (!subscriptionId) {
     notFound();
+  }
+
+  // Get current user and check authorization
+  const user = await currentUser();
+  if (!user) {
+    notFound();
+  }
+
+  const dimoToken = user.privateMetadata?.dimoToken as string;
+  const jwtToken = (await cookies()).get('dimo_jwt')?.value;
+  const authResult = await authorizeSubscriptionAccess(subscriptionId, dimoToken, jwtToken);
+  if (!authResult.authorized) {
+    redirect('/dashboard');
   }
 
   let subscription = null;

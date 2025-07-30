@@ -1,7 +1,9 @@
+import { currentUser } from '@clerk/nextjs/server';
+import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import CancelSubscriptionCard from '@/components/subscriptions/CancelSubscriptionCard';
 import { stripe } from '@/libs/Stripe';
-import { fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
+import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 // Helper function to check if subscription should redirect
@@ -44,6 +46,19 @@ export default async function CancelSubscriptionPage({ params }: { params: Promi
 
   if (!subscriptionId) {
     notFound();
+  }
+
+  // Get current user and check authorization
+  const user = await currentUser();
+  if (!user) {
+    notFound();
+  }
+
+  const dimoToken = user.privateMetadata?.dimoToken as string;
+  const jwtToken = (await cookies()).get('dimo_jwt')?.value;
+  const authResult = await authorizeSubscriptionAccess(subscriptionId, dimoToken, jwtToken);
+  if (!authResult.authorized) {
+    redirect('/dashboard');
   }
 
   try {

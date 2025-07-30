@@ -1,26 +1,12 @@
 import type { NextRequest } from 'next/server';
 import { currentUser } from '@clerk/nextjs/server';
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { featureFlags } from '@/utils/FeatureFlags';
+import { authorizeSubscriptionAccess } from '@/utils/subscriptionHelpers';
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await currentUser();
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not authenticated' },
-        { status: 401 },
-      );
-    }
-
-    const dimoToken = user.privateMetadata?.dimoToken as string;
-    if (!dimoToken) {
-      return NextResponse.json(
-        { error: 'DIMO authentication required - please sign in with DIMO' },
-        { status: 401 },
-      );
-    }
-
     const body = await request.json();
     const { subscriptionId, newPriceId, prorationDate } = body;
 
@@ -29,6 +15,19 @@ export async function POST(request: NextRequest) {
         { error: 'Subscription ID and new price ID are required' },
         { status: 400 },
       );
+    }
+
+    // Get current user and check authorization
+    const user = await currentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
+    }
+
+    const dimoToken = user.privateMetadata?.dimoToken as string;
+    const jwtToken = (await cookies()).get('dimo_jwt')?.value;
+    const authResult = await authorizeSubscriptionAccess(subscriptionId, dimoToken, jwtToken);
+    if (!authResult.authorized) {
+      return NextResponse.json({ error: authResult.error || 'Unauthorized' }, { status: 401 });
     }
 
     const backendUrl = `${featureFlags.backendApiUrl}/subscription/update-plan/${subscriptionId}`;
@@ -44,7 +43,6 @@ export async function POST(request: NextRequest) {
     const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${dimoToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(requestBody),
