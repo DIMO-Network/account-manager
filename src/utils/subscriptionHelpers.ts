@@ -347,3 +347,50 @@ export async function fetchBackendSubscriptions(dimoToken: string): Promise<Back
     return null;
   }
 }
+
+export async function checkUserOwnsSubscription(subscriptionId: string, dimoToken: string): Promise<boolean> {
+  try {
+    const userSubscriptions = await fetchBackendSubscriptions(dimoToken);
+
+    if (!userSubscriptions) {
+      return false;
+    }
+
+    // Check if the subscription ID exists in the user's subscriptions
+    return userSubscriptions.some(sub => sub.stripe_id === subscriptionId);
+  } catch (error) {
+    console.error('Error checking subscription ownership:', error);
+    return false;
+  }
+}
+
+// Simple authorization function that accepts user info as parameters
+export async function authorizeSubscriptionAccess(subscriptionId: string, dimoToken: string | null, jwtToken?: string | null): Promise<{ authorized: boolean; error?: string }> {
+  try {
+    // Try DIMO token first (from user metadata)
+    if (dimoToken) {
+      const userOwnsSubscription = await checkUserOwnsSubscription(subscriptionId, dimoToken);
+      if (userOwnsSubscription) {
+        return { authorized: true };
+      }
+    }
+
+    // Try JWT token from cookies (for URL passthrough authentication)
+    if (jwtToken) {
+      const userOwnsSubscription = await checkUserOwnsSubscription(subscriptionId, jwtToken);
+      if (userOwnsSubscription) {
+        return { authorized: true };
+      }
+    }
+
+    // If neither token worked, user doesn't own the subscription
+    if (!dimoToken && !jwtToken) {
+      return { authorized: false, error: 'DIMO authentication required' };
+    }
+
+    return { authorized: false, error: 'Subscription not found' };
+  } catch (error) {
+    console.error('Error in subscription authorization:', error);
+    return { authorized: false, error: 'Authorization failed' };
+  }
+}
