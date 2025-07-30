@@ -1,6 +1,9 @@
 import type { NextRequest } from 'next/server';
+import { currentUser } from '@clerk/nextjs/server';
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { stripe } from '@/libs/Stripe';
+import { authorizeSubscriptionAccess } from '@/utils/subscriptionHelpers';
 
 export async function GET(
   _request: NextRequest,
@@ -14,6 +17,19 @@ export async function GET(
         { error: 'Subscription ID is required' },
         { status: 400 },
       );
+    }
+
+    // Get current user and check authorization
+    const user = await currentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
+    }
+
+    const dimoToken = user.privateMetadata?.dimoToken as string;
+    const jwtToken = (await cookies()).get('dimo_jwt')?.value;
+    const authResult = await authorizeSubscriptionAccess(subscriptionId, dimoToken, jwtToken);
+    if (!authResult.authorized) {
+      return NextResponse.json({ error: authResult.error || 'Unauthorized' }, { status: 401 });
     }
 
     // Fetch the subscription with expanded product information
