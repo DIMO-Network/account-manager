@@ -2,7 +2,7 @@
 
 import type { BackendSubscription } from '@/types/subscription';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useState } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { getBackendSubscriptionRenewalInfo } from './utils/subscriptionDisplayHelpers';
@@ -13,6 +13,7 @@ type GrandfatheredSubscriptionDetailCardProps = {
 
 export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscriptionDetailCardProps> = ({ subscription }) => {
   const router = useRouter();
+  const [isActivating, setIsActivating] = useState(false);
   const device = subscription.device;
 
   if (!device) {
@@ -23,6 +24,57 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
   const serialLabel = device.serial ? 'Serial Number' : 'Token ID';
 
   const renewalInfo = getBackendSubscriptionRenewalInfo(subscription);
+
+  const handleActivateSubscription = async () => {
+    setIsActivating(true);
+    try {
+      // Check if user has a valid payment method
+      const checkResponse = await fetch('/api/subscriptions/check-user-payment-method', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!checkResponse.ok) {
+        throw new Error('Failed to check payment method');
+      }
+
+      const { hasValidPaymentMethod } = await checkResponse.json();
+
+      if (hasValidPaymentMethod) {
+        // TODO: Handle case where user already has a valid payment method
+        console.warn('User has valid payment method - TODO: implement subscription activation');
+        return;
+      }
+
+      // Create subscription link
+      const vehicleTokenId = device.vehicle?.tokenId;
+      if (!vehicleTokenId) {
+        throw new Error('No vehicle token ID found');
+      }
+
+      const subscriptionResponse = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription-link`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!subscriptionResponse.ok) {
+        throw new Error('Failed to create subscription link');
+      }
+
+      const { checkout_url } = await subscriptionResponse.json();
+
+      // Open checkout session in same tab
+      window.open(checkout_url, '_blank');
+    } catch (error) {
+      console.error('Error activating subscription:', error);
+    } finally {
+      setIsActivating(false);
+    }
+  };
 
   // Reusable styles
   const labelStyle = 'font-medium text-base leading-5 px-4 mb-1';
@@ -105,6 +157,18 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
         </div>
 
         <div className="flex flex-col mt-4 px-4 gap-2">
+          <button
+            onClick={handleActivateSubscription}
+            disabled={isActivating || !device.vehicle?.tokenId}
+            className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
+              isActivating || !device.vehicle?.tokenId
+                ? COLORS.button.disabledTransparent
+                : COLORS.button.primary
+            }`}
+            type="button"
+          >
+            {isActivating ? 'Activating...' : 'Activate Subscription'}
+          </button>
           <button
             onClick={() => router.push('/dashboard')}
             className={`${RESPONSIVE.touch} ${COLORS.button.secondary} ${BORDER_RADIUS.full} font-medium w-full mt-2`}
