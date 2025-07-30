@@ -1,3 +1,10 @@
+# [2.17.0](https://github.com/DIMO-Network/account-manager/compare/v2.16.0...v2.17.0) (2025-07-30)
+
+
+### Features
+
+* create grandfathered devices flow ([#43](https://github.com/DIMO-Network/account-manager/issues/43)) ([e7809d2](https://github.com/DIMO-Network/account-manager/commit/e7809d29bb98c73c3b18e0b0fb09877ae7a66594))
+
 # [2.16.0](https://github.com/DIMO-Network/account-manager/compare/v2.15.0...v2.16.0) (2025-07-28)
 
 
