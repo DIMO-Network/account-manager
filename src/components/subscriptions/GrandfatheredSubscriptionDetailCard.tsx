@@ -14,6 +14,7 @@ type GrandfatheredSubscriptionDetailCardProps = {
 export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscriptionDetailCardProps> = ({ subscription }) => {
   const router = useRouter();
   const [isActivating, setIsActivating] = useState(false);
+  const [showConfirmActivation, setShowConfirmActivation] = useState(false);
   const device = subscription.device;
 
   if (!device) {
@@ -43,12 +44,13 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
       const { hasValidPaymentMethod } = await checkResponse.json();
 
       if (hasValidPaymentMethod) {
-        // TODO: Handle case where user already has a valid payment method
-        console.warn('User has valid payment method - TODO: implement subscription activation');
+        // Show confirmation for direct subscription activation
+        setShowConfirmActivation(true);
+        setIsActivating(false);
         return;
       }
 
-      // Create subscription link
+      // Create subscription link for users without payment method
       const vehicleTokenId = device.vehicle?.tokenId;
       if (!vehicleTokenId) {
         throw new Error('No vehicle token ID found');
@@ -67,13 +69,49 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
 
       const { checkout_url } = await subscriptionResponse.json();
 
-      // Open checkout session in same tab
+      // Open checkout session in new tab
       window.open(checkout_url, '_blank');
     } catch (error) {
       console.error('Error activating subscription:', error);
+      // TODO: Add proper error handling/notification
     } finally {
       setIsActivating(false);
     }
+  };
+
+  const handleConfirmActivation = async () => {
+    setIsActivating(true);
+    try {
+      const vehicleTokenId = device.vehicle?.tokenId;
+      if (!vehicleTokenId) {
+        throw new Error('No vehicle token ID found');
+      }
+
+      const response = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to activate subscription');
+      }
+
+      // Subscription activated successfully
+      setShowConfirmActivation(false);
+      // TODO: Add success notification and refresh data
+      console.warn('Subscription activated successfully');
+    } catch (error) {
+      console.error('Error confirming subscription activation:', error);
+      // TODO: Add proper error handling/notification
+    } finally {
+      setIsActivating(false);
+    }
+  };
+
+  const handleCancelActivation = () => {
+    setShowConfirmActivation(false);
   };
 
   // Reusable styles
@@ -157,21 +195,48 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
         </div>
 
         <div className="flex flex-col mt-4 px-4 gap-2">
-          <button
-            onClick={handleActivateSubscription}
-            disabled={isActivating || !device.vehicle?.tokenId}
-            className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
-              isActivating || !device.vehicle?.tokenId
-                ? COLORS.button.disabledTransparent
-                : COLORS.button.primary
-            }`}
-            type="button"
-          >
-            {isActivating ? 'Activating...' : 'Activate Subscription'}
-          </button>
+          {!showConfirmActivation
+            ? (
+                <button
+                  onClick={handleActivateSubscription}
+                  disabled={isActivating || !device.vehicle?.tokenId}
+                  className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
+                    isActivating || !device.vehicle?.tokenId
+                      ? COLORS.button.disabledTransparent
+                      : COLORS.button.primary
+                  }`}
+                  type="button"
+                >
+                  {isActivating ? 'Activating...' : 'Activate Subscription'}
+                </button>
+              )
+            : (
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={handleConfirmActivation}
+                    disabled={isActivating}
+                    className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium flex-1 ${
+                      isActivating
+                        ? COLORS.button.disabledTransparent
+                        : COLORS.button.primary
+                    }`}
+                    type="button"
+                  >
+                    {isActivating ? 'Activating...' : 'Confirm'}
+                  </button>
+                  <button
+                    onClick={handleCancelActivation}
+                    disabled={isActivating}
+                    className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium flex-1 ${COLORS.button.secondaryTransparent}`}
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
           <button
             onClick={() => router.push('/dashboard')}
-            className={`${RESPONSIVE.touch} ${COLORS.button.secondary} ${BORDER_RADIUS.full} font-medium w-full mt-2`}
+            className={`${RESPONSIVE.touch} ${COLORS.button.tertiary} ${BORDER_RADIUS.full} font-medium w-full`}
             type="button"
           >
             Back to Dashboard
