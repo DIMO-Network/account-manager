@@ -81,7 +81,11 @@ export function getBackendSubscriptionRenewalInfo(status: {
       return { displayText: `Cancels on ${formatDate(status.cancel_at)}`, date: formatDate(status.cancel_at) };
     }
     if (status.trial_end) {
-      return { displayText: `Trial ends on ${formatDate(status.trial_end)}`, date: formatDate(status.trial_end) };
+      return {
+        displayText: `Trial ends on ${formatDate(status.trial_end)}`,
+        secondaryText: 'This is a grandfathered device with extended trial period.',
+        date: formatDate(status.trial_end),
+      };
     }
   }
 
@@ -97,7 +101,11 @@ export function getBackendSubscriptionRenewalInfo(status: {
     return { displayText: `Renews on ${formatDate(status.next_renewal_date)}`, date: formatDate(status.next_renewal_date) };
   }
   if (status.trial_end) {
-    return { displayText: `Trial ends on ${formatDate(status.trial_end)}`, date: formatDate(status.trial_end) };
+    return {
+      displayText: `Trial ends on ${formatDate(status.trial_end)}`,
+      secondaryText: 'This is a grandfathered device with extended trial period.',
+      date: formatDate(status.trial_end),
+    };
   }
   return { displayText: 'N/A', date: undefined };
 }
