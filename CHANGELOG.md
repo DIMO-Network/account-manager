@@ -1,3 +1,10 @@
+# [2.18.0](https://github.com/DIMO-Network/account-manager/compare/v2.17.0...v2.18.0) (2025-07-30)
+
+
+### Features
+
+* prevent unauthorized access subscription not owned by user ([#44](https://github.com/DIMO-Network/account-manager/issues/44)) ([c59b318](https://github.com/DIMO-Network/account-manager/commit/c59b3181d042a51bcf5bb905c4aa4154e5c783da))
+
 # [2.17.0](https://github.com/DIMO-Network/account-manager/compare/v2.16.0...v2.17.0) (2025-07-30)
 
 
