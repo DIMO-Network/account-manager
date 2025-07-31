@@ -41,6 +41,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   const selectedPriceId = searchParams.get('priceId');
 
   const [isUpdating, setIsUpdating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const currentPriceId = subscription?.items?.data?.[0]?.price?.id;
   const currentPrice = productPrices.find(price => price.id === currentPriceId);
@@ -102,6 +103,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
     }
 
     setIsUpdating(true);
+    setError(null);
     try {
       const endpoint = featureFlags.useBackendProxy
         ? '/api/subscriptions/update-plan'
@@ -122,11 +124,12 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
         router.push(`/subscriptions/${subscription.id}`);
       } else {
         console.error('Failed to update subscription:', result.error);
+        setError(result.error || 'Failed to update subscription');
         setIsUpdating(false);
-        // TODO: Show error message to user
       }
     } catch (error) {
       console.error('Error updating subscription:', error);
+      setError('Failed to update subscription');
       setIsUpdating(false);
     }
   };
@@ -195,6 +198,13 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
         title={isCanceled ? 'Reactivate Subscription' : 'Confirm Subscription Change'}
         className="mb-4"
       />
+
+      {error && (
+        <div className="mb-4 py-3 px-4 bg-surface-input rounded-2xl">
+          <p className="text-red-300 text-sm">{error}</p>
+        </div>
+      )}
+
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="px-4 mb-8">
           <p className="text-base leading-6">
