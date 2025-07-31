@@ -130,7 +130,9 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
             const { displayText, priceFormatted, isCurrent } = formatPrice(price);
             const isSelected = price.id === selectedPriceId;
             // For trialing subscriptions, the current price is scheduled to continue after trial
+            // For active subscriptions, the current price is the current plan
             const isScheduled = nextScheduledPrice?.id === price.id || (isCurrent && subscription.status === 'trialing');
+            const isCurrentPlan = isCurrent && subscription.status === 'active';
 
             return (
               <button
@@ -151,14 +153,16 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                 aria-pressed={isSelected}
                 aria-describedby={isCurrent ? 'current-plan' : undefined}
               >
-                {isCurrent && !isCanceled && isScheduled && (
-                  <div
-                    id="current-plan"
-                    className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
-                  >
-                    Current
-                  </div>
-                )}
+                {(isCurrent && !isCanceled && isScheduled) || isCurrentPlan
+                  ? (
+                      <div
+                        id="current-plan"
+                        className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
+                      >
+                        Current
+                      </div>
+                    )
+                  : null}
                 {isCurrent && isCanceled && (
                   <div
                     className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
