@@ -19,7 +19,7 @@ export function BackendSubscriptionHeader({
   children,
 }: BackendSubscriptionHeaderProps) {
   const headerContent = (
-    <div className="border-b border-gray-700 pb-2">
+    <div className="border-b border-gray-600 pb-2">
       <div className="flex flex-row items-center justify-between gap-2 px-4 pt-3 w-full">
         <div className="flex flex-row items-center gap-2">
           <ConnectionIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
