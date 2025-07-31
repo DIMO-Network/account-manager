@@ -5,7 +5,7 @@ import type { StripeEnhancedSubscription } from '@/utils/subscriptionHelpers';
 import { CarIcon } from '@/components/Icons';
 import { BackendSubscriptions } from '@/components/subscriptions/backend';
 import { StripeSubscriptions } from '@/components/subscriptions/StripeSubscriptions';
-import { COLORS } from '@/utils/designSystem';
+import { PageHeader } from '@/components/ui';
 
 type SubscriptionsClientProps = {
   backendStatuses: BackendSubscription[] | null;
@@ -18,10 +18,7 @@ export function SubscriptionsClient({
 }: SubscriptionsClientProps) {
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2">
-        <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
-        <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Subscriptions</h1>
-      </div>
+      <PageHeader icon={<CarIcon />} title="Subscriptions" className="mb-0" />
       {backendStatuses
         ? (
             <BackendSubscriptions statuses={backendStatuses} />
