@@ -56,7 +56,7 @@ export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
               'fontSize': '16px',
               'color': '#ffffff',
               '::placeholder': {
-                color: '#aab7c4',
+                color: '#464646', // Stripe Elements doesn't support CSS custom properties
               },
             },
             invalid: {
@@ -66,6 +66,24 @@ export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
         });
 
         card.mount('#card-element');
+
+        // Add focus and blur event listeners to handle outline styling
+        card.on('focus', () => {
+          const cardElement = document.getElementById('card-element');
+          if (cardElement) {
+            cardElement.style.outline = '1px solid white';
+            cardElement.style.outlineOffset = '0';
+          }
+        });
+
+        card.on('blur', () => {
+          const cardElement = document.getElementById('card-element');
+          if (cardElement) {
+            cardElement.style.outline = '';
+            cardElement.style.outlineOffset = '';
+          }
+        });
+
         setCardElement(card);
         setCardElementLoading(false);
       } else {
