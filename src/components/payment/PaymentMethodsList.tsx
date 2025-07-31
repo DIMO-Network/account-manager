@@ -122,7 +122,7 @@ export const PaymentMethodsList = () => {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col justify-between min-w-full bg-surface-default rounded-xl py-4 px-3">
           <h3 className="font-medium text-base leading-6">No payment methods found</h3>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-xs text-text-secondary font-light leading-4.5 mt-1">
             You haven't added any payment methods yet. Add one to get started.
           </p>
         </div>
