@@ -25,6 +25,15 @@ export async function POST(request: NextRequest) {
 
     const dimoToken = user.privateMetadata?.dimoToken as string;
     const jwtToken = (await cookies()).get('dimo_jwt')?.value;
+
+    // Check if JWT token is missing
+    if (!jwtToken) {
+      return NextResponse.json(
+        { error: 'DIMO session expired. Please sign in with DIMO again.' },
+        { status: 401 },
+      );
+    }
+
     const authResult = await authorizeSubscriptionAccess(subscriptionId, dimoToken, jwtToken);
     if (!authResult.authorized) {
       return NextResponse.json({ error: authResult.error || 'Unauthorized' }, { status: 401 });
