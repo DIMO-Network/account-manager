@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ChevronRightIcon, ConnectionIcon } from '@/components/Icons';
+import { ChevronIcon, ConnectionIcon } from '@/components/Icons';
 import { COLORS } from '@/utils/designSystem';
 import { formatProductName, getDeviceHeaderName } from '../utils/subscriptionDisplayHelpers';
 
@@ -33,7 +33,7 @@ export function BackendSubscriptionHeader({
                 )}
           </h3>
         </div>
-        {(stripeId || device?.tokenId) && <ChevronRightIcon className={`w-2 h-3 ${COLORS.text.secondary}`} />}
+        {(stripeId || device?.tokenId) && <ChevronIcon orientation="right" className={`w-2 h-3 ${COLORS.text.secondary}`} />}
       </div>
     </div>
   );
