@@ -9,7 +9,7 @@ import { CarIcon, EditIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
-import { getStripeSubscriptionRenewalInfo } from './utils/subscriptionDisplayHelpers';
+import { getStripeStatusDisplay, getStripeSubscriptionRenewalInfo } from './utils/subscriptionDisplayHelpers';
 
 type SubscriptionDetailCardProps = {
   subscription: StripeSubscription;
@@ -40,22 +40,16 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
   const renewalInfo = getStripeSubscriptionRenewalInfo(subscription, nextScheduledPrice, nextScheduledDate);
 
   // Reusable styles
-  const labelStyle = 'font-medium text-base leading-5 px-4 mb-1';
-  const valueStyle = 'font-light text-xs leading-5 px-4 pb-3';
+  const labelStyle = 'font-light text-xs leading-5 px-4 mb-1';
+  const valueStyle = 'font-medium text-base leading-5 px-4 pb-4';
   const borderStyle = 'border-b border-gray-700';
-  const clickableValueStyle = 'font-light text-xs leading-5 flex justify-between items-center cursor-pointer px-4';
+  const clickableValueStyle = 'font-medium text-base leading-5 flex justify-between items-center cursor-pointer px-4';
 
   return (
     <>
       <PageHeader icon={<CarIcon />} title="Subscription Detail" className="mb-4" />
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="space-y-4">
-          {/* Serial Number / Vehicle Token ID */}
-          <div>
-            <div className={labelStyle}>{serialLabel}</div>
-            <div className={`${valueStyle} ${borderStyle}`}>{serialNumber}</div>
-          </div>
-
           {/* Connected To */}
           <div>
             <div className={labelStyle}>Connected To</div>
@@ -75,6 +69,12 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
             </div>
           </div>
 
+          {/* Serial Number / Vehicle Token ID */}
+          <div>
+            <div className={labelStyle}>{serialLabel}</div>
+            <div className={`${valueStyle} ${borderStyle}`}>{serialNumber}</div>
+          </div>
+
           {/* Type */}
           <div>
             <div className={labelStyle}>Type</div>
@@ -91,13 +91,21 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
           {/* Schedule */}
           <div>
             <div className={labelStyle}>Schedule</div>
-            <div className={valueStyle}>
+            <div className={`${valueStyle} ${borderStyle}`}>
               <div>{renewalInfo.displayText}</div>
               {renewalInfo.secondaryText && (
-                <div className="text-xs text-text-secondary">
+                <div className="text-xs text-text-secondary mt-1">
                   {renewalInfo.secondaryText}
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Status */}
+          <div>
+            <div className={labelStyle}>Status</div>
+            <div className={`${valueStyle} ${getStripeStatusDisplay(subscription).color}`}>
+              {getStripeStatusDisplay(subscription).text}
             </div>
           </div>
         </div>
