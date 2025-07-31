@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
 import { CarIcon } from '@/components/Icons';
+import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { featureFlags } from '@/utils/FeatureFlags';
 import { formatProductName } from './utils/subscriptionDisplayHelpers';
@@ -151,10 +152,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   if (!selectedPrice) {
     return (
       <>
-        <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 mb-4">
-          <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
-          <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Invalid Selection</h1>
-        </div>
+        <PageHeader icon={<CarIcon />} title="Invalid Selection" className="mb-4" />
         <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
           <div className="px-4 mb-6">
             <p className="text-base leading-6">
@@ -192,12 +190,11 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
 
   return (
     <>
-      <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 mb-4">
-        <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
-        <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>
-          {isCanceled ? 'Reactivate Subscription' : 'Confirm Subscription Change'}
-        </h1>
-      </div>
+      <PageHeader
+        icon={<CarIcon />}
+        title={isCanceled ? 'Reactivate Subscription' : 'Confirm Subscription Change'}
+        className="mb-4"
+      />
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="px-4 mb-8">
           <p className="text-base leading-6">
