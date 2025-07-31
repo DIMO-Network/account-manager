@@ -4,7 +4,7 @@ export type IconProps = {
 };
 
 export { CarIcon } from './CarIcon';
-export { ChevronRightIcon } from './ChevronRightIcon';
+export { ChevronIcon } from './ChevronIcon';
 export { CloseIcon } from './CloseIcon';
 export { ConnectionIcon } from './ConnectionIcon';
 export { DIMOLogo } from './DIMOLogo';

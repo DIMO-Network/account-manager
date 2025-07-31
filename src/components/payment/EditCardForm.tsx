@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { FormField } from '@/components/FormField';
 import { FormSkeleton } from '@/components/payment/FormSkeleton';
+import { CountryDropdown } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
 
 type EditCardFormProps = {
@@ -207,13 +208,9 @@ export const EditCardForm = ({ cardId, customerId, onSuccess, onCancel }: EditCa
             />
           </div>
           <div className="flex-1">
-            <FormField
-              label="Country"
-              id="address_country"
-              name="address_country"
+            <CountryDropdown
               value={form.address_country}
-              onChange={handleChange}
-              placeholder="Country"
+              onChangeAction={value => setForm(f => ({ ...f, address_country: value }))}
             />
           </div>
         </div>
