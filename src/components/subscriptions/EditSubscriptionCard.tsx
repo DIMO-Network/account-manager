@@ -129,7 +129,8 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
           {sortedProductPrices.map((price) => {
             const { displayText, priceFormatted, isCurrent } = formatPrice(price);
             const isSelected = price.id === selectedPriceId;
-            const isScheduled = nextScheduledPrice?.id === price.id;
+            // For trialing subscriptions, the current price is scheduled to continue after trial
+            const isScheduled = nextScheduledPrice?.id === price.id || (isCurrent && subscription.status === 'trialing');
 
             return (
               <button
@@ -158,14 +159,14 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                     Current
                   </div>
                 )}
-                {isCurrent && isCanceled && !isScheduled && (
+                {isCurrent && isCanceled && (
                   <div
                     className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
                   >
                     Previous
                   </div>
                 )}
-                {isScheduled && (
+                {isScheduled && !isCurrent && (
                   <div
                     className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
                   >
