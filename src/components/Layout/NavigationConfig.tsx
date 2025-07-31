@@ -1,5 +1,5 @@
 import type { MenuItemConfig } from '@/types/menu';
-import { SignOutButton } from '@clerk/nextjs';
+import { SignOutButton } from '@/components/auth/SignOutButton';
 import { CarIcon, HomeIcon, LogoutIcon, SettingsIcon, WalletIcon } from '@/components/Icons';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { MenuActionButton } from '@/components/Menu/MenuActionButton';
