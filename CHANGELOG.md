@@ -1,3 +1,10 @@
+# [2.20.0](https://github.com/DIMO-Network/account-manager/compare/v2.19.1...v2.20.0) (2025-08-01)
+
+
+### Features
+
+* improve loading behavior for nested routes ([#49](https://github.com/DIMO-Network/account-manager/issues/49)) ([ea0c7b1](https://github.com/DIMO-Network/account-manager/commit/ea0c7b1e473b734077a269ed47210ce6710790c4))
+
 ## [2.19.1](https://github.com/DIMO-Network/account-manager/compare/v2.19.0...v2.19.1) (2025-08-01)
 
 
