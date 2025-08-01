@@ -8,7 +8,7 @@ import { authorizeSubscriptionAccess } from '@/utils/subscriptionHelpers';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { subscriptionId, newPriceId, prorationDate } = body;
+    const { subscriptionId, newPriceId, prorationDate, billingCycleAnchor } = body;
 
     if (!subscriptionId || !newPriceId) {
       return NextResponse.json(
@@ -47,6 +47,10 @@ export async function POST(request: NextRequest) {
 
     if (prorationDate) {
       requestBody.prorationDate = prorationDate;
+    }
+
+    if (billingCycleAnchor) {
+      requestBody.billingCycleAnchor = billingCycleAnchor;
     }
 
     const response = await fetch(backendUrl, {
