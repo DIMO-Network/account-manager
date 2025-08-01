@@ -1,16 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ActivateButton } from '@/components/subscriptions/ActivateButton';
-import { CancellationFlow } from '@/components/subscriptions/CancellationFlow';
-import { ErrorDisplay } from '@/components/subscriptions/ErrorDisplay';
-import { StatusHeader } from '@/components/subscriptions/StatusHeader';
-import { SubscriptionStatusCard } from '@/components/subscriptions/SubscriptionStatusCard';
-import { SuccessMessage } from '@/components/subscriptions/SuccessMessage';
+import { SubscriptionStatusCard } from '@/components/vehicles/SubscriptionStatusCard';
 import { useCancellationSuccess } from '@/hooks/useCancellationSuccess';
 import { useCheckoutSuccess } from '@/hooks/useCheckoutSuccess';
 import { useSubscriptionActions } from '@/hooks/useSubscriptionActions';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { ActivateButton } from './ActivateButton';
+import { CancellationFlow } from './CancellationFlow';
+import { ErrorDisplay } from './ErrorDisplay';
+import { StatusHeader } from './StatusHeader';
+import { SuccessMessage } from './SuccessMessage';
 
 type SubscriptionStatusProps = {
   connectionId: string;

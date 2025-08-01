@@ -4,8 +4,7 @@ import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { getPreviewInvoice } from '@/app/actions/getPreviewInvoice';
 import { getProductPrices } from '@/app/actions/getProductPrices';
-import { EditConfirmationCard } from '@/components/subscriptions/EditConfirmationCard';
-import { EditSubscriptionCard } from '@/components/subscriptions/EditSubscriptionCard';
+import { EditSubscriptionFlow } from '@/components/subscriptions/edit/EditSubscriptionFlow';
 import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
@@ -76,30 +75,16 @@ export default async function EditSubscriptionPage({
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       <div className="w-full lg:w-3/4">
-        {step === 'confirm'
-          ? (
-              <EditConfirmationCard
-                subscription={subscriptionData}
-                vehicleInfo={vehicleInfo}
-                productName={productName}
-                vehicleDisplay={vehicleDisplay}
-                productPrices={productPrices}
-                previewInvoiceMeta={previewInvoiceMeta}
-                previewInvoice={previewInvoiceMeta}
-                nextScheduledDate={nextScheduledDate}
-              />
-            )
-          : (
-              <EditSubscriptionCard
-                subscription={subscriptionData}
-                vehicleInfo={vehicleInfo}
-                productName={productName}
-                vehicleDisplay={vehicleDisplay}
-                productPrices={productPrices}
-                nextScheduledPrice={nextScheduledPrice}
-                nextScheduledDate={nextScheduledDate}
-              />
-            )}
+        <EditSubscriptionFlow
+          subscription={subscriptionData}
+          vehicleInfo={vehicleInfo}
+          productName={productName}
+          vehicleDisplay={vehicleDisplay}
+          productPrices={productPrices}
+          nextScheduledPrice={nextScheduledPrice}
+          nextScheduledDate={nextScheduledDate}
+          previewInvoiceMeta={previewInvoiceMeta}
+        />
       </div>
       <PaymentMethodSection />
     </div>

@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { DimoVehicles } from '@/components/DimoVehicles';
+import { DimoVehicles } from '@/components/vehicles';
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string }>;

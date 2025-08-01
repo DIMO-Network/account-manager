@@ -5,7 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getDimoVehicles } from '@/app/actions/getDimoVehicles';
-import { DeviceSubscriptionStatus } from '@/components/subscriptions/DeviceSubscriptionStatus';
+import { DeviceSubscriptionStatus } from './DeviceSubscriptionStatus';
 
 export const DimoVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
