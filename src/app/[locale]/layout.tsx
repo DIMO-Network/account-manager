@@ -53,7 +53,7 @@ export default async function RootLayout(props: {
   const clerkLocale = ClerkLocalizations.supportedLocales[locale] ?? ClerkLocalizations.defaultLocale;
   let signInUrl = '/sign-in';
   let dashboardUrl = '/dashboard';
-  let afterSignOutUrl = '/';
+  let afterSignOutUrl = '/sign-in';
 
   if (locale !== routing.defaultLocale) {
     signInUrl = `/${locale}${signInUrl}`;

@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { CarIcon } from '@/components/Icons';
+import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { formatProductName } from './utils/subscriptionDisplayHelpers';
 
@@ -103,10 +104,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
 
   return (
     <>
-      <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 mb-4">
-        <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
-        <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Edit Subscription</h1>
-      </div>
+      <PageHeader icon={<CarIcon />} title="Edit Subscription" className="mb-4" />
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="mb-8 px-4">
           <h3 className="font-medium text-base leading-6">
@@ -131,7 +129,56 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
           {sortedProductPrices.map((price) => {
             const { displayText, priceFormatted, isCurrent } = formatPrice(price);
             const isSelected = price.id === selectedPriceId;
+            // Determine if this price is scheduled to be active after the current period
             const isScheduled = nextScheduledPrice?.id === price.id;
+
+            // Determine badge logic based on subscription state and plan status
+            let shouldShowCurrent = false;
+            let shouldShowScheduled = false;
+
+            if (subscription.status === 'active') {
+              // Active subscription logic
+              if (nextScheduledPrice) {
+                // Has scheduled change
+                if (isCurrent && isScheduled) {
+                  // Current plan is scheduled to continue (same plan)
+                  shouldShowScheduled = true;
+                } else if (isCurrent && !isScheduled) {
+                  // Current plan is being replaced
+                  shouldShowCurrent = false;
+                  shouldShowScheduled = false;
+                } else if (!isCurrent && isScheduled) {
+                  // New plan is scheduled
+                  shouldShowScheduled = true;
+                }
+              } else {
+                // No scheduled change
+                if (isCurrent) {
+                  shouldShowCurrent = true;
+                }
+              }
+            } else if (subscription.status === 'trialing') {
+              // Trialing subscription logic
+              if (nextScheduledPrice) {
+                // Has scheduled change
+                if (isCurrent && isScheduled) {
+                  // Current plan is scheduled to continue after trial
+                  shouldShowScheduled = true;
+                } else if (isCurrent && !isScheduled) {
+                  // Current plan is being replaced after trial
+                  shouldShowCurrent = false;
+                  shouldShowScheduled = false;
+                } else if (!isCurrent && isScheduled) {
+                  // New plan is scheduled to start after trial
+                  shouldShowScheduled = true;
+                }
+              } else {
+                // No scheduled change - current plan continues after trial
+                if (isCurrent) {
+                  shouldShowCurrent = true;
+                }
+              }
+            }
 
             return (
               <button
@@ -152,22 +199,24 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                 aria-pressed={isSelected}
                 aria-describedby={isCurrent ? 'current-plan' : undefined}
               >
-                {isCurrent && !isCanceled && isScheduled && (
-                  <div
-                    id="current-plan"
-                    className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
-                  >
-                    Current
-                  </div>
-                )}
-                {isCurrent && isCanceled && !isScheduled && (
+                {shouldShowCurrent && !isCanceled
+                  ? (
+                      <div
+                        id="current-plan"
+                        className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
+                      >
+                        Current
+                      </div>
+                    )
+                  : null}
+                {isCurrent && isCanceled && (
                   <div
                     className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
                   >
                     Previous
                   </div>
                 )}
-                {isScheduled && (
+                {shouldShowScheduled && (
                   <div
                     className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
                   >

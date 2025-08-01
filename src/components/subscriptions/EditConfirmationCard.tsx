@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
 import { CarIcon } from '@/components/Icons';
+import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { featureFlags } from '@/utils/FeatureFlags';
 import { formatProductName } from './utils/subscriptionDisplayHelpers';
@@ -40,6 +41,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   const selectedPriceId = searchParams.get('priceId');
 
   const [isUpdating, setIsUpdating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const currentPriceId = subscription?.items?.data?.[0]?.price?.id;
   const currentPrice = productPrices.find(price => price.id === currentPriceId);
@@ -56,7 +58,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
     : null;
 
   // Check if subscription is canceled with active trial
-  const isCanceled = subscription.cancel_at !== null;
+  const isCanceled = subscription.cancel_at !== null || subscription.cancel_at_period_end === true;
   const isTrialing = subscription.status === 'trialing';
   const isCanceledWithTrial = isCanceled && isTrialing;
 
@@ -95,41 +97,6 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
     router.push(url.toString());
   };
 
-  const handleConfirm = async () => {
-    if (!selectedPriceId) {
-      return;
-    }
-
-    setIsUpdating(true);
-    try {
-      const endpoint = featureFlags.useBackendProxy
-        ? '/api/subscriptions/update-plan'
-        : '/api/stripe/update-subscription';
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subscriptionId: subscription.id,
-          newPriceId: selectedPriceId,
-          prorationDate: isPreviewInvoice(previewInvoiceMeta) ? previewInvoiceMeta.prorationDate : undefined,
-        }),
-      });
-      const result = await res.json();
-
-      if (result.success) {
-        router.push(`/subscriptions/${subscription.id}`);
-      } else {
-        console.error('Failed to update subscription:', result.error);
-        setIsUpdating(false);
-        // TODO: Show error message to user
-      }
-    } catch (error) {
-      console.error('Error updating subscription:', error);
-      setIsUpdating(false);
-    }
-  };
-
   // Type guard for PreviewInvoice
   function isPreviewInvoice(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined): obj is PreviewInvoice {
     return !!obj && 'id' in obj && 'lines' in obj;
@@ -145,16 +112,58 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
     return !!obj && 'scheduledSubscription' in obj;
   }
 
-  const nextChargeDate = isPreviewInvoice(previewInvoiceMeta) ? previewInvoiceMeta.chargeDate : undefined;
+  // For active subscriptions switching plans, use current_period_end as the charge date
+  // For other cases, use the preview invoice charge date
+  const nextChargeDate = isPreviewInvoice(previewInvoiceMeta) && previewInvoiceMeta.chargeDate
+    ? previewInvoiceMeta.chargeDate
+    : (subscription.status === 'active' && !isCanceled)
+        ? subscription.items?.data?.[0]?.current_period_end
+        : undefined;
+
+  const handleConfirm = async () => {
+    if (!selectedPriceId) {
+      return;
+    }
+
+    setIsUpdating(true);
+    setError(null);
+    try {
+      const endpoint = featureFlags.useBackendProxy
+        ? '/api/subscriptions/update-plan'
+        : '/api/stripe/update-subscription';
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subscriptionId: subscription.id,
+          newPriceId: selectedPriceId,
+          prorationDate: isPreviewInvoice(previewInvoiceMeta) ? previewInvoiceMeta.prorationDate : undefined,
+          billingCycleAnchor: nextChargeDate,
+        }),
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        router.push(`/subscriptions/${subscription.id}`);
+      } else {
+        console.error('Failed to update subscription:', result.error);
+        setError(result.error || 'Failed to update subscription');
+        setIsUpdating(false);
+      }
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      setError('Failed to update subscription');
+      setIsUpdating(false);
+    }
+  };
+
   const showScheduledChange = previewInvoice && 'scheduledChange' in previewInvoice && previewInvoice.scheduledChange;
 
   if (!selectedPrice) {
     return (
       <>
-        <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 mb-4">
-          <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
-          <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Invalid Selection</h1>
-        </div>
+        <PageHeader icon={<CarIcon />} title="Invalid Selection" className="mb-4" />
         <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
           <div className="px-4 mb-6">
             <p className="text-base leading-6">
@@ -192,12 +201,18 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
 
   return (
     <>
-      <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 mb-4">
-        <CarIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
-        <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>
-          {isCanceled ? 'Reactivate Subscription' : 'Confirm Subscription Change'}
-        </h1>
-      </div>
+      <PageHeader
+        icon={<CarIcon />}
+        title={isCanceled ? 'Reactivate Subscription' : 'Confirm Subscription Change'}
+        className="mb-4"
+      />
+
+      {error && (
+        <div className="mb-4 py-3 px-4 bg-surface-input rounded-2xl">
+          <p className="text-red-300 text-sm">{error}</p>
+        </div>
+      )}
+
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="px-4 mb-8">
           <p className="text-base leading-6">

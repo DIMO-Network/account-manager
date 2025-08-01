@@ -62,6 +62,29 @@
       sans-serif;
     font-weight: 400; /* Regular weight as default */
   }
+
+  /* Override focus styles for input elements */
+  :focus-visible {
+    outline: 1px solid white;
+    outline-offset: 0;
+  }
+
+  /* Override autofill styles for input elements */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--color-surface-raised) inset !important;
+    -webkit-text-fill-color: white !important;
+    caret-color: white !important;
+  }
+
+  /* Override internal autofill selected styles */
+  input:-internal-autofill-selected {
+    appearance: none !important;
+    background-image: none !important;
+    color: white !important;
+  }
 }
 
 /*

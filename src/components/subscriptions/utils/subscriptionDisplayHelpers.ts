@@ -246,3 +246,43 @@ export function getStripeSubscriptionRenewalInfo(
     return { displayText: date, date };
   }
 }
+
+// Helper function for Stripe subscription status display
+export function getStripeStatusDisplay(subscription: any) {
+  const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+  const isTrialing = subscription.status === 'trialing';
+  const isCanceled = subscription.status === 'canceled';
+  const isIncomplete = subscription.status === 'incomplete' || subscription.status === 'incomplete_expired';
+  const isUnpaid = subscription.status === 'unpaid';
+  const isPastDue = subscription.status === 'past_due';
+  const isMarkedForCancellation = subscription.cancel_at_period_end || !!subscription.cancel_at;
+
+  let statusText = subscription.status;
+  let statusColor = 'text-text-secondary';
+
+  if (isActive) {
+    statusColor = 'text-green-500';
+    if (isTrialing) {
+      statusText = 'Trial Active';
+    } else {
+      statusText = 'Active';
+    }
+  } else if (isMarkedForCancellation) {
+    statusColor = 'text-orange-500';
+    statusText = 'Scheduled To Cancel';
+  } else if (isCanceled) {
+    statusColor = 'text-red-500';
+    statusText = 'Canceled';
+  } else if (isIncomplete) {
+    statusColor = 'text-yellow-500';
+    statusText = 'Incomplete';
+  } else if (isUnpaid) {
+    statusColor = 'text-red-500';
+    statusText = 'Unpaid';
+  } else if (isPastDue) {
+    statusColor = 'text-orange-500';
+    statusText = 'Past Due';
+  }
+
+  return { text: statusText, color: statusColor };
+}
