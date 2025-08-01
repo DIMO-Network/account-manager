@@ -1,7 +1,7 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
-import CancelSubscriptionCard from '@/components/subscriptions/CancelSubscriptionCard';
+import { CancellationFlow } from '@/components/subscriptions/cancellation/CancellationFlow';
 import { stripe } from '@/libs/Stripe';
 import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
@@ -72,7 +72,7 @@ export default async function CancelSubscriptionPage({ params }: { params: Promi
     return (
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:w-3/4">
-          <CancelSubscriptionCard
+          <CancellationFlow
             subscription={subscription}
             vehicleInfo={vehicleInfo}
             nextScheduledPrice={nextScheduledPrice}
