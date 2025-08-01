@@ -58,7 +58,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
     : null;
 
   // Check if subscription is canceled with active trial
-  const isCanceled = subscription.cancel_at !== null;
+  const isCanceled = subscription.cancel_at !== null || subscription.cancel_at_period_end === true;
   const isTrialing = subscription.status === 'trialing';
   const isCanceledWithTrial = isCanceled && isTrialing;
 
@@ -97,6 +97,29 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
     router.push(url.toString());
   };
 
+  // Type guard for PreviewInvoice
+  function isPreviewInvoice(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined): obj is PreviewInvoice {
+    return !!obj && 'id' in obj && 'lines' in obj;
+  }
+
+  // Type guard for CanceledTrialPreview
+  function isCanceledTrialPreview(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined): obj is CanceledTrialPreview {
+    return !!obj && 'canceledTrial' in obj;
+  }
+
+  // Type guard for ScheduledSubscriptionPreview
+  function isScheduledSubscriptionPreview(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined): obj is ScheduledSubscriptionPreview {
+    return !!obj && 'scheduledSubscription' in obj;
+  }
+
+  // For active subscriptions switching plans, use current_period_end as the charge date
+  // For other cases, use the preview invoice charge date
+  const nextChargeDate = isPreviewInvoice(previewInvoiceMeta) && previewInvoiceMeta.chargeDate
+    ? previewInvoiceMeta.chargeDate
+    : (subscription.status === 'active' && !isCanceled)
+        ? subscription.items?.data?.[0]?.current_period_end
+        : undefined;
+
   const handleConfirm = async () => {
     if (!selectedPriceId) {
       return;
@@ -116,6 +139,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
           subscriptionId: subscription.id,
           newPriceId: selectedPriceId,
           prorationDate: isPreviewInvoice(previewInvoiceMeta) ? previewInvoiceMeta.prorationDate : undefined,
+          billingCycleAnchor: nextChargeDate,
         }),
       });
       const result = await res.json();
@@ -134,22 +158,6 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
     }
   };
 
-  // Type guard for PreviewInvoice
-  function isPreviewInvoice(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined): obj is PreviewInvoice {
-    return !!obj && 'id' in obj && 'lines' in obj;
-  }
-
-  // Type guard for CanceledTrialPreview
-  function isCanceledTrialPreview(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined): obj is CanceledTrialPreview {
-    return !!obj && 'canceledTrial' in obj;
-  }
-
-  // Type guard for ScheduledSubscriptionPreview
-  function isScheduledSubscriptionPreview(obj: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview | undefined): obj is ScheduledSubscriptionPreview {
-    return !!obj && 'scheduledSubscription' in obj;
-  }
-
-  const nextChargeDate = isPreviewInvoice(previewInvoiceMeta) ? previewInvoiceMeta.chargeDate : undefined;
   const showScheduledChange = previewInvoice && 'scheduledChange' in previewInvoice && previewInvoice.scheduledChange;
 
   if (!selectedPrice) {

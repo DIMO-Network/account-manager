@@ -129,10 +129,56 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
           {sortedProductPrices.map((price) => {
             const { displayText, priceFormatted, isCurrent } = formatPrice(price);
             const isSelected = price.id === selectedPriceId;
-            // For trialing subscriptions, the current price is scheduled to continue after trial
-            // For active subscriptions, the current price is the current plan
-            const isScheduled = nextScheduledPrice?.id === price.id || (isCurrent && subscription.status === 'trialing');
-            const isCurrentPlan = isCurrent && subscription.status === 'active';
+            // Determine if this price is scheduled to be active after the current period
+            const isScheduled = nextScheduledPrice?.id === price.id;
+
+            // Determine badge logic based on subscription state and plan status
+            let shouldShowCurrent = false;
+            let shouldShowScheduled = false;
+
+            if (subscription.status === 'active') {
+              // Active subscription logic
+              if (nextScheduledPrice) {
+                // Has scheduled change
+                if (isCurrent && isScheduled) {
+                  // Current plan is scheduled to continue (same plan)
+                  shouldShowScheduled = true;
+                } else if (isCurrent && !isScheduled) {
+                  // Current plan is being replaced
+                  shouldShowCurrent = false;
+                  shouldShowScheduled = false;
+                } else if (!isCurrent && isScheduled) {
+                  // New plan is scheduled
+                  shouldShowScheduled = true;
+                }
+              } else {
+                // No scheduled change
+                if (isCurrent) {
+                  shouldShowCurrent = true;
+                }
+              }
+            } else if (subscription.status === 'trialing') {
+              // Trialing subscription logic
+              if (nextScheduledPrice) {
+                // Has scheduled change
+                if (isCurrent && isScheduled) {
+                  // Current plan is scheduled to continue after trial
+                  shouldShowScheduled = true;
+                } else if (isCurrent && !isScheduled) {
+                  // Current plan is being replaced after trial
+                  shouldShowCurrent = false;
+                  shouldShowScheduled = false;
+                } else if (!isCurrent && isScheduled) {
+                  // New plan is scheduled to start after trial
+                  shouldShowScheduled = true;
+                }
+              } else {
+                // No scheduled change - current plan continues after trial
+                if (isCurrent) {
+                  shouldShowCurrent = true;
+                }
+              }
+            }
 
             return (
               <button
@@ -153,7 +199,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                 aria-pressed={isSelected}
                 aria-describedby={isCurrent ? 'current-plan' : undefined}
               >
-                {(isCurrent && !isCanceled && isScheduled) || isCurrentPlan
+                {shouldShowCurrent && !isCanceled
                   ? (
                       <div
                         id="current-plan"
@@ -170,7 +216,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
                     Previous
                   </div>
                 )}
-                {isScheduled && !isCurrent && (
+                {shouldShowScheduled && (
                   <div
                     className="absolute -top-4 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider"
                   >
