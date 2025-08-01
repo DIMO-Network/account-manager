@@ -1,3 +1,10 @@
+# [2.19.0](https://github.com/DIMO-Network/account-manager/compare/v2.18.0...v2.19.0) (2025-08-01)
+
+
+### Features
+
+* ux improvements and subscription management enhancements ([#46](https://github.com/DIMO-Network/account-manager/issues/46)) ([ecd0a85](https://github.com/DIMO-Network/account-manager/commit/ecd0a85e1d46b8d8c834e9ef42d9b4534003c060))
+
 # [2.18.0](https://github.com/DIMO-Network/account-manager/compare/v2.17.0...v2.18.0) (2025-07-30)
 
 
