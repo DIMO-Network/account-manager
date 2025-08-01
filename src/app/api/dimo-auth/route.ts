@@ -122,10 +122,11 @@ export async function GET(request: NextRequest) {
     // 5. Set DIMO JWT as secure cookie for API fallback
     const response = NextResponse.redirect(new URL('/sign-in', getBaseUrl()));
     response.cookies.set('dimo_jwt', token, {
-      httpOnly: true,
+      httpOnly: process.env.NODE_ENV === 'production',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 3600, // 1 hour
+      maxAge: Number.parseInt(process.env.DIMO_JWT_COOKIE_MAX_AGE || '7200'), // 2 hours default
+      path: '/',
     });
 
     // 6. Add sign-in token to redirect URL
