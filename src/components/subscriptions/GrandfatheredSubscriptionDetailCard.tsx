@@ -72,6 +72,9 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
 
       // Open checkout session in new tab
       window.open(checkout_url, '_blank');
+
+      // TODO: Make redirect_uri in backend customizable
+      router.push('/dashboard');
     } catch (error) {
       console.error('Error activating subscription:', error);
       // TODO: Add proper error handling/notification
