@@ -20,7 +20,7 @@ export const Header: FC = () => {
       </Link>
       {user?.primaryEmailAddress?.emailAddress && (
         <span
-          className={`flex items-center gap-2 rounded-full p-1 md:pr-3 ${COLORS.background.secondary}`}
+          className={`hidden md:flex items-center gap-2 rounded-full p-1 md:pr-3 ${COLORS.background.secondary}`}
         >
           <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-700">
             <UserIcon className="w-4 h-4 text-white" />
