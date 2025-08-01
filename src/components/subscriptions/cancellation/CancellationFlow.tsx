@@ -4,63 +4,74 @@ import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
 import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
-
 import { COLORS, SPACING } from '@/utils/designSystem';
 import { featureFlags } from '@/utils/FeatureFlags';
-import {
-  ConfirmationStep,
-  ReasonsStep,
-  ReviewStep,
-} from './cancellation';
+import { ConfirmationStep } from './ConfirmationStep';
+import { ConfirmationStepSkeleton } from './ConfirmationStepSkeleton';
+import { ReasonsStep } from './ReasonsStep';
+import { ReasonsStepSkeleton } from './ReasonsStepSkeleton';
+import { ReviewStep } from './ReviewStep';
+import { ReviewStepSkeleton } from './ReviewStepSkeleton';
 
 type CancellationReason = StripeCancellationFeedback;
 
-type CancelSubscriptionCardProps = {
+type CancellationFlowProps = {
   subscription: StripeSubscription;
   vehicleInfo?: VehicleDetail;
   nextScheduledPrice?: any;
   nextScheduledDate?: number | null;
 };
 
-export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
+export function CancellationFlow({
   subscription,
   vehicleInfo,
   nextScheduledPrice,
   nextScheduledDate,
-}) => {
+}: CancellationFlowProps) {
   const [canceling, setCanceling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [isPending, startTransition] = useTransition();
+
   const [selectedReason, setSelectedReason] = useState<CancellationReason | ''>('');
   const [customComment, setCustomComment] = useState<string>('');
   const step = searchParams.get('step') || 'confirm';
 
   const handleProceedToReasons = () => {
-    router.push(`/subscriptions/${subscription.id}/cancel?step=reasons`);
+    startTransition(() => {
+      router.push(`/subscriptions/${subscription.id}/cancel?step=reasons`);
+    });
   };
 
   const handleGoBack = () => {
-    if (step === 'reasons') {
-      router.push(`/subscriptions/${subscription.id}/cancel`);
-    } else if (step === 'review') {
-      router.push(`/subscriptions/${subscription.id}/cancel?step=reasons`);
-    } else {
-      router.push(`/subscriptions/${subscription.id}`);
-    }
+    startTransition(() => {
+      if (step === 'reasons') {
+        router.push(`/subscriptions/${subscription.id}/cancel`);
+      } else if (step === 'review') {
+        router.push(`/subscriptions/${subscription.id}/cancel?step=reasons`);
+      } else {
+        router.push(`/subscriptions/${subscription.id}`);
+      }
+    });
   };
 
   const handleContinueToReview = (feedback: CancellationReason, comment?: string) => {
     setSelectedReason(feedback);
     setCustomComment(comment || '');
-    router.push(`/subscriptions/${subscription.id}/cancel?step=review`);
+    startTransition(() => {
+      router.push(`/subscriptions/${subscription.id}/cancel?step=review`);
+    });
   };
 
   const handleKeepSubscription = () => {
-    router.push(`/subscriptions/${subscription.id}`);
+    startTransition(() => {
+      router.push(`/subscriptions/${subscription.id}`);
+    });
   };
 
   const handleFinalCancel = async () => {
@@ -105,6 +116,29 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
     }
   };
 
+  // Show loading skeleton during transitions
+  if (isPending) {
+    return (
+      <>
+        <PageHeader icon={<CarIcon />} title="Cancel Subscription" className="mb-4" />
+        <div className="flex flex-col justify-between min-w-full bg-surface-default rounded-xl py-4 px-3">
+          {step === 'reasons'
+            ? (
+                <ReasonsStepSkeleton />
+              )
+            : step === 'review'
+              ? (
+                  <ReviewStepSkeleton />
+                )
+              : (
+                  <ConfirmationStepSkeleton />
+                )}
+        </div>
+      </>
+    );
+  }
+
+  // Render appropriate step
   const renderCurrentStep = () => {
     switch (step) {
       case 'reasons':
@@ -153,6 +187,4 @@ export const CancelSubscriptionCard: React.FC<CancelSubscriptionCardProps> = ({
       </div>
     </>
   );
-};
-
-export default CancelSubscriptionCard;
+}

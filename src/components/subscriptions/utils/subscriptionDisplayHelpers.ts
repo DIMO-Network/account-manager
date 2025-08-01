@@ -58,23 +58,23 @@ export function getStatusDisplay(status: any) {
 }
 
 // Helper function for backend subscription renewal info
+const formatDate = (dateString: string | null) => {
+  if (!dateString) {
+    return 'N/A';
+  }
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'long',
+    day: '2-digit',
+    year: 'numeric',
+  });
+};
+
 export function getBackendSubscriptionRenewalInfo(status: {
   new_status: string;
   cancel_at: string | null;
   next_renewal_date: string | null;
   trial_end: string | null;
 }) {
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) {
-      return 'N/A';
-    }
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric',
-    });
-  };
-
   // For trialing_incomplete status, show trial_end if cancel_at is null
   if (status.new_status === 'trialing_incomplete') {
     if (status.cancel_at) {
@@ -162,11 +162,11 @@ export function getStripeSubscriptionRenewalInfo(
     return { displayText: 'N/A', date: undefined };
   }
 
-  const date = new Date(currentPeriodEnd * 1000).toLocaleDateString();
+  const date = formatDate(new Date(currentPeriodEnd * 1000).toISOString());
 
   // Handle scheduled changes first
   if (nextScheduledPrice && nextScheduledDate) {
-    const nextDate = new Date(nextScheduledDate * 1000).toLocaleDateString();
+    const nextDate = formatDate(new Date(nextScheduledDate * 1000).toISOString());
     const nextAmount = formatPriceWithInterval(nextScheduledPrice.unit_amount, nextScheduledPrice.recurring?.interval);
     const scheduledChangeText = `${nextDate} at ${nextAmount}`;
 
@@ -178,7 +178,7 @@ export function getStripeSubscriptionRenewalInfo(
     } else if (status === 'canceled') {
       const canceledAt = subscription.canceled_at;
       if (canceledAt) {
-        const canceledDate = new Date(canceledAt * 1000).toLocaleDateString();
+        const canceledDate = formatDate(new Date(canceledAt * 1000).toISOString());
         return { displayText: `Canceled on ${canceledDate}`, date: canceledDate };
       }
       return { displayText: `Canceled`, date: nextDate };
@@ -210,13 +210,13 @@ export function getStripeSubscriptionRenewalInfo(
 
   // Fall back to regular renewal/cancellation logic
   if (cancelAtPeriodEnd && cancelAt) {
-    const cancelDate = new Date(cancelAt * 1000).toLocaleDateString();
+    const cancelDate = formatDate(new Date(cancelAt * 1000).toISOString());
     return { displayText: `Cancels on ${cancelDate}`, date: cancelDate };
   }
 
   // Check for cancel_at regardless of status (including trialing)
   if (cancelAt) {
-    const cancelDate = new Date(cancelAt * 1000).toLocaleDateString();
+    const cancelDate = formatDate(new Date(cancelAt * 1000).toISOString());
     return { displayText: `Cancels on ${cancelDate}`, date: cancelDate };
   }
 
@@ -240,7 +240,7 @@ export function getStripeSubscriptionRenewalInfo(
   } else if (status === 'canceled') {
     const canceledAt = subscription.canceled_at;
     if (canceledAt) {
-      const canceledDate = new Date(canceledAt * 1000).toLocaleDateString();
+      const canceledDate = formatDate(new Date(canceledAt * 1000).toISOString());
       return { displayText: `Canceled on ${canceledDate}`, date: canceledDate };
     }
     return { displayText: `Canceled`, date };
