@@ -103,6 +103,8 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
       setShowConfirmActivation(false);
       // TODO: Add success notification and refresh data
       console.warn('Subscription activated successfully');
+
+      router.push('/dashboard');
     } catch (error) {
       console.error('Error confirming subscription activation:', error);
       // TODO: Add proper error handling/notification
@@ -116,8 +118,8 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
   };
 
   // Reusable styles
-  const labelStyle = 'font-medium text-base leading-5 px-4 mb-1';
-  const valueStyle = 'font-light text-xs leading-5 px-4 pb-3';
+  const labelStyle = 'font-light text-xs leading-5 px-4 mb-1';
+  const valueStyle = 'font-medium text-base leading-5 px-4 pb-3';
   const borderStyle = 'border-b border-gray-700';
 
   return (
