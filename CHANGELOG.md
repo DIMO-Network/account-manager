@@ -1,3 +1,10 @@
+## [2.19.1](https://github.com/DIMO-Network/account-manager/compare/v2.19.0...v2.19.1) (2025-08-01)
+
+
+### Bug Fixes
+
+* improve loading behavior ([#48](https://github.com/DIMO-Network/account-manager/issues/48)) ([344e79f](https://github.com/DIMO-Network/account-manager/commit/344e79ff51e7426f82c2a216e537fcd6ff313cbb))
+
 # [2.19.0](https://github.com/DIMO-Network/account-manager/compare/v2.18.0...v2.19.0) (2025-08-01)
 
 
