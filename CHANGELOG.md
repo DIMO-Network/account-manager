@@ -1,3 +1,10 @@
+# [2.21.0](https://github.com/DIMO-Network/account-manager/compare/v2.20.0...v2.21.0) (2025-08-01)
+
+
+### Features
+
+* add Tesla connection subscription support ([#50](https://github.com/DIMO-Network/account-manager/issues/50)) ([7d3b411](https://github.com/DIMO-Network/account-manager/commit/7d3b41160566edc00f6db20295dca6a108749b4a))
+
 # [2.20.0](https://github.com/DIMO-Network/account-manager/compare/v2.19.1...v2.20.0) (2025-08-01)
 
 
