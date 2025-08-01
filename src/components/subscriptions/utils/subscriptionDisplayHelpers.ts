@@ -74,16 +74,20 @@ export function getBackendSubscriptionRenewalInfo(status: {
   cancel_at: string | null;
   next_renewal_date: string | null;
   trial_end: string | null;
-}) {
+}, device?: any) {
   // For trialing_incomplete status, show trial_end if cancel_at is null
   if (status.new_status === 'trialing_incomplete') {
     if (status.cancel_at) {
       return { displayText: `Cancels on ${formatDate(status.cancel_at)}`, date: formatDate(status.cancel_at) };
     }
     if (status.trial_end) {
+      // Only show grandfathered device message for actual grandfathered devices (not Tesla connections)
+      const isGrandfatheredDevice = device?.manufacturer?.name === 'Ruptela' || device?.manufacturer?.name === 'HashDog' || device?.manufacturer?.name === 'AutoPi';
+      const secondaryText = isGrandfatheredDevice ? 'This is a grandfathered device with extended trial period.' : undefined;
+
       return {
         displayText: `Trial ends on ${formatDate(status.trial_end)}`,
-        secondaryText: 'This is a grandfathered device with extended trial period.',
+        secondaryText,
         date: formatDate(status.trial_end),
       };
     }
@@ -101,9 +105,13 @@ export function getBackendSubscriptionRenewalInfo(status: {
     return { displayText: `Renews on ${formatDate(status.next_renewal_date)}`, date: formatDate(status.next_renewal_date) };
   }
   if (status.trial_end) {
+    // Only show grandfathered device message for actual grandfathered devices (not Tesla connections)
+    const isGrandfatheredDevice = device?.manufacturer?.name === 'Ruptela' || device?.manufacturer?.name === 'HashDog' || device?.manufacturer?.name === 'AutoPi';
+    const secondaryText = isGrandfatheredDevice ? 'This is a grandfathered device with extended trial period.' : undefined;
+
     return {
       displayText: `Trial ends on ${formatDate(status.trial_end)}`,
-      secondaryText: 'This is a grandfathered device with extended trial period.',
+      secondaryText,
       date: formatDate(status.trial_end),
     };
   }
@@ -129,8 +137,8 @@ export function getDeviceDisplayName(device: any): string {
 
 // Helper function to get device header name (for non-Stripe subscriptions)
 export function getDeviceHeaderName(device: any): string {
-  // For Ruptela, HashDog, and AutoPi devices, show "DIMO Pro" consistently
-  if (device?.manufacturer?.name === 'Ruptela' || device?.manufacturer?.name === 'HashDog' || device?.manufacturer?.name === 'AutoPi') {
+  // For Ruptela, HashDog, AutoPi devices, and Tesla software subscriptions, show "DIMO Pro" consistently
+  if (device?.manufacturer?.name === 'Ruptela' || device?.manufacturer?.name === 'HashDog' || device?.manufacturer?.name === 'AutoPi' || device?.connection?.name === 'Tesla') {
     return 'DIMO Pro';
   }
 
