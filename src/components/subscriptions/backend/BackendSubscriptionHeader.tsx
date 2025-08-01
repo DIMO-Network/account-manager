@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ChevronRightIcon, ConnectionIcon } from '@/components/Icons';
+import { ChevronIcon, ConnectionIcon } from '@/components/Icons';
 import { COLORS } from '@/utils/designSystem';
 import { formatProductName, getDeviceHeaderName } from '../utils/subscriptionDisplayHelpers';
 
@@ -19,7 +19,7 @@ export function BackendSubscriptionHeader({
   children,
 }: BackendSubscriptionHeaderProps) {
   const headerContent = (
-    <div className="border-b border-gray-700 pb-2">
+    <div className="border-b border-gray-600 pb-2">
       <div className="flex flex-row items-center justify-between gap-2 px-4 pt-3 w-full">
         <div className="flex flex-row items-center gap-2">
           <ConnectionIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
@@ -33,7 +33,7 @@ export function BackendSubscriptionHeader({
                 )}
           </h3>
         </div>
-        {(stripeId || device?.tokenId) && <ChevronRightIcon className={`w-2 h-3 ${COLORS.text.secondary}`} />}
+        {(stripeId || device?.tokenId) && <ChevronIcon orientation="right" className={`w-2 h-3 ${COLORS.text.secondary}`} />}
       </div>
     </div>
   );

@@ -76,13 +76,37 @@ export async function GET(request: NextRequest) {
       const redirectUrl = new URL('/sign-in', getBaseUrl());
       redirectUrl.searchParams.set('token', result.signInToken);
       redirectUrl.searchParams.set('action', 'auto-signin');
-      return NextResponse.redirect(redirectUrl);
+
+      const response = NextResponse.redirect(redirectUrl);
+
+      // Set DIMO JWT as secure cookie for API fallback
+      response.cookies.set('dimo_jwt', token, {
+        httpOnly: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: Number.parseInt(process.env.DIMO_JWT_COOKIE_MAX_AGE || '7200'), // 2 hours default
+        path: '/', // Ensure it's available for all paths
+      });
+
+      return response;
     } else {
       // Fallback to manual sign-in
       const redirectUrl = new URL('/sign-in', getBaseUrl());
       redirectUrl.searchParams.set('email', userEmail);
       redirectUrl.searchParams.set('message', result.isExistingUser ? 'dimo_updated' : 'dimo_registered');
-      return NextResponse.redirect(redirectUrl);
+
+      const response = NextResponse.redirect(redirectUrl);
+
+      // Set DIMO JWT as secure cookie for API fallback
+      response.cookies.set('dimo_jwt', token, {
+        httpOnly: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: Number.parseInt(process.env.DIMO_JWT_COOKIE_MAX_AGE || '7200'), // 2 hours default
+        path: '/', // Ensure it's available for all paths
+      });
+
+      return response;
     }
   } catch (error) {
     console.error('DIMO callback error:', error);

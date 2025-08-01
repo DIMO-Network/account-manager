@@ -1,6 +1,6 @@
 import type { StripeEnhancedSubscription } from '@/utils/subscriptionHelpers';
 import Link from 'next/link';
-import { ChevronRightIcon, ConnectionIcon } from '@/components/Icons';
+import { ChevronIcon, ConnectionIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
 import { getStripeSubscriptionRenewalInfo } from './utils/subscriptionDisplayHelpers';
@@ -32,7 +32,7 @@ function StripeSubscriptionItem({ subscription }: { subscription: StripeEnhanced
                 {subscription.productName}
               </h3>
             </div>
-            <ChevronRightIcon className={`w-2 h-3 ${COLORS.text.secondary}`} />
+            <ChevronIcon orientation="right" className={`w-2 h-3 ${COLORS.text.secondary}`} />
           </div>
         </div>
         <div className="px-4 py-3">

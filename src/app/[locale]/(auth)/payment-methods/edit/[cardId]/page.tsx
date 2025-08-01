@@ -3,7 +3,7 @@
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { WalletIcon } from '@/components/Icons';
 import { EditCardForm } from '@/components/payment/EditCardForm';
-import { COLORS } from '@/utils/designSystem';
+import { PageHeader } from '@/components/ui';
 
 export default function EditPaymentMethodPage() {
   const router = useRouter();
@@ -16,11 +16,8 @@ export default function EditPaymentMethodPage() {
   }
 
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2 mb-6">
-        <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
-        <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Edit Card</h1>
-      </div>
+    <div className="flex flex-col flex-1 gap-4">
+      <PageHeader icon={<WalletIcon />} title="Edit Card" />
 
       <EditCardForm
         cardId={cardId as string}

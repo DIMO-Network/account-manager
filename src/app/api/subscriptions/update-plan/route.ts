@@ -8,7 +8,7 @@ import { authorizeSubscriptionAccess } from '@/utils/subscriptionHelpers';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { subscriptionId, newPriceId, prorationDate } = body;
+    const { subscriptionId, newPriceId, prorationDate, billingCycleAnchor } = body;
 
     if (!subscriptionId || !newPriceId) {
       return NextResponse.json(
@@ -25,6 +25,15 @@ export async function POST(request: NextRequest) {
 
     const dimoToken = user.privateMetadata?.dimoToken as string;
     const jwtToken = (await cookies()).get('dimo_jwt')?.value;
+
+    // Check if JWT token is missing
+    if (!jwtToken) {
+      return NextResponse.json(
+        { error: 'DIMO session expired. Please sign in with DIMO again.' },
+        { status: 401 },
+      );
+    }
+
     const authResult = await authorizeSubscriptionAccess(subscriptionId, dimoToken, jwtToken);
     if (!authResult.authorized) {
       return NextResponse.json({ error: authResult.error || 'Unauthorized' }, { status: 401 });
@@ -40,10 +49,15 @@ export async function POST(request: NextRequest) {
       requestBody.prorationDate = prorationDate;
     }
 
+    if (billingCycleAnchor) {
+      requestBody.billingCycleAnchor = billingCycleAnchor;
+    }
+
     const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(jwtToken && { Authorization: `Bearer ${jwtToken}` }),
       },
       body: JSON.stringify(requestBody),
     });
