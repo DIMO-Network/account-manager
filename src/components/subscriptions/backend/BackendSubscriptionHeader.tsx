@@ -39,7 +39,19 @@ export function BackendSubscriptionHeader({
   );
 
   // For grandfathered devices (no stripeId), link to device tokenId
+  // For Tesla connections, link to connection page using vehicle tokenId
   if (!stripeId && device?.tokenId) {
+    // Check if this is a Tesla connection subscription
+    if (device?.connection?.name === 'Tesla' && device?.vehicle?.tokenId) {
+      return (
+        <Link href={`/subscriptions/connection/${device.vehicle.tokenId}`} className="block">
+          {headerContent}
+          {children}
+        </Link>
+      );
+    }
+
+    // For other grandfathered devices, link to device page
     return (
       <Link href={`/subscriptions/device/${device.tokenId}`} className="block">
         {headerContent}

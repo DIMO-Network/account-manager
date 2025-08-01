@@ -8,11 +8,11 @@ import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { getBackendSubscriptionRenewalInfo } from './utils/subscriptionDisplayHelpers';
 
-type GrandfatheredSubscriptionDetailCardProps = {
+type ConnectionSubscriptionDetailCardProps = {
   subscription: BackendSubscription;
 };
 
-export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscriptionDetailCardProps> = ({ subscription }) => {
+export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDetailCardProps> = ({ subscription }) => {
   const router = useRouter();
   const [isActivating, setIsActivating] = useState(false);
   const [showConfirmActivation, setShowConfirmActivation] = useState(false);
@@ -22,8 +22,8 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
     return null;
   }
 
-  const serialNumber = device.serial || `Token ID: ${device.tokenId}`;
-  const serialLabel = device.serial ? 'Serial Number' : 'Token ID';
+  const vehicleTokenId = device.vehicle?.tokenId;
+  const connectionName = device.connection?.name || 'Unknown Connection';
 
   const renewalInfo = getBackendSubscriptionRenewalInfo(subscription, device);
 
@@ -52,7 +52,6 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
       }
 
       // Create subscription link for users without payment method
-      const vehicleTokenId = device.vehicle?.tokenId;
       if (!vehicleTokenId) {
         throw new Error('No vehicle token ID found');
       }
@@ -86,7 +85,6 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
   const handleConfirmActivation = async () => {
     setIsActivating(true);
     try {
-      const vehicleTokenId = device.vehicle?.tokenId;
       if (!vehicleTokenId) {
         throw new Error('No vehicle token ID found');
       }
@@ -127,23 +125,15 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
 
   return (
     <>
-      <PageHeader icon={<CarIcon />} title="Grandfathered Device Details" className="mb-4" />
+      <PageHeader icon={<CarIcon />} title={`${connectionName} Connection Details`} className="mb-4" />
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="space-y-4">
-          {/* Note for devices without connected vehicles */}
-          {!device.vehicle?.tokenId && (
-            <div>
-              <div className={labelStyle}>Note</div>
-              <div className={`${valueStyle} ${borderStyle}`}>
-                Please connect your vehicle in the DIMO Mobile app
-              </div>
-            </div>
-          )}
-
-          {/* Serial Number / Token ID */}
+          {/* Connection Type */}
           <div>
-            <div className={labelStyle}>{serialLabel}</div>
-            <div className={`${valueStyle} ${borderStyle}`}>{serialNumber}</div>
+            <div className={labelStyle}>Connection Type</div>
+            <div className={`${valueStyle} ${borderStyle}`}>
+              {connectionName}
+            </div>
           </div>
 
           {/* Connected To */}
@@ -171,20 +161,12 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
             </div>
           </div>
 
-          {/* Device Type */}
+          {/* Connection Date */}
           <div>
-            <div className={labelStyle}>Device Type</div>
+            <div className={labelStyle}>Connection Date</div>
             <div className={`${valueStyle} ${borderStyle}`}>
-              {device.manufacturer?.name || 'N/A'}
-            </div>
-          </div>
-
-          {/* Claimed Date */}
-          <div>
-            <div className={labelStyle}>Claimed Date</div>
-            <div className={`${valueStyle} ${borderStyle}`}>
-              {device.claimedAt
-                ? new Date(device.claimedAt).toLocaleDateString('en-US', {
+              {device.connection?.mintedAt
+                ? new Date(device.connection.mintedAt).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -212,9 +194,9 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
             ? (
                 <button
                   onClick={handleActivateSubscription}
-                  disabled={isActivating || !device.vehicle?.tokenId}
+                  disabled={isActivating || !vehicleTokenId}
                   className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
-                    isActivating || !device.vehicle?.tokenId
+                    isActivating || !vehicleTokenId
                       ? COLORS.button.disabled
                       : COLORS.button.primary
                   }`}
@@ -261,4 +243,4 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
   );
 };
 
-export default GrandfatheredSubscriptionDetailCard;
+export default ConnectionSubscriptionDetailCard;
