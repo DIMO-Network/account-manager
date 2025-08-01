@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { formatProductName } from './utils/subscriptionDisplayHelpers';
+import { formatProductName } from '../utils/subscriptionDisplayHelpers';
 
 type EditSubscriptionCardProps = {
   subscription: StripeSubscription;
@@ -20,6 +20,7 @@ type EditSubscriptionCardProps = {
   productPrices: ProductPrice[];
   nextScheduledPrice?: Stripe.Price | null;
   nextScheduledDate?: number | null;
+  onContinue?: (step: string, priceId: string) => void;
 };
 
 export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
@@ -30,6 +31,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
   productPrices,
   nextScheduledPrice,
   nextScheduledDate,
+  onContinue,
 }) => {
   const t = useTranslations('Subscriptions.interval');
   const router = useRouter();
@@ -85,11 +87,8 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
   };
 
   const handleContinue = () => {
-    if (selectedPriceId) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('step', 'confirm');
-      url.searchParams.set('priceId', selectedPriceId);
-      router.push(url.toString());
+    if (selectedPriceId && onContinue) {
+      onContinue('confirm', selectedPriceId);
     }
   };
 

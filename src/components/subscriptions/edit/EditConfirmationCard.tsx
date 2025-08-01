@@ -12,7 +12,7 @@ import { CarIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { featureFlags } from '@/utils/FeatureFlags';
-import { formatProductName } from './utils/subscriptionDisplayHelpers';
+import { formatProductName } from '../utils/subscriptionDisplayHelpers';
 
 type EditConfirmationCardProps = {
   subscription: StripeSubscription;
@@ -23,6 +23,7 @@ type EditConfirmationCardProps = {
   previewInvoice?: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview;
   previewInvoiceMeta?: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview;
   nextScheduledDate?: number | null;
+  onBack?: () => void;
 };
 
 export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
@@ -34,6 +35,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   previewInvoice,
   previewInvoiceMeta,
   nextScheduledDate,
+  onBack,
 }) => {
   const t = useTranslations('Subscriptions.interval');
   const router = useRouter();
@@ -91,10 +93,9 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   };
 
   const handleBack = () => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete('step');
-    url.searchParams.delete('priceId');
-    router.push(url.toString());
+    if (onBack) {
+      onBack();
+    }
   };
 
   // Type guard for PreviewInvoice
