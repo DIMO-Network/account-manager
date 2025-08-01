@@ -129,15 +129,17 @@ export function getDeviceDisplayName(device: any): string {
 
 // Helper function to get device header name (for non-Stripe subscriptions)
 export function getDeviceHeaderName(device: any): string {
+  // For Ruptela, HashDog, and AutoPi devices, show "DIMO Pro" consistently
+  if (device?.manufacturer?.name === 'Ruptela' || device?.manufacturer?.name === 'HashDog' || device?.manufacturer?.name === 'AutoPi') {
+    return 'DIMO Pro';
+  }
+
+  // For devices with vehicle definitions, show vehicle info
   if (device?.vehicle?.definition) {
     return `${device.vehicle.definition.make} ${device.vehicle.definition.model}`;
   }
 
-  // For detached devices, show "DIMO Pro" consistently
-  if (device?.manufacturer?.name === 'HashDog' || device?.manufacturer?.name === 'Ruptela') {
-    return 'DIMO Pro';
-  }
-
+  // For other manufacturers, show manufacturer name
   return device?.manufacturer?.name || 'Unknown Device';
 }
 

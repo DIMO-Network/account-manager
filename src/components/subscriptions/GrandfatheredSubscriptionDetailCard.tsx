@@ -72,6 +72,9 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
 
       // Open checkout session in new tab
       window.open(checkout_url, '_blank');
+
+      // TODO: Make redirect_uri in backend customizable
+      router.push('/dashboard');
     } catch (error) {
       console.error('Error activating subscription:', error);
       // TODO: Add proper error handling/notification
@@ -103,6 +106,8 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
       setShowConfirmActivation(false);
       // TODO: Add success notification and refresh data
       console.warn('Subscription activated successfully');
+
+      router.push('/dashboard');
     } catch (error) {
       console.error('Error confirming subscription activation:', error);
       // TODO: Add proper error handling/notification
@@ -116,8 +121,8 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
   };
 
   // Reusable styles
-  const labelStyle = 'font-medium text-base leading-5 px-4 mb-1';
-  const valueStyle = 'font-light text-xs leading-5 px-4 pb-3';
+  const labelStyle = 'font-light text-xs leading-5 px-4 mb-1';
+  const valueStyle = 'font-medium text-base leading-5 px-4 pb-3';
   const borderStyle = 'border-b border-gray-700';
 
   return (
@@ -125,6 +130,16 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
       <PageHeader icon={<CarIcon />} title="Grandfathered Device Details" className="mb-4" />
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="space-y-4">
+          {/* Note for devices without connected vehicles */}
+          {!device.vehicle?.tokenId && (
+            <div>
+              <div className={labelStyle}>Note</div>
+              <div className={`${valueStyle} ${borderStyle}`}>
+                Please connect your vehicle in the DIMO Mobile app
+              </div>
+            </div>
+          )}
+
           {/* Serial Number / Token ID */}
           <div>
             <div className={labelStyle}>{serialLabel}</div>
@@ -200,7 +215,7 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
                   disabled={isActivating || !device.vehicle?.tokenId}
                   className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
                     isActivating || !device.vehicle?.tokenId
-                      ? COLORS.button.disabledTransparent
+                      ? COLORS.button.disabled
                       : COLORS.button.primary
                   }`}
                   type="button"
@@ -232,6 +247,7 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
                   </button>
                 </div>
               )}
+
           <button
             onClick={() => router.push('/dashboard')}
             className={`${RESPONSIVE.touch} ${COLORS.button.tertiary} ${BORDER_RADIUS.full} font-medium w-full`}
