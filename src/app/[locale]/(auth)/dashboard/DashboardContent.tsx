@@ -1,10 +1,9 @@
 'use client';
 
+import type { StripeEnhancedSubscription } from '@/libs/StripeSubscriptionService';
 import type { BackendSubscription } from '@/types/subscription';
-import type { StripeEnhancedSubscription } from '@/utils/subscriptionHelpers';
 import { useEffect, useState } from 'react';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
-import { fetchEnhancedSubscriptions } from '@/utils/subscriptionHelpers';
 import { SubscriptionsClient } from '../subscriptions/SubscriptionsClient';
 
 type DashboardContentProps = {
@@ -23,8 +22,14 @@ export function DashboardContent({
     const fetchSubscriptions = async () => {
       if (customerId && initialSubscriptions.length === 0) {
         try {
-          const enhancedSubscriptions = await fetchEnhancedSubscriptions(customerId);
-          setSubscriptions(enhancedSubscriptions);
+          const response = await fetch(`/api/stripe/subscriptions?customerId=${customerId}`);
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch subscriptions');
+          }
+
+          const data = await response.json();
+          setSubscriptions(data.subscriptions);
         } catch (error) {
           console.error('Error fetching subscriptions:', error);
         }

@@ -3,8 +3,8 @@ import { currentUser } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { stripe } from '@/libs/Stripe';
+import { authorizeSubscriptionAccess } from '@/libs/StripeSubscriptionService';
 import { featureFlags } from '@/utils/FeatureFlags';
-import { authorizeSubscriptionAccess } from '@/utils/subscriptionHelpers';
 import { SubscriptionService } from '@/utils/SubscriptionService';
 
 export async function GET(

@@ -1,5 +1,5 @@
+import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
 import type { SubscriptionData } from '@/types/subscription';
-import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { currentUser } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
 import { getDB } from '@/libs/DB';

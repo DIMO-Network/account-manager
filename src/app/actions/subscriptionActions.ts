@@ -1,7 +1,7 @@
 'use server';
 
 import type Stripe from 'stripe';
-import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
+import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
 import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';

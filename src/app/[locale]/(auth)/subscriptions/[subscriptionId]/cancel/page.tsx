@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { CancellationFlow } from '@/components/subscriptions/cancellation/CancellationFlow';
 import { stripe } from '@/libs/Stripe';
-import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
+import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/libs/StripeSubscriptionService';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 // Helper function to check if subscription should redirect

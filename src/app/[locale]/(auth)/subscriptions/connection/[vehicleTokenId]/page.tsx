@@ -1,7 +1,7 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { notFound } from 'next/navigation';
 import ConnectionSubscriptionDetailCard from '@/components/subscriptions/ConnectionSubscriptionDetailCard';
-import { fetchBackendSubscriptions } from '@/utils/subscriptionHelpers';
+import { fetchBackendSubscriptions } from '@/libs/StripeSubscriptionService';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 export default async function ConnectionSubscriptionDetailPage({

@@ -1,7 +1,7 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { notFound } from 'next/navigation';
 import GrandfatheredSubscriptionDetailCard from '@/components/subscriptions/GrandfatheredSubscriptionDetailCard';
-import { fetchBackendSubscriptions } from '@/utils/subscriptionHelpers';
+import { fetchBackendSubscriptions } from '@/libs/StripeSubscriptionService';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 export default async function GrandfatheredDeviceDetailPage({

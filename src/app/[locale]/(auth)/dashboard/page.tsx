@@ -1,10 +1,10 @@
+import type { StripeEnhancedSubscription } from '@/libs/StripeSubscriptionService';
 import type { BackendSubscription } from '@/types/subscription';
-import type { StripeEnhancedSubscription } from '@/utils/subscriptionHelpers';
 import { currentUser } from '@clerk/nextjs/server';
 import { getTranslations } from 'next-intl/server';
 import { cookies } from 'next/headers';
+import { fetchBackendSubscriptions } from '@/libs/StripeSubscriptionService';
 import { featureFlags } from '@/utils/FeatureFlags';
-import { fetchBackendSubscriptions } from '@/utils/subscriptionHelpers';
 import { DashboardContent } from './DashboardContent';
 import { PaymentMethodSection } from './PaymentMethodSection';
 

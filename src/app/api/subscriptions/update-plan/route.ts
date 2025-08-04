@@ -2,8 +2,8 @@ import type { NextRequest } from 'next/server';
 import { currentUser } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { authorizeSubscriptionAccess } from '@/libs/StripeSubscriptionService';
 import { featureFlags } from '@/utils/FeatureFlags';
-import { authorizeSubscriptionAccess } from '@/utils/subscriptionHelpers';
 
 export async function POST(request: NextRequest) {
   try {

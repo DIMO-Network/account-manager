@@ -1,9 +1,9 @@
 'use client';
 
-import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
+import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
 import React, { useState } from 'react';
+import { STRIPE_CANCELLATION_FEEDBACK } from '@/libs/StripeSubscriptionService';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { STRIPE_CANCELLATION_FEEDBACK } from '@/utils/subscriptionHelpers';
 
 const CANCELLATION_REASONS = [
   { value: 'customer_service' as StripeCancellationFeedback, label: STRIPE_CANCELLATION_FEEDBACK.customer_service },

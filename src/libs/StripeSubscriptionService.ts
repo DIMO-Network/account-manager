@@ -102,7 +102,7 @@ async function getProductInfo(productId: string): Promise<{ name: string } | nul
   }
 }
 
-export async function fetchEnhancedSubscriptions(customerId: string): Promise<StripeEnhancedSubscription[]> {
+export async function fetchStripeSubscriptions(customerId: string): Promise<StripeEnhancedSubscription[]> {
   const subs = await stripe().subscriptions.list({
     customer: customerId,
     expand: ['data.items.data.price'],

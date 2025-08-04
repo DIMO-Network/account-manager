@@ -1,8 +1,8 @@
 'use client';
 
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
+import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
 import type { StripeSubscription } from '@/types/subscription';
-import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState, useTransition } from 'react';
 import { CarIcon } from '@/components/Icons';

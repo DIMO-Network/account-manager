@@ -5,7 +5,7 @@ import { notFound, redirect } from 'next/navigation';
 import { getPreviewInvoice } from '@/app/actions/getPreviewInvoice';
 import { getProductPrices } from '@/app/actions/getProductPrices';
 import { EditSubscriptionFlow } from '@/components/subscriptions/edit/EditSubscriptionFlow';
-import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
+import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/libs/StripeSubscriptionService';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 export default async function EditSubscriptionPage({

@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { CarIcon, EditIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
+import { getSubscriptionTypeAndPrice } from '@/libs/StripeSubscriptionService';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
 import { getStripeStatusDisplay, getStripeSubscriptionRenewalInfo } from './utils/subscriptionDisplayHelpers';
 
 type SubscriptionDetailCardProps = {

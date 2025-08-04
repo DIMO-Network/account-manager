@@ -2,7 +2,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import SubscriptionDetailCard from '@/components/subscriptions/SubscriptionDetailCard';
-import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/utils/subscriptionHelpers';
+import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/libs/StripeSubscriptionService';
 import { PaymentMethodSection } from '../PaymentMethodSection';
 
 export default async function SubscriptionDetailPage({ params }: { params: Promise<{ subscriptionId: string }> }) {
