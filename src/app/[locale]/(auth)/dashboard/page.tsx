@@ -1,42 +1,12 @@
+import type { StripeEnhancedSubscription } from '@/libs/StripeSubscriptionService';
 import type { BackendSubscription } from '@/types/subscription';
-import type { StripeEnhancedSubscription } from '@/utils/subscriptionHelpers';
-import { currentUser } from '@clerk/nextjs/server';
 import { getTranslations } from 'next-intl/server';
 import { cookies } from 'next/headers';
-import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
-import { WalletIcon } from '@/components/Icons';
-import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
-import { PageHeader } from '@/components/ui';
-import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
+import { getSession } from '@/libs/Session';
+import { fetchBackendSubscriptions } from '@/libs/StripeSubscriptionService';
 import { featureFlags } from '@/utils/FeatureFlags';
-import { fetchBackendSubscriptions, fetchEnhancedSubscriptions } from '@/utils/subscriptionHelpers';
-import { PaymentMethodClient } from '../subscriptions/PaymentMethodClient';
-import { SubscriptionsClient } from '../subscriptions/SubscriptionsClient';
-import { PaymentMethodButtons } from './PaymentMethodButtons';
-
-function PaymentMethodSection() {
-  return (
-    <div className="flex flex-col gap-4 lg:w-1/4 w-full order-1 lg:order-2">
-      <PageHeader
-        icon={<WalletIcon />}
-        title="Payment Method"
-        className="lg:hidden"
-      />
-      <div className={`flex flex-col justify-between ${BORDER_RADIUS.lg} ${COLORS.background.primary} py-3 px-4 lg:block min-h-24`}>
-        <div className="flex flex-col">
-          <div className="mb-4 hidden lg:block">
-            <WalletIcon className="w-4 h-4" />
-          </div>
-          <div className="flex-1">
-            <PaymentMethodClient />
-          </div>
-        </div>
-        <PaymentMethodButtons />
-      </div>
-      <PaymentMethodsNote />
-    </div>
-  );
-}
+import { DashboardContent } from './DashboardContent';
+import { PaymentMethodSection } from './PaymentMethodSection';
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string }>;
@@ -53,44 +23,28 @@ export async function generateMetadata(props: {
 }
 
 export default async function DashboardPage() {
-  const customerResult = await getOrCreateStripeCustomer();
-
-  if (!customerResult.success || !customerResult.customerId) {
-    return (
-      <div className="flex flex-col lg:flex-row gap-6">
-        <PaymentMethodSection />
-        <div className="w-full lg:w-3/4 order-2 lg:order-1">
-          <div className="text-center py-8">
-            <p className="text-gray-500">Unable to load subscriptions</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Fetch data based on feature flag
-  let subscriptions: StripeEnhancedSubscription[] = [];
+  const subscriptions: StripeEnhancedSubscription[] = [];
   let backendStatuses: BackendSubscription[] = [];
 
   if (featureFlags.useBackendProxy) {
+    const session = await getSession();
     const dimoToken = (await cookies()).get('dimo_jwt')?.value
-      || (await currentUser())?.privateMetadata?.dimoToken as string;
+      || session?.dimoToken;
 
     if (dimoToken) {
       const result = await fetchBackendSubscriptions(dimoToken);
       backendStatuses = result || [];
     }
-  } else {
-    subscriptions = await fetchEnhancedSubscriptions(customerResult.customerId);
   }
 
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       <PaymentMethodSection />
       <div className="w-full lg:w-3/4 order-2 lg:order-1">
-        <SubscriptionsClient
-          subscriptions={subscriptions}
-          backendStatuses={backendStatuses}
+        <DashboardContent
+          initialSubscriptions={subscriptions}
+          initialBackendStatuses={backendStatuses}
         />
       </div>
     </div>

@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 import { DefaultPaymentMethodCard } from '@/components/payment/DefaultPaymentMethodCard';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';

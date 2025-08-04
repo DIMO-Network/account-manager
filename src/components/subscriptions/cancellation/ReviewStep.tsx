@@ -1,10 +1,10 @@
 'use client';
 
+import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
 import type { StripeSubscription } from '@/types/subscription';
-import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
 import React from 'react';
+import { getCancellationFeedbackLabel } from '@/libs/StripeSubscriptionService';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { getCancellationFeedbackLabel } from '@/utils/subscriptionHelpers';
 import { getStripeSubscriptionRenewalInfo } from '../utils/subscriptionDisplayHelpers';
 
 type ReviewStepProps = {

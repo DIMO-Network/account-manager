@@ -1,6 +1,7 @@
 'use server';
 
-import { clerkClient, currentUser } from '@clerk/nextjs/server';
+import { getUser } from '@/libs/DAL';
+import { updateSessionData } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 
 export async function getOrCreateStripeCustomer(): Promise<{
@@ -9,20 +10,16 @@ export async function getOrCreateStripeCustomer(): Promise<{
   error?: string;
 }> {
   try {
-    const user = await currentUser();
+    const user = await getUser();
 
     if (!user) {
       return { success: false, error: 'User not authenticated' };
     }
 
-    if (!user.primaryEmailAddress?.emailAddress) {
-      return { success: false, error: 'User email not found' };
-    }
-
-    const userEmail = user.primaryEmailAddress.emailAddress;
+    const userEmail = user.email;
 
     // Check if we already have a customer ID stored
-    const existingCustomerId: string | undefined = user.publicMetadata?.stripeCustomerId as string;
+    const existingCustomerId: string | undefined = user.stripeCustomerId;
 
     if (existingCustomerId) {
       // Verify the customer still exists in Stripe
@@ -49,23 +46,16 @@ export async function getOrCreateStripeCustomer(): Promise<{
       // Create new customer
       const customer = await stripe().customers.create({
         email: userEmail,
-        name: user.fullName || undefined,
         metadata: {
-          user_id: user.id,
-          auth_type: 'clerk',
+          userId: user.id,
+          authType: 'dimoJWT',
         },
       });
       customerId = customer.id;
     }
 
-    // Store customer ID in user's metadata
-    const client = await clerkClient();
-    await client.users.updateUserMetadata(user.id, {
-      publicMetadata: {
-        ...user.publicMetadata,
-        stripeCustomerId: customerId,
-      },
-    });
+    // Store customer ID in session for future use
+    await updateSessionData({ stripeCustomerId: customerId });
 
     return { success: true, customerId };
   } catch (error) {

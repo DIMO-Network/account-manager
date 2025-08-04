@@ -3,8 +3,8 @@
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
 import React from 'react';
+import { getSubscriptionTypeAndPrice } from '@/libs/StripeSubscriptionService';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
 import { getStripeSubscriptionRenewalInfo } from '../utils/subscriptionDisplayHelpers';
 
 type ConfirmationStepProps = {

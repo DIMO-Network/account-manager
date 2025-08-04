@@ -1,8 +1,8 @@
-import type { StripeEnhancedSubscription } from '@/utils/subscriptionHelpers';
+import type { StripeEnhancedSubscription } from '@/libs/StripeSubscriptionService';
 import Link from 'next/link';
 import { ChevronIcon, ConnectionIcon } from '@/components/Icons';
+import { getSubscriptionTypeAndPrice } from '@/libs/StripeSubscriptionService';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
-import { getSubscriptionTypeAndPrice } from '@/utils/subscriptionHelpers';
 import { getStripeSubscriptionRenewalInfo } from './utils/subscriptionDisplayHelpers';
 
 function SubscriptionRenewalInfo({ subscription }: { subscription: StripeEnhancedSubscription }) {

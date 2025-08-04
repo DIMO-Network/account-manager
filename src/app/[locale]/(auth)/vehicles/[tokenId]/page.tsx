@@ -1,8 +1,8 @@
-import { currentUser } from '@clerk/nextjs/server';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import { DeviceSubscriptionStatus } from '@/components/vehicles';
+import { getSession } from '@/libs/Session';
 
 type VehicleDetailPageProps = {
   params: Promise<{ locale: string; tokenId: string }>;
@@ -24,9 +24,9 @@ export default async function VehicleDetailPage(props: VehicleDetailPageProps) {
   const { locale, tokenId } = await props.params;
   setRequestLocale(locale);
 
-  const [result, user] = await Promise.all([
+  const [result, session] = await Promise.all([
     getDimoVehicleDetails(tokenId),
-    currentUser(),
+    getSession(),
   ]);
 
   if (!result.success || !result.vehicle) {
@@ -108,7 +108,7 @@ export default async function VehicleDetailPage(props: VehicleDetailPageProps) {
                     <DeviceSubscriptionStatus
                       vehicleTokenId={vehicle.tokenId}
                       connectionId={vehicle.aftermarketDevice.tokenDID}
-                      userEmail={user?.primaryEmailAddress?.emailAddress}
+                      userEmail={session?.userEmail}
                     />
                   </div>
                 </div>

@@ -1,6 +1,6 @@
 import type { MenuItemConfig } from '@/types/menu';
 import { SignOutButton } from '@/components/auth/SignOutButton';
-import { CarIcon, HomeIcon, LogoutIcon, SettingsIcon, WalletIcon } from '@/components/Icons';
+import { CarIcon, HomeIcon, LogoutIcon, WalletIcon } from '@/components/Icons';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { MenuActionButton } from '@/components/Menu/MenuActionButton';
 import { isProductionMode } from '@/utils/FeatureFlags';
@@ -40,7 +40,7 @@ export const createAuthNavigation = (translations: AuthNavigationTranslations): 
     },
   ];
 
-  // Show vehicles and user-profile items if not in production mode
+  // Show vehicles if not in production mode
   if (!isProduction) {
     menuItems.push(
       {
@@ -48,13 +48,6 @@ export const createAuthNavigation = (translations: AuthNavigationTranslations): 
         icon: CarIcon,
         iconClassName: 'h-5 w-5 text-text-secondary',
         link: '/vehicles/',
-        section: 'main',
-      },
-      {
-        label: translations.user_profile_link,
-        icon: SettingsIcon,
-        iconClassName: 'h-5 w-5 text-text-secondary',
-        link: '/user-profile/',
         section: 'main',
       },
     );

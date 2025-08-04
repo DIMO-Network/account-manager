@@ -1,5 +1,5 @@
 @import './theme.css';
-@layer theme, base, clerk, components, utilities; /* Ensure Clerk is compatible with Tailwind CSS v4 */
+@layer theme, base, components, utilities;
 
 @import 'tailwindcss';
 

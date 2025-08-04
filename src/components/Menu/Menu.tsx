@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import type { MenuItemConfig } from '@/types/menu';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { DIMOLogo } from '@/components/Icons';
 import { MenuItem } from './MenuItem';
 
@@ -11,6 +11,7 @@ type MenuProps = {
 
 export const Menu: FC<MenuProps> = ({ menuItems, onMenuItemClick }) => {
   const pathname = usePathname();
+  const router = useRouter();
 
   const getIsHighlighted = (item: MenuItemConfig) => {
     if (typeof item.link !== 'string') {
@@ -27,13 +28,23 @@ export const Menu: FC<MenuProps> = ({ menuItems, onMenuItemClick }) => {
     return currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
   };
 
+  const handleLogoClick = () => {
+    router.push('/dashboard');
+  };
+
   const mainMenuItems = menuItems.filter(item => !item.section || item.section === 'main');
   const bottomMenuItems = menuItems.filter(item => item.section === 'bottom');
 
   return (
     <div className="flex flex-col gap-4 md:rounded-xl px-4 py-6 h-full w-full md:w-64 bg-black md:bg-surface-default">
       <div className="mb-6 hidden md:block">
-        <DIMOLogo className="h-8 w-28" />
+        <button
+          onClick={handleLogoClick}
+          className="cursor-pointer"
+          type="button"
+        >
+          <DIMOLogo className="h-8 w-28" />
+        </button>
       </div>
       <ul className="flex flex-col gap-4 justify-center">
         {mainMenuItems.map(item => (

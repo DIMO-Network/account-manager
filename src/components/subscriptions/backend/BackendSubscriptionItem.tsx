@@ -1,4 +1,5 @@
 import type { BackendSubscription } from '@/types/subscription';
+import { memo } from 'react';
 import { useStripeProductName } from '@/hooks/useStripeProductName';
 import { BORDER_RADIUS } from '@/utils/designSystem';
 import { BackendSubscriptionDetails } from './BackendSubscriptionDetails';
@@ -6,12 +7,11 @@ import { BackendSubscriptionHeader } from './BackendSubscriptionHeader';
 
 type BackendSubscriptionItemProps = {
   status: BackendSubscription;
-  index: number;
 };
 
-export function BackendSubscriptionItem({ status, index }: BackendSubscriptionItemProps) {
+export const BackendSubscriptionItem = memo(({ status }: BackendSubscriptionItemProps) => {
   const device = status.device;
-  const key = device?.tokenId ? `device-${device.tokenId}` : `status-${status.start_date}-${index}`;
+  const key = device?.tokenId ? `device-${device.tokenId}` : `status-${status.start_date}-${status.new_status}`;
   const { productName, loading } = useStripeProductName(status.stripe_id ?? null);
 
   return (
@@ -26,4 +26,4 @@ export function BackendSubscriptionItem({ status, index }: BackendSubscriptionIt
       </BackendSubscriptionHeader>
     </li>
   );
-}
+});

@@ -1,39 +1,63 @@
 'use client';
 
-import { useAuth as useClerkAuth, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export type AuthUser = {
   id: string;
   email: string;
   walletAddress?: string;
-  isClerkUser: boolean;
+  stripeCustomerId?: string;
+  dimoToken: string;
 };
 
 export function useAuth() {
-  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
-  const { signOut: clerkSignOut } = useClerkAuth();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const router = useRouter();
 
-  const user: AuthUser | null = clerkUser
-    ? {
-        id: clerkUser.id,
-        email: clerkUser.primaryEmailAddress?.emailAddress || '',
-        walletAddress: clerkUser.publicMetadata?.walletAddress as string,
-        isClerkUser: true,
+  useEffect(() => {
+    // Check authentication status on mount
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+          setIsSignedIn(true);
+        } else {
+          setUser(null);
+          setIsSignedIn(false);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        setUser(null);
+        setIsSignedIn(false);
+      } finally {
+        setIsLoading(false);
       }
-    : null;
+    };
+
+    checkAuth();
+  }, []);
 
   const signOut = async () => {
-    await clerkSignOut();
-    router.push('/sign-in');
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setUser(null);
+      setIsSignedIn(false);
+      router.push('/sign-in');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return {
     user,
-    isLoading: !clerkLoaded,
-    isSignedIn: !!user,
-    isClerkUser: !!clerkUser,
+    isLoading,
+    isSignedIn,
     signOut,
   };
 }

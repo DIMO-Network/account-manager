@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { WalletIcon } from '@/components/Icons';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
