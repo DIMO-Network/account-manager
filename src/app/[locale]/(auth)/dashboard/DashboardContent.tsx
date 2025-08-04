@@ -58,37 +58,35 @@ export function DashboardContent({
 
   if (isLoading) {
     return (
-      <div className="w-full lg:w-3/4 order-2 lg:order-1">
-        <div className="space-y-6">
-          {/* Header Skeleton */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <SkeletonBox className="w-6 h-6" />
-              <SkeletonBox className="w-48 h-6" />
-            </div>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <SkeletonBox className="w-6 h-6" />
+            <SkeletonBox className="w-48 h-6" />
           </div>
+        </div>
 
-          {/* Subscription Cards Skeleton */}
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className={`${BORDER_RADIUS.lg} ${COLORS.background.primary} p-4`}>
-                <div className="flex flex-col lg:flex-row gap-4">
-                  <div className="flex-1 space-y-3">
-                    <SkeletonBox className="w-3/4 h-6" />
-                    <SkeletonBox className="w-1/2 h-4" />
-                    <div className="flex gap-2">
-                      <SkeletonBox className="w-16 h-6" />
-                      <SkeletonBox className="w-20 h-6" />
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2 lg:w-1/4">
-                    <SkeletonBox className="w-full h-10" />
-                    <SkeletonBox className="w-full h-8" />
+        {/* Subscription Cards Skeleton */}
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className={`${BORDER_RADIUS.lg} ${COLORS.background.primary} p-4`}>
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1 space-y-3">
+                  <SkeletonBox className="w-3/4 h-6" />
+                  <SkeletonBox className="w-1/2 h-4" />
+                  <div className="flex gap-2">
+                    <SkeletonBox className="w-16 h-6" />
+                    <SkeletonBox className="w-20 h-6" />
                   </div>
                 </div>
+                <div className="flex flex-col gap-2 lg:w-1/4">
+                  <SkeletonBox className="w-full h-10" />
+                  <SkeletonBox className="w-full h-8" />
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     );
