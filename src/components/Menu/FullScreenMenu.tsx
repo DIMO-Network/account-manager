@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import type { MenuItemConfig } from '@/types/menu';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CloseIcon, DIMOLogo } from '@/components/Icons';
 import { COLORS, SPACING } from '@/utils/designSystem';
@@ -22,6 +23,7 @@ export const FullScreenMenu: FC<FullScreenMenuProps> = ({
   menuItems,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const [menuState, setMenuState] = useState<MenuState>({
     isAnimating: false,
     isClosing: false,
@@ -40,6 +42,11 @@ export const FullScreenMenu: FC<FullScreenMenuProps> = ({
       onClose();
     }, 300);
   }, [onClose, updateMenuState]);
+
+  const handleLogoClick = useCallback(() => {
+    router.push('/dashboard');
+    handleClose();
+  }, [router, handleClose]);
 
   const startAnimation = useCallback(() => {
     updateMenuState({ isAnimating: true });
@@ -94,7 +101,13 @@ export const FullScreenMenu: FC<FullScreenMenuProps> = ({
         className="flex flex-col h-full w-full"
       >
         <div className={`flex justify-between items-center ${SPACING.md}`}>
-          <DIMOLogo className="h-6 w-auto" />
+          <button
+            onClick={handleLogoClick}
+            className="cursor-pointer"
+            type="button"
+          >
+            <DIMOLogo className="h-6 w-auto" />
+          </button>
           <button
             onClick={handleClose}
             className={`p-2 rounded-lg hover:bg-surface-sunken transition-colors ${COLORS.text.primary}`}
