@@ -1,3 +1,10 @@
+# [2.22.0](https://github.com/DIMO-Network/account-manager/compare/v2.21.0...v2.22.0) (2025-08-04)
+
+
+### Features
+
+* remove clerk ([#51](https://github.com/DIMO-Network/account-manager/issues/51)) ([71a6c4b](https://github.com/DIMO-Network/account-manager/commit/71a6c4bacf8465b01f797e2badefae7cbd239113))
+
 # [2.21.0](https://github.com/DIMO-Network/account-manager/compare/v2.20.0...v2.21.0) (2025-08-01)
 
 
