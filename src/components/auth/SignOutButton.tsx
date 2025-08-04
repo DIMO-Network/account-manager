@@ -1,18 +1,22 @@
 'use client';
 
-import { useClerk } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
-// Custom sign out component that clears JWT cookie
+// Custom sign out component that clears session
 export function SignOutButton({ children }: { children: React.ReactNode }) {
-  const { signOut } = useClerk();
+  const router = useRouter();
 
   const handleSignOut = async () => {
-    // Clear the JWT cookie
-    document.cookie = 'dimo_jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    try {
+      // Call our logout API (handles cookie deletion server-side)
+      await fetch('/api/auth/logout', { method: 'POST' });
 
-    // Sign out from Clerk
-    await signOut({ redirectUrl: '/sign-in' });
+      router.push('/sign-in');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      router.push('/sign-in');
+    }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {

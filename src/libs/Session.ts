@@ -94,6 +94,24 @@ export async function updateSession() {
   return session;
 }
 
+// Update session with new data
+export async function updateSessionData(updates: Partial<Omit<SessionPayload, 'expiresAt'>>) {
+  const session = await getSession();
+
+  if (!session) {
+    return null;
+  }
+
+  // Merge existing session data with updates
+  const { expiresAt, ...userData } = session;
+  const updatedUserData = { ...userData, ...updates };
+
+  // Create new session with updated data
+  await createSession(updatedUserData);
+
+  return updatedUserData;
+}
+
 // Delete session (logout)
 export async function deleteSession() {
   const cookieStore = await cookies();
