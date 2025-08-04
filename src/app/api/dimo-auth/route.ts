@@ -1,12 +1,15 @@
 import type { NextRequest } from 'next/server';
-import { clerkClient } from '@clerk/nextjs/server';
+import type { DIMOProfile } from '@/types/dimo';
 import { NextResponse } from 'next/server';
 import { logger } from '@/libs/Logger';
+import { createSession } from '@/libs/Session';
 import { getBaseUrl } from '@/utils/Helpers';
 import { verifyDimoJwt } from '@/utils/verifyDimoJwt';
 
-async function fetchDimoProfile(dimoToken: string) {
-  const profilesResponse = await fetch('https://profiles.dimo.co/v1/account', {
+async function fetchDimoProfile(dimoToken: string): Promise<DIMOProfile> {
+  const profilesApiUrl = process.env.DIMO_PROFILES_API_URL || 'https://profiles.dimo.co/v1/account';
+
+  const profilesResponse = await fetch(profilesApiUrl, {
     headers: {
       Authorization: `Bearer ${dimoToken}`,
       Accept: 'application/json',
@@ -20,58 +23,35 @@ async function fetchDimoProfile(dimoToken: string) {
   return await profilesResponse.json();
 }
 
-async function ensureClerkUser(dimoProfile: any, dimoToken: string) {
-  const client = await clerkClient();
+async function createUserSession(dimoProfile: DIMOProfile, dimoToken: string) {
   const userEmail = dimoProfile.email?.address;
   const walletAddress = dimoProfile.wallet?.address;
+  const dimoUserId = dimoProfile.id;
 
   if (!userEmail) {
     throw new Error('No email found in DIMO profile');
   }
 
-  // Check if user exists in Clerk
-  const existingUsers = await client.users.getUserList({
-    emailAddress: [userEmail],
-  });
-
-  let user = existingUsers.data[0];
-
-  if (user) {
-    // Update existing user with DIMO data
-    user = await client.users.updateUserMetadata(user.id, {
-      publicMetadata: {
-        ...user.publicMetadata,
-        hasDimoAccount: true,
-        walletAddress: walletAddress || null,
-        lastDimoSync: new Date().toISOString(),
-      },
-      privateMetadata: {
-        ...user.privateMetadata,
-        dimoToken,
-      },
-    });
-
-    logger.info('Updated existing Clerk user with DIMO data', { userId: user.id, email: userEmail });
-  } else {
-    // Create new Clerk user
-    user = await client.users.createUser({
-      emailAddress: [userEmail],
-      publicMetadata: {
-        hasDimoAccount: true,
-        walletAddress: walletAddress || null,
-        signupMethod: 'dimo',
-        registrationDate: new Date().toISOString(),
-      },
-      privateMetadata: {
-        dimoToken,
-      },
-      skipPasswordRequirement: true,
-    });
-
-    logger.info('Created new Clerk user with DIMO data', { userId: user.id, email: userEmail });
+  if (!dimoUserId) {
+    throw new Error('No user ID found in DIMO profile');
   }
 
-  return user;
+  // Create session with user data using DIMO's unique ID
+  await createSession({
+    userId: dimoUserId,
+    userEmail,
+    walletAddress: walletAddress || undefined,
+    stripeCustomerId: undefined, // Will be set when needed
+    dimoToken,
+  });
+
+  logger.info('Created user session with DIMO data', {
+    userId: dimoUserId,
+    email: userEmail,
+    walletAddress: walletAddress || 'none',
+  });
+
+  return { userId: dimoUserId, userEmail, walletAddress };
 }
 
 export async function GET(request: NextRequest) {
@@ -109,18 +89,11 @@ export async function GET(request: NextRequest) {
     const dimoProfile = await fetchDimoProfile(token);
     logger.info('DIMO profile fetched successfully', { email: dimoProfile.email?.address });
 
-    // 3. Ensure Clerk user exists and is updated
-    const clerkUser = await ensureClerkUser(dimoProfile, token);
+    // 3. Create user session with DIMO data
+    const userData = await createUserSession(dimoProfile, token);
 
-    // 4. Create sign-in token for automatic sign-in
-    const client = await clerkClient();
-    const signInToken = await client.signInTokens.createSignInToken({
-      userId: clerkUser.id,
-      expiresInSeconds: 300, // 5 minutes
-    });
-
-    // 5. Set DIMO JWT as secure cookie for API fallback
-    const response = NextResponse.redirect(new URL('/sign-in', getBaseUrl()));
+    // 4. Set DIMO JWT as secure cookie for API fallback
+    const response = NextResponse.redirect(new URL('/dashboard', getBaseUrl()));
     response.cookies.set('dimo_jwt', token, {
       httpOnly: process.env.NODE_ENV === 'production',
       secure: process.env.NODE_ENV === 'production',
@@ -129,14 +102,8 @@ export async function GET(request: NextRequest) {
       path: '/',
     });
 
-    // 6. Add sign-in token to redirect URL
-    const signInUrl = new URL('/sign-in', getBaseUrl());
-    signInUrl.searchParams.set('token', signInToken.token);
-    signInUrl.searchParams.set('action', 'auto-signin');
-    signInUrl.searchParams.set('email', dimoProfile.email?.address || '');
-
-    logger.info('Redirecting to sign-in with auto-signin token', { userId: clerkUser.id });
-    return NextResponse.redirect(signInUrl);
+    logger.info('Redirecting to dashboard with authenticated session', { userId: userData.userId });
+    return response;
   } catch (error) {
     logger.error('DIMO auth error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
