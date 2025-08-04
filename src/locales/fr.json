@@ -21,12 +21,7 @@
     "meta_description": "Créez un compte facilement grâce à notre processus d'inscription intuitif."
   },
   "Dashboard": {
-    "meta_title": "Tableau de bord",
-    "hello_message": "Bonjour {email}!",
-    "alternative_message": "Vous voulez créer votre SaaS plus rapidement en utilisant la même stack ? Essayez <url></url>."
-  },
-  "UserProfile": {
-    "meta_title": "Profil de l'utilisateur"
+    "meta_title": "Tableau de bord"
   },
   "DashboardLayout": {
     "dashboard_link": "Tableau de bord",

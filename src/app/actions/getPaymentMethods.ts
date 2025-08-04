@@ -1,10 +1,10 @@
 import type { PaymentMethodsResponse } from '@/types/paymentMethod';
-import { currentUser } from '@clerk/nextjs/server';
+import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 
 export async function getPaymentMethods(customerId: string): Promise<PaymentMethodsResponse> {
-  const user = await currentUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     throw new Error('User not authenticated');
   }
 

@@ -1,9 +1,9 @@
 import type { NextRequest } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { getSession } from '@/libs/Session';
+import { authorizeSubscriptionAccess } from '@/libs/StripeSubscriptionService';
 import { featureFlags } from '@/utils/FeatureFlags';
-import { authorizeSubscriptionAccess } from '@/utils/subscriptionHelpers';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,12 +18,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current user and check authorization
-    const user = await currentUser();
-    if (!user) {
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
     }
 
-    const dimoToken = user.privateMetadata?.dimoToken as string;
+    const dimoToken = session.dimoToken as string;
     const jwtToken = (await cookies()).get('dimo_jwt')?.value;
 
     // Check if JWT token is missing

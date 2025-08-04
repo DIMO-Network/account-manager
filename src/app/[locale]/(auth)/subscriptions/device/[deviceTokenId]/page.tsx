@@ -1,7 +1,7 @@
-import { currentUser } from '@clerk/nextjs/server';
 import { notFound } from 'next/navigation';
 import GrandfatheredSubscriptionDetailCard from '@/components/subscriptions/GrandfatheredSubscriptionDetailCard';
-import { fetchBackendSubscriptions } from '@/utils/subscriptionHelpers';
+import { getSession } from '@/libs/Session';
+import { fetchBackendSubscriptions } from '@/libs/StripeSubscriptionService';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 export default async function GrandfatheredDeviceDetailPage({
@@ -16,12 +16,12 @@ export default async function GrandfatheredDeviceDetailPage({
   }
 
   try {
-    const user = await currentUser();
-    if (!user) {
+    const session = await getSession();
+    if (!session) {
       notFound();
     }
 
-    const dimoToken = user.privateMetadata?.dimoToken as string;
+    const dimoToken = session.dimoToken;
     if (!dimoToken) {
       notFound();
     }

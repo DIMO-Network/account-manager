@@ -21,12 +21,7 @@
     "meta_description": "Effortlessly create an account through our intuitive sign-up process."
   },
   "Dashboard": {
-    "meta_title": "Dashboard",
-    "hello_message": "Hello {email}!",
-    "alternative_message": "Want to build your SaaS faster using the same stack? Try <url></url>."
-  },
-  "UserProfile": {
-    "meta_title": "User Profile"
+    "meta_title": "Dashboard"
   },
   "DashboardLayout": {
     "dashboard_link": "Dashboard",

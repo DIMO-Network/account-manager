@@ -1,4 +1,4 @@
-import type { StripeCancellationFeedback } from '@/utils/subscriptionHelpers';
+import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import {
   createCheckoutAction,

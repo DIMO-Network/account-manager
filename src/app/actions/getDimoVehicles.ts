@@ -1,8 +1,8 @@
 'use server';
 
 import type { GetVehiclesByOwnerQuery } from '@/generated/graphql';
-import { currentUser } from '@clerk/nextjs/server';
 import { graphql } from '@/generated';
+import { getSession } from '@/libs/Session';
 
 const GET_VEHICLES_BY_OWNER = graphql(`
   query GetVehiclesByOwner($owner: Address!, $first: Int!) {
@@ -42,13 +42,13 @@ export async function getDimoVehicles(): Promise<{
   error?: string;
 }> {
   try {
-    const user = await currentUser();
+    const session = await getSession();
 
-    if (!user) {
+    if (!session) {
       return { success: false, vehicles: [], error: 'User not authenticated' };
     }
 
-    const walletAddress = user.publicMetadata?.walletAddress as string;
+    const walletAddress = session.walletAddress;
 
     if (!walletAddress) {
       return { success: false, vehicles: [], error: 'No wallet address found' };

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export const useStripeProductName = (subscriptionId: string | null) => {
   const [productName, setProductName] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lastSubscriptionId = useRef<string | null>(null);
 
   useEffect(() => {
     const fetchProductName = async () => {
@@ -11,9 +12,16 @@ export const useStripeProductName = (subscriptionId: string | null) => {
         setProductName(null);
         setLoading(false);
         setError(null);
+        lastSubscriptionId.current = null;
         return;
       }
 
+      // Prevent duplicate requests for the same subscriptionId
+      if (lastSubscriptionId.current === subscriptionId) {
+        return;
+      }
+
+      lastSubscriptionId.current = subscriptionId;
       setLoading(true);
       setError(null);
 

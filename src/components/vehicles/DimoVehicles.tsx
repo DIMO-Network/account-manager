@@ -1,10 +1,10 @@
 'use client';
 
 import type { Vehicle } from '@/app/actions/getDimoVehicles';
-import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getDimoVehicles } from '@/app/actions/getDimoVehicles';
+import { useAuth } from '@/hooks/useAuth';
 import { DeviceSubscriptionStatus } from './DeviceSubscriptionStatus';
 
 export const DimoVehicles = () => {
@@ -12,7 +12,7 @@ export const DimoVehicles = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -128,7 +128,7 @@ export const DimoVehicles = () => {
                 <DeviceSubscriptionStatus
                   vehicleTokenId={vehicle.tokenId}
                   connectionId={vehicle.aftermarketDevice.tokenDID}
-                  userEmail={user?.primaryEmailAddress?.emailAddress}
+                  userEmail={user?.email}
                   compact={true}
                 />
               </div>

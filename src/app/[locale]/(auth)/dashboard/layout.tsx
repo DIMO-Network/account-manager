@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { DashboardLayoutClient } from './DashboardLayoutClient';
+import { LayoutWrapper } from '@/components/Layout';
 
 export default async function DashboardLayout(props: {
   children: React.ReactNode;
@@ -13,7 +13,8 @@ export default async function DashboardLayout(props: {
   });
 
   return (
-    <DashboardLayoutClient
+    <LayoutWrapper
+      layoutType="auth"
       translations={{
         dashboard_link: t('dashboard_link'),
         vehicles_link: t('vehicles_link'),
@@ -24,6 +25,6 @@ export default async function DashboardLayout(props: {
       }}
     >
       {props.children}
-    </DashboardLayoutClient>
+    </LayoutWrapper>
   );
 }

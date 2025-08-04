@@ -30,8 +30,6 @@
   },
   "dependencies": {
     "@arcjet/next": "^1.0.0-beta.6",
-    "@clerk/localizations": "^3.17.2",
-    "@clerk/nextjs": "^6.23.3",
     "@dimo-network/login-with-dimo": "^0.0.26",
     "@hookform/resolvers": "^5.1.1",
     "@logtail/pino": "^0.5.4",

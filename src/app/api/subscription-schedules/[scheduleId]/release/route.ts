@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 
 export async function POST(
@@ -20,8 +20,8 @@ export async function POST(
     }
 
     // Check if user is authenticated
-    const user = await currentUser();
-    if (!user) {
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json(
         { error: 'User not authenticated' },
         { status: 401 },
