@@ -13,7 +13,7 @@ export function PaymentMethodButtons() {
   if (loading || !customerId) {
     return (
       <div className="mt-6 flex justify-center">
-        <div className="animate-pulse bg-surface-sunken h-6 w-full rounded" />
+        <div className="animate-pulse bg-surface-sunken h-6 w-full rounded-full" />
       </div>
     );
   }

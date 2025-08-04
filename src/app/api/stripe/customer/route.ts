@@ -1,12 +1,12 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
+import { getSession } from '@/libs/Session';
 
 export async function GET() {
   try {
-    const { userId } = await auth();
+    const session = await getSession();
 
-    if (!userId) {
+    if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 },
