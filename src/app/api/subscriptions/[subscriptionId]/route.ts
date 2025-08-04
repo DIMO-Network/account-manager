@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 import { authorizeSubscriptionAccess } from '@/libs/StripeSubscriptionService';
 import { featureFlags } from '@/utils/FeatureFlags';
@@ -17,13 +17,13 @@ export async function GET(
     return NextResponse.json({ error: 'No subscriptionId provided' }, { status: 400 });
   }
 
-  // Get current user and check authorization
-  const user = await currentUser();
-  if (!user) {
+  // Get current session and check authorization
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
   }
 
-  const dimoToken = user.privateMetadata?.dimoToken as string;
+  const dimoToken = session.dimoToken;
   const jwtToken = (await cookies()).get('dimo_jwt')?.value;
   const authResult = await authorizeSubscriptionAccess(subscriptionId, dimoToken, jwtToken);
   if (!authResult.authorized) {
@@ -54,13 +54,13 @@ export async function POST(
       );
     }
 
-    // Get current user and check authorization
-    const user = await currentUser();
-    if (!user) {
+    // Get current session and check authorization
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
     }
 
-    const dimoToken = user.privateMetadata?.dimoToken as string;
+    const dimoToken = session.dimoToken;
     const jwtToken = (await cookies()).get('dimo_jwt')?.value;
     const authResult = await authorizeSubscriptionAccess(subscriptionId, dimoToken, jwtToken);
     if (!authResult.authorized) {

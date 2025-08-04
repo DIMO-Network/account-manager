@@ -1,6 +1,6 @@
-import { currentUser } from '@clerk/nextjs/server';
 import { notFound } from 'next/navigation';
 import ConnectionSubscriptionDetailCard from '@/components/subscriptions/ConnectionSubscriptionDetailCard';
+import { getSession } from '@/libs/Session';
 import { fetchBackendSubscriptions } from '@/libs/StripeSubscriptionService';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
@@ -16,12 +16,12 @@ export default async function ConnectionSubscriptionDetailPage({
   }
 
   try {
-    const user = await currentUser();
-    if (!user) {
+    const session = await getSession();
+    if (!session) {
       notFound();
     }
 
-    const dimoToken = user.privateMetadata?.dimoToken as string;
+    const dimoToken = session.dimoToken;
     if (!dimoToken) {
       notFound();
     }

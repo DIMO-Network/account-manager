@@ -1,8 +1,8 @@
 import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
 import type { SubscriptionData } from '@/types/subscription';
-import { currentUser } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
 import { getDB } from '@/libs/DB';
+import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 import { dataSourcesSchema, subscriptionsSchema } from '@/models/Schema';
 import { featureFlags } from './FeatureFlags';
@@ -11,8 +11,8 @@ export class SubscriptionService {
   static async checkDeviceSubscription(connectionId: string): Promise<SubscriptionData> {
     if (featureFlags.useBackendProxy) {
       try {
-        const user = await currentUser();
-        const dimoToken = user?.privateMetadata?.dimoToken as string;
+        const session = await getSession();
+        const dimoToken = session?.dimoToken;
 
         if (!dimoToken) {
           return {

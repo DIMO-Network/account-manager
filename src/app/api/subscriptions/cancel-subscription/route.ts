@@ -1,13 +1,13 @@
 import type { NextRequest } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { getSession } from '@/libs/Session';
 import { featureFlags } from '@/utils/FeatureFlags';
 import { SubscriptionService } from '@/utils/SubscriptionService';
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await currentUser();
-    if (!user) {
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json(
         { error: 'User not authenticated' },
         { status: 401 },
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // V2: Use backend proxy if feature flag is enabled
     if (featureFlags.useBackendProxy) {
-      const dimoToken = user.privateMetadata?.dimoToken as string;
+      const dimoToken = session.dimoToken as string;
       if (!dimoToken) {
         return NextResponse.json(
           { error: 'DIMO authentication required - please sign in with DIMO' },

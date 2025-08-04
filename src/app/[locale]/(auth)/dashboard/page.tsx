@@ -1,8 +1,8 @@
 import type { StripeEnhancedSubscription } from '@/libs/StripeSubscriptionService';
 import type { BackendSubscription } from '@/types/subscription';
-import { currentUser } from '@clerk/nextjs/server';
 import { getTranslations } from 'next-intl/server';
 import { cookies } from 'next/headers';
+import { getSession } from '@/libs/Session';
 import { fetchBackendSubscriptions } from '@/libs/StripeSubscriptionService';
 import { featureFlags } from '@/utils/FeatureFlags';
 import { DashboardContent } from './DashboardContent';
@@ -28,8 +28,9 @@ export default async function DashboardPage() {
   let backendStatuses: BackendSubscription[] = [];
 
   if (featureFlags.useBackendProxy) {
+    const session = await getSession();
     const dimoToken = (await cookies()).get('dimo_jwt')?.value
-      || (await currentUser())?.privateMetadata?.dimoToken as string;
+      || session?.dimoToken;
 
     if (dimoToken) {
       const result = await fetchBackendSubscriptions(dimoToken);

@@ -2,9 +2,9 @@
 
 import type Stripe from 'stripe';
 import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
-import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
+import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 import { featureFlags } from '@/utils/FeatureFlags';
 import { getBaseUrl } from '@/utils/Helpers';
@@ -209,12 +209,12 @@ export async function createCheckoutActionV2(
   plan: 'monthly' | 'annual' = 'monthly',
 ): Promise<ActionResult<{ checkout_url: string }>> {
   try {
-    const user = await currentUser();
-    if (!user) {
+    const session = await getSession();
+    if (!session) {
       return { success: false, error: 'User not authenticated' };
     }
 
-    const dimoToken = user.privateMetadata?.dimoToken as string;
+    const dimoToken = session.dimoToken;
     if (!dimoToken) {
       return { success: false, error: 'DIMO authentication required' };
     }
@@ -291,12 +291,12 @@ export async function cancelSubscriptionActionV2(
   },
 ): Promise<ActionResult<void>> {
   try {
-    const user = await currentUser();
-    if (!user) {
+    const session = await getSession();
+    if (!session) {
       return { success: false, error: 'User not authenticated' };
     }
 
-    const dimoToken = user.privateMetadata?.dimoToken as string;
+    const dimoToken = session.dimoToken;
     if (!dimoToken) {
       return { success: false, error: 'DIMO authentication required' };
     }
@@ -359,12 +359,12 @@ export async function updateSubscriptionActionV2(
   },
 ): Promise<ActionResult<void>> {
   try {
-    const user = await currentUser();
-    if (!user) {
+    const session = await getSession();
+    if (!session) {
       return { success: false, error: 'User not authenticated' };
     }
 
-    const dimoToken = user.privateMetadata?.dimoToken as string;
+    const dimoToken = session.dimoToken;
     if (!dimoToken) {
       return { success: false, error: 'DIMO authentication required' };
     }
