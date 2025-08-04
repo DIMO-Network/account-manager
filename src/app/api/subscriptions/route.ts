@@ -1,12 +1,12 @@
 import type { NextRequest } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
