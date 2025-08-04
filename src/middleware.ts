@@ -1,49 +1,62 @@
 import type { NextFetchEvent, NextRequest } from 'next/server';
 import { detectBot } from '@arcjet/next';
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
 import arcjet from '@/libs/Arcjet';
+import { isAuthenticated, redirectToSignIn } from '@/libs/MiddlewareAuth';
 import { AppConfig } from '@/utils/AppConfig';
 import { routing } from './libs/i18nRouting';
 
 const handleI18nRouting = createMiddleware(routing);
 
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/:locale/dashboard(.*)',
-  '/subscriptions(.*)',
-  '/:locale/subscriptions(.*)',
-  '/vehicles(.*)',
-  '/:locale/vehicles(.*)',
-  '/payment-methods(.*)',
-  '/:locale/payment-methods(.*)',
-  '/user-profile(.*)',
-  '/:locale/user-profile(.*)',
-]);
+// Route matchers
+const isProtectedRoute = (pathname: string) => {
+  const protectedPatterns = [
+    /^\/dashboard/,
+    /^\/[a-z]{2}\/dashboard/,
+    /^\/subscriptions/,
+    /^\/[a-z]{2}\/subscriptions/,
+    /^\/vehicles/,
+    /^\/[a-z]{2}\/vehicles/,
+    /^\/payment-methods/,
+    /^\/[a-z]{2}\/payment-methods/,
+    /^\/user-profile/,
+    /^\/[a-z]{2}\/user-profile/,
+  ];
+  return protectedPatterns.some(pattern => pattern.test(pathname));
+};
 
-const isProductionRestrictedRoute = createRouteMatcher([
-  '/vehicles(.*)',
-  '/:locale/vehicles(.*)',
-  '/user-profile(.*)',
-  '/:locale/user-profile(.*)',
-]);
+const isProductionRestrictedRoute = (pathname: string) => {
+  const restrictedPatterns = [
+    /^\/vehicles/,
+    /^\/[a-z]{2}\/vehicles/,
+    /^\/user-profile/,
+    /^\/[a-z]{2}\/user-profile/,
+  ];
+  return restrictedPatterns.some(pattern => pattern.test(pathname));
+};
 
-const isAuthPage = createRouteMatcher([
-  '/sign-in(.*)',
-  '/:locale/sign-in(.*)',
-]);
+const isAuthPage = (pathname: string) => {
+  const authPatterns = [
+    /^\/sign-in/,
+    /^\/[a-z]{2}\/sign-in/,
+  ];
+  return authPatterns.some(pattern => pattern.test(pathname));
+};
 
-const isProtectedApiRoute = createRouteMatcher([
-  '/api/stripe/customer',
-  '/api/payment-methods',
-  '/api/subscriptions',
-  '/api/subscriptions/(.*)',
-  '/api/subscription-schedules',
-  '/api/subscription-schedules/(.*)',
-]);
+const isProtectedApiRoute = (pathname: string) => {
+  const protectedApiPatterns = [
+    /^\/api\/stripe\/customer/,
+    /^\/api\/payment-methods/,
+    /^\/api\/subscriptions/,
+    /^\/api\/subscription-schedules/,
+  ];
+  return protectedApiPatterns.some(pattern => pattern.test(pathname));
+};
 
-const isApiRoute = createRouteMatcher(['/api/(.*)']);
+const isApiRoute = (pathname: string) => {
+  return pathname.startsWith('/api/');
+};
 
 // Improve security with Arcjet
 const aj = arcjet.withRule(
@@ -59,11 +72,13 @@ const aj = arcjet.withRule(
 
 export default async function middleware(
   request: NextRequest,
-  event: NextFetchEvent,
+  _event: NextFetchEvent,
 ) {
+  const pathname = request.nextUrl.pathname;
+
   // If production mode and redirect from restricted routes
-  if (process.env.NEXT_PUBLIC_APP_VERSION === 'production' && isProductionRestrictedRoute(request)) {
-    const locale = request.nextUrl.pathname.match(/(\/.*)\/(vehicles|user-profile)/)?.at(1) ?? `/${AppConfig.defaultLocale}`;
+  if (process.env.NEXT_PUBLIC_APP_VERSION === 'production' && isProductionRestrictedRoute(pathname)) {
+    const locale = pathname.match(/(\/.*)\/(vehicles|user-profile)/)?.at(1) ?? `/${AppConfig.defaultLocale}`;
     const dashboardUrl = new URL(`${locale}/dashboard`, request.url);
     return NextResponse.redirect(dashboardUrl);
   }
@@ -77,36 +92,30 @@ export default async function middleware(
     }
   }
 
-  // Handle API routes - apply Clerk protection
-  if (isApiRoute(request)) {
-    if (isProtectedApiRoute(request)) {
-      return clerkMiddleware(async (auth) => {
-        await auth.protect();
-        return NextResponse.next();
-      })(request, event);
+  // Handle API routes - apply custom authentication
+  if (isApiRoute(pathname)) {
+    if (isProtectedApiRoute(pathname)) {
+      const authenticated = await isAuthenticated(request);
+      if (!authenticated) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     }
     return NextResponse.next();
   }
 
-  // Handle protected routes with Clerk authentication
-  if (isProtectedRoute(request)) {
-    return clerkMiddleware(async (auth, req) => {
-      const locale = req.nextUrl.pathname.match(/(\/.*)\/dashboard/)?.at(1) ?? `/${AppConfig.defaultLocale}`;
-      const signInUrl = new URL(`${locale}/sign-in`, req.url);
-
-      await auth.protect({
-        unauthenticatedUrl: signInUrl.toString(),
-      });
-
-      return handleI18nRouting(request);
-    })(request, event);
+  // Handle protected routes with custom authentication
+  if (isProtectedRoute(pathname)) {
+    const authenticated = await isAuthenticated(request);
+    if (!authenticated) {
+      const locale = pathname.match(/(\/.*)\/dashboard/)?.at(1) ?? `/${AppConfig.defaultLocale}`;
+      return redirectToSignIn(request, locale.replace('/', ''));
+    }
+    return handleI18nRouting(request);
   }
 
   // Handle auth pages
-  if (isAuthPage(request)) {
-    return clerkMiddleware(async (_auth) => {
-      return handleI18nRouting(request);
-    })(request, event);
+  if (isAuthPage(pathname)) {
+    return handleI18nRouting(request);
   }
 
   // Apply i18n routing to non-API routes
