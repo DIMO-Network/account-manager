@@ -23,9 +23,6 @@
   "Dashboard": {
     "meta_title": "Dashboard"
   },
-  "UserProfile": {
-    "meta_title": "User Profile"
-  },
   "DashboardLayout": {
     "dashboard_link": "Dashboard",
     "subscriptions_link": "Subscriptions",

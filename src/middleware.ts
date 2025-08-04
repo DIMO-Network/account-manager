@@ -20,8 +20,6 @@ const isProtectedRoute = (pathname: string) => {
     /^\/[a-z]{2}\/vehicles/,
     /^\/payment-methods/,
     /^\/[a-z]{2}\/payment-methods/,
-    /^\/user-profile/,
-    /^\/[a-z]{2}\/user-profile/,
   ];
   return protectedPatterns.some(pattern => pattern.test(pathname));
 };
@@ -30,8 +28,6 @@ const isProductionRestrictedRoute = (pathname: string) => {
   const restrictedPatterns = [
     /^\/vehicles/,
     /^\/[a-z]{2}\/vehicles/,
-    /^\/user-profile/,
-    /^\/[a-z]{2}\/user-profile/,
   ];
   return restrictedPatterns.some(pattern => pattern.test(pathname));
 };
@@ -78,7 +74,7 @@ export default async function middleware(
 
   // If production mode and redirect from restricted routes
   if (process.env.NEXT_PUBLIC_APP_VERSION === 'production' && isProductionRestrictedRoute(pathname)) {
-    const locale = pathname.match(/(\/.*)\/(vehicles|user-profile)/)?.at(1) ?? `/${AppConfig.defaultLocale}`;
+    const locale = pathname.match(/(\/.*)\/(vehicles)/)?.at(1) ?? `/${AppConfig.defaultLocale}`;
     const dashboardUrl = new URL(`${locale}/dashboard`, request.url);
     return NextResponse.redirect(dashboardUrl);
   }
