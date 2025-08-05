@@ -16,21 +16,15 @@ import * as types from './graphql';
  */
 type Documents = {
     "\n  query GetVehicle($tokenId: Int!) {\n    vehicle(tokenId: $tokenId) {\n      tokenId\n      owner\n      dcn {\n        id\n        name\n      }\n      name\n      mintedAt\n      definition {\n        make\n        model\n        year\n      }\n      aftermarketDevice {\n        tokenId\n        tokenDID\n        serial\n        owner\n        pairedAt\n        manufacturer {\n          name\n        }\n      }\n      syntheticDevice {\n        tokenId\n      }\n    }\n  }\n": typeof types.GetVehicleDocument,
-    "\n  query GetVehiclesByOwner($owner: Address!, $first: Int!) {\n    vehicles(filterBy: { owner: $owner }, first: $first) {\n      totalCount\n      edges {\n        node {\n          tokenId\n          owner\n          mintedAt\n          definition {\n            make\n            model\n            year\n          }\n          aftermarketDevice {\n            tokenId\n            tokenDID\n            serial\n            owner\n            pairedAt\n            manufacturer {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n": typeof types.GetVehiclesByOwnerDocument,
 };
 const documents: Documents = {
     "\n  query GetVehicle($tokenId: Int!) {\n    vehicle(tokenId: $tokenId) {\n      tokenId\n      owner\n      dcn {\n        id\n        name\n      }\n      name\n      mintedAt\n      definition {\n        make\n        model\n        year\n      }\n      aftermarketDevice {\n        tokenId\n        tokenDID\n        serial\n        owner\n        pairedAt\n        manufacturer {\n          name\n        }\n      }\n      syntheticDevice {\n        tokenId\n      }\n    }\n  }\n": types.GetVehicleDocument,
-    "\n  query GetVehiclesByOwner($owner: Address!, $first: Int!) {\n    vehicles(filterBy: { owner: $owner }, first: $first) {\n      totalCount\n      edges {\n        node {\n          tokenId\n          owner\n          mintedAt\n          definition {\n            make\n            model\n            year\n          }\n          aftermarketDevice {\n            tokenId\n            tokenDID\n            serial\n            owner\n            pairedAt\n            manufacturer {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n": types.GetVehiclesByOwnerDocument,
 };
 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query GetVehicle($tokenId: Int!) {\n    vehicle(tokenId: $tokenId) {\n      tokenId\n      owner\n      dcn {\n        id\n        name\n      }\n      name\n      mintedAt\n      definition {\n        make\n        model\n        year\n      }\n      aftermarketDevice {\n        tokenId\n        tokenDID\n        serial\n        owner\n        pairedAt\n        manufacturer {\n          name\n        }\n      }\n      syntheticDevice {\n        tokenId\n      }\n    }\n  }\n"): typeof import('./graphql').GetVehicleDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query GetVehiclesByOwner($owner: Address!, $first: Int!) {\n    vehicles(filterBy: { owner: $owner }, first: $first) {\n      totalCount\n      edges {\n        node {\n          tokenId\n          owner\n          mintedAt\n          definition {\n            make\n            model\n            year\n          }\n          aftermarketDevice {\n            tokenId\n            tokenDID\n            serial\n            owner\n            pairedAt\n            manufacturer {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n"): typeof import('./graphql').GetVehiclesByOwnerDocument;
 
 
 export function graphql(source: string) {
