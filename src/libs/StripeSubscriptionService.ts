@@ -25,51 +25,46 @@ export const SUBSCRIPTION_TYPES = {
 } as const;
 
 export const STRIPE_CANCELLATION_FEEDBACK = {
+  too_expensive: 'Too expensive',
+  missing_features: 'Missing features',
+  switched_service: 'Switched to different service',
+  unused: 'Unused',
   customer_service: 'Customer service was less than expected',
   low_quality: 'Quality was less than expected',
-  missing_features: 'Some features are missing',
-  other: 'Other reason',
-  switched_service: 'I\'m switching to a different service',
   too_complex: 'Ease of use was less than expected',
-  too_expensive: 'It\'s too expensive',
-  unused: 'I don\'t use the service enough',
+  other: 'Other reason',
 } as const;
 
 export type StripeCancellationFeedback = keyof typeof STRIPE_CANCELLATION_FEEDBACK;
-
-export type StripeEnhancedSubscription = Stripe.Subscription & {
-  productName: string;
-  vehicleDisplay: string;
-  nextScheduledPrice?: Stripe.Price | null;
-  nextScheduledDate?: number | null;
-};
 
 // ============================================================================
 // SHARED UTILITY FUNCTIONS
 // ============================================================================
 
 export function formatPriceAmount(amountCents: number | null | undefined): string {
-  if (typeof amountCents === 'number') {
-    return `$${(amountCents / 100).toFixed(2)}`;
+  if (!amountCents) {
+    return 'N/A';
   }
-  return '';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(amountCents / 100);
 }
 
 export function formatPriceWithInterval(amountCents: number | null | undefined, interval?: string): string {
-  const formattedAmount = formatPriceAmount(amountCents);
-  if (!formattedAmount) {
-    return '';
+  if (!amountCents) {
+    return 'N/A';
   }
-
-  const intervalSuffix = interval === 'month' ? '/month' : interval === 'year' ? '/year' : '';
-  return `${formattedAmount}${intervalSuffix}`;
+  const formatted = formatPriceAmount(amountCents);
+  return interval ? `${formatted}/${interval}` : formatted;
 }
 
 export function getVehicleDisplay(vehicleInfo?: any, vehicleTokenId?: string): string {
-  if (vehicleInfo?.definition?.year && vehicleInfo?.definition?.make && vehicleInfo?.definition?.model) {
-    return `${vehicleInfo.definition.year} ${vehicleInfo.definition.make} ${vehicleInfo.definition.model}`;
+  if (vehicleInfo?.definition) {
+    const { year, make, model } = vehicleInfo.definition;
+    return `${year} ${make} ${model}`;
   }
-  return vehicleTokenId || 'N/A';
+  return vehicleTokenId || 'Unknown Vehicle';
 }
 
 export async function withStripeErrorHandling<T>(
@@ -80,10 +75,10 @@ export async function withStripeErrorHandling<T>(
     const result = await operation();
     return { success: true, data: result };
   } catch (error) {
-    console.error(errorMessage, error);
+    console.error('Stripe operation failed:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : errorMessage,
     };
   }
 }
@@ -91,90 +86,6 @@ export async function withStripeErrorHandling<T>(
 // ============================================================================
 // STRIPE SUBSCRIPTION HELPERS
 // ============================================================================
-
-async function getProductInfo(productId: string): Promise<{ name: string } | null> {
-  try {
-    const product = await stripe().products.retrieve(productId);
-    return { name: product.name };
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    return null;
-  }
-}
-
-export async function fetchStripeSubscriptions(customerId: string): Promise<StripeEnhancedSubscription[]> {
-  const subs = await stripe().subscriptions.list({
-    customer: customerId,
-    expand: ['data.items.data.price'],
-  });
-
-  const enhancedSubscriptions = await Promise.all(
-    subs.data.map(async (sub) => {
-      // Fetch each subscription individually to get schedule data
-      const fullSubscription = await stripe().subscriptions.retrieve(sub.id, {
-        expand: ['schedule'],
-      });
-
-      const itemsWithProducts = await Promise.all(
-        fullSubscription.items.data.map(async (item) => {
-          const productId = typeof item.price.product === 'string'
-            ? item.price.product
-            : item.price.product?.id;
-
-          const productInfo = productId ? await getProductInfo(productId) : null;
-
-          return {
-            ...item,
-            price: {
-              ...item.price,
-              product: productInfo,
-            },
-          };
-        }),
-      );
-
-      return {
-        ...fullSubscription,
-        items: {
-          ...fullSubscription.items,
-          data: itemsWithProducts,
-        },
-      };
-    }),
-  );
-
-  // Get vehicle information and scheduled price information for each subscription
-  const subscriptionsWithVehicles = await Promise.all(
-    enhancedSubscriptions.map(async (sub) => {
-      const vehicleTokenId = sub.metadata?.vehicleTokenId;
-      let vehicleInfo: any = null;
-
-      if (vehicleTokenId) {
-        const result = await getDimoVehicleDetails(vehicleTokenId);
-        vehicleInfo = result.success ? result.vehicle : null;
-      }
-
-      const { nextScheduledPrice, nextScheduledDate } = await getScheduledPriceInfo(sub as unknown as Stripe.Subscription);
-
-      return {
-        ...sub,
-        vehicleInfo,
-        nextScheduledPrice,
-        nextScheduledDate,
-      };
-    }),
-  );
-
-  const simplifiedSubscriptions = subscriptionsWithVehicles.map(sub => ({
-    ...sub,
-    productName: sub.items?.data?.[0]?.price?.product?.name || `Subscription ${sub.id}`,
-    vehicleDisplay: getVehicleDisplay(sub.vehicleInfo, sub.metadata?.vehicleTokenId),
-    nextScheduledPrice: sub.nextScheduledPrice,
-    nextScheduledDate: sub.nextScheduledDate,
-  }));
-
-  return simplifiedSubscriptions as unknown as StripeEnhancedSubscription[];
-}
 
 export async function fetchSubscriptionWithSchedule(subscriptionId: string): Promise<{
   subscription: Stripe.Subscription;
