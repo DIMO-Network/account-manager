@@ -1,7 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/libs/Session';
-import { featureFlags } from '@/utils/FeatureFlags';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const backendUrl = `${featureFlags.backendApiUrl}/subscription/cancel-subscription/${subscriptionId}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001'}/subscription/cancel-subscription/${subscriptionId}`;
 
     const requestBody: any = {};
 

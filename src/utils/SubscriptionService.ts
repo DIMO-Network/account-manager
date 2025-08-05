@@ -5,7 +5,6 @@ import { getDB } from '@/libs/DB';
 import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 import { dataSourcesSchema, subscriptionsSchema } from '@/models/Schema';
-import { featureFlags } from './FeatureFlags';
 
 export class SubscriptionService {
   static async checkDeviceSubscription(connectionId: string): Promise<SubscriptionData> {
@@ -24,7 +23,7 @@ export class SubscriptionService {
 
       // URL encode the connectionId for the backend API
       const encodedConnectionId = encodeURIComponent(connectionId);
-      const backendUrl = `${featureFlags.backendApiUrl}/subscription/status/${encodedConnectionId}`;
+      const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001'}/subscription/status/${encodedConnectionId}`;
 
       const response = await fetch(backendUrl, {
         headers: {

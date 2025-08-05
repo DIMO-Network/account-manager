@@ -1,7 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/libs/Session';
-import { featureFlags } from '@/utils/FeatureFlags';
 
 export async function POST(
   _request: NextRequest,
@@ -32,7 +31,7 @@ export async function POST(
       );
     }
 
-    const backendUrl = `${featureFlags.backendApiUrl}/subscription/vehicle/${vehicleTokenId}/new-subscription`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001'}/subscription/vehicle/${vehicleTokenId}/new-subscription`;
 
     const response = await fetch(backendUrl, {
       method: 'POST',

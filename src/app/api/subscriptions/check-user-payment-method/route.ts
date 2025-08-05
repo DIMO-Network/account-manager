@@ -1,7 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/libs/Session';
-import { featureFlags } from '@/utils/FeatureFlags';
 
 export async function GET(_request: NextRequest) {
   try {
@@ -21,7 +20,7 @@ export async function GET(_request: NextRequest) {
       );
     }
 
-    const backendUrl = `${featureFlags.backendApiUrl}/subscription/check-user-payment-method`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001'}/subscription/check-user-payment-method`;
 
     const response = await fetch(backendUrl, {
       headers: {

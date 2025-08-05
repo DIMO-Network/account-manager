@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 import { authorizeSubscriptionAccess } from '@/libs/StripeSubscriptionService';
-import { featureFlags } from '@/utils/FeatureFlags';
 
 export async function GET(
   _req: NextRequest,
@@ -66,7 +65,7 @@ export async function POST(
       return NextResponse.json({ error: authResult.error || 'Unauthorized' }, { status: 401 });
     }
 
-    const backendUrl = `${featureFlags.backendApiUrl}/subscription/update/${subscriptionId}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001'}/subscription/update/${subscriptionId}`;
 
     const backendResponse = await fetch(backendUrl, {
       method: 'POST',
