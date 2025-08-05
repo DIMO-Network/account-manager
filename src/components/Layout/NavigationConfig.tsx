@@ -1,6 +1,6 @@
 import type { MenuItemConfig } from '@/types/menu';
 import { SignOutButton } from '@/components/auth/SignOutButton';
-import { CarIcon, HomeIcon, LogoutIcon, WalletIcon } from '@/components/Icons';
+import { HomeIcon, LogoutIcon, WalletIcon } from '@/components/Icons';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { MenuActionButton } from '@/components/Menu/MenuActionButton';
 import { isProductionMode } from '@/utils/FeatureFlags';
@@ -11,7 +11,6 @@ export type AuthNavigationTranslations = {
   user_profile_link: string;
   sign_out: string;
   subscriptions_link: string;
-  vehicles_link: string;
 };
 
 export type PublicNavigationTranslations = {
@@ -39,19 +38,6 @@ export const createAuthNavigation = (translations: AuthNavigationTranslations): 
       section: 'main',
     },
   ];
-
-  // Show vehicles if not in production mode
-  if (!isProduction) {
-    menuItems.push(
-      {
-        label: translations.vehicles_link,
-        icon: CarIcon,
-        iconClassName: 'h-5 w-5 text-text-secondary',
-        link: '/vehicles/',
-        section: 'main',
-      },
-    );
-  }
 
   // Bottom navigation items
   menuItems.push(

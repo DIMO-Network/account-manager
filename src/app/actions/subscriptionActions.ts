@@ -41,7 +41,6 @@ async function createDirectSubscription(
 
     if (subscription.status === 'active') {
       revalidatePath('/dashboard');
-      revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
 
       return {
         success: true,
@@ -72,7 +71,6 @@ async function createDirectSubscription(
             const updatedSub = await stripe().subscriptions.retrieve(subscription.id);
             if (updatedSub.status === 'active') {
               revalidatePath('/dashboard');
-              revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
 
               return {
                 success: true,
@@ -243,7 +241,6 @@ export async function createCheckoutActionV2(
     const result = await backendResponse.json();
 
     revalidatePath('/dashboard');
-    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
 
     return {
       success: true,
@@ -270,7 +267,6 @@ export async function cancelSubscriptionAction(
   try {
     const result = await SubscriptionService.cancelSubscription(subscriptionId, cancellationDetails);
     revalidatePath('/dashboard');
-    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
 
     return result.success
       ? { success: true, data: undefined }
@@ -317,7 +313,6 @@ export async function cancelSubscriptionActionV2(
     }
 
     revalidatePath('/dashboard');
-    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
 
     return { success: true, data: undefined };
   } catch (error) {
@@ -338,7 +333,6 @@ export async function updateSubscriptionAction(
   try {
     const result = await SubscriptionService.updateSubscription(subscriptionId, cancellationDetails);
     revalidatePath('/dashboard');
-    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
 
     return result.success
       ? { success: true, data: undefined }
@@ -395,7 +389,6 @@ export async function updateSubscriptionActionV2(
     }
 
     revalidatePath('/dashboard');
-    revalidatePath('/dashboard/vehicles/[tokenId]', 'page');
 
     return { success: true, data: undefined };
   } catch (error) {
