@@ -1,16 +1,22 @@
 name: Crowdin Action
 
 on:
-  push:
-    branches: [main] # Run on push to the main branch
-  schedule:
-    - cron: '0 5 * * *' # Run every day at 5am
+  # Temporarily disable Crowdin workflow
+  # push:
+  #   branches: [main] # Run on push to the main branch
+  # schedule:
+  #   - cron: '0 5 * * *' # Run every day at 5am
   workflow_dispatch: # Run manually
 
 jobs:
   synchronize-with-crowdin:
     name: Synchronize with Crowdin
     runs-on: ubuntu-latest
+
+    # Add explicit permissions for the job
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
