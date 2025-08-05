@@ -5,7 +5,6 @@ import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 import { authorizeSubscriptionAccess } from '@/libs/StripeSubscriptionService';
 import { featureFlags } from '@/utils/FeatureFlags';
-import { SubscriptionService } from '@/utils/SubscriptionService';
 
 export async function GET(
   _req: NextRequest,
@@ -67,51 +66,33 @@ export async function POST(
       return NextResponse.json({ error: authResult.error || 'Unauthorized' }, { status: 401 });
     }
 
-    // V2: Use backend proxy if feature flag is enabled
-    if (featureFlags.useBackendProxy) {
-      console.warn(`🚩 Using backend proxy: ${featureFlags.backendApiUrl}`);
+    const backendUrl = `${featureFlags.backendApiUrl}/subscription/update/${subscriptionId}`;
 
-      const backendUrl = `${featureFlags.backendApiUrl}/subscription/update/${subscriptionId}`;
+    const backendResponse = await fetch(backendUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cancel_at_period_end: true,
+        cancellation_details: cancellationDetails
+          ? {
+              feedback: cancellationDetails.feedback,
+              comment: cancellationDetails.comment,
+            }
+          : undefined,
+      }),
+    });
 
-      const backendResponse = await fetch(backendUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          cancel_at_period_end: true,
-          cancellation_details: cancellationDetails
-            ? {
-                feedback: cancellationDetails.feedback,
-                comment: cancellationDetails.comment,
-              }
-            : undefined,
-        }),
-      });
-
-      if (!backendResponse.ok) {
-        const error = await backendResponse.json();
-        return NextResponse.json(
-          { error: error.message || 'Failed to update subscription' },
-          { status: backendResponse.status },
-        );
-      }
-
-      return NextResponse.json({ success: true });
-    }
-
-    // V1: Use local Stripe service
-    console.warn('🚩 Using direct Stripe');
-    const result = await SubscriptionService.updateSubscription(subscriptionId, cancellationDetails);
-
-    if (result.success) {
-      return NextResponse.json({ success: true });
-    } else {
+    if (!backendResponse.ok) {
+      const error = await backendResponse.json();
       return NextResponse.json(
-        { error: result.error },
-        { status: 500 },
+        { error: error.message || 'Failed to update subscription' },
+        { status: backendResponse.status },
       );
     }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error in update subscription endpoint:', error);
     return NextResponse.json(

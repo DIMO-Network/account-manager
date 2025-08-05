@@ -1,7 +1,6 @@
 type Environment = 'development' | 'staging' | 'production';
 
 type FeatureFlags = {
-  useBackendProxy: boolean;
   backendApiUrl: string;
 };
 
@@ -20,7 +19,6 @@ const getBackendApiUrl = (): string => {
 };
 
 export const featureFlags: FeatureFlags = {
-  useBackendProxy: process.env.NEXT_PUBLIC_USE_BACKEND_PROXY === 'true',
   backendApiUrl: getBackendApiUrl(),
 } as const;
 
