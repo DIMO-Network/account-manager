@@ -1,22 +1,27 @@
-# [WIP] DIMO Subscription Manager
+# DIMO Account Manager
 
-A Next.js web application for managing device subscriptions and connected vehicles through the DIMO ecosystem. At this time, this application enables users to view their connected vehicles, activate/cancel device subscriptions, and manage payment methods.
+A Next.js web application for managing device subscriptions and connected vehicles through the DIMO ecosystem. This application enables users to view their connected vehicles, manage payment methods, and handle activate/update/cancel subscription flows including grandfathered devices and Tesla connections.
 
 ## 🚗 Features
 
 ### Current Features
-- **DIMO Authentication**: Integrated with [Login With DIMO](https://docs.dimo.org/developer-platform/developer-guide/dimo-developer-sdks/login-with-dimo-sdk/react-component) for seamless user authentication
-- **Vehicle Dashboard**: Display connected vehicles from user's DIMO account
-- **Device Subscription Management**:
-  - Activate subscriptions for R1 devices
-  - Cancel active subscriptions
-  - Real-time subscription status checking
+- **DIMO Authentication**: Integrated with [Login With DIMO](https://docs.dimo.org/developer-platform/developer-guide/dimo-developer-sdks/login-with-dimo-sdk/react-component) for seamless user auth using JWT tokens
+- **BackendSubscriptions Management**: Subscription management with three distinct flows:
+  - **Active Subscriptions**: Existing subscriptions managed via backend proxy
+  - **Grandfathered Devices**: Special handling for devices that pre-date the current subscription model
+  - **Tesla Connections**: Dedicated flow for Tesla vehicle connections
+- **Vehicle Dashboard**: Display connected vehicles from user's DIMO account with subscription status
+- **Subscription Management**:
+  - Activate subscriptions for R1, AutoPi, and Macaron devices; as well as, Tesla connections
+  - Cancel active subscriptions with feedback collection
+  - Real-time subscription status checking via backend proxy
+  - Plan updates and subscription modifications
 - **Payment Method Management**:
   - View saved payment methods
   - Set default payment methods
   - Remove payment methods
-- **Stripe Integration**: Secure payment processing with subscription management
-- **Multi-language Support**: Internationalization with English and French (uses Crowdin)
+  - Stripe integration for secure payment processing
+- **Multi-language Support**: (WIP) Internationalization with English and Spanish
 - **Responsive Design**: Mobile-friendly interface built with Tailwind CSS
 
 ### Future Roadmap (DINC Account Manager Evolution)
@@ -26,24 +31,51 @@ A Next.js web application for managing device subscriptions and connected vehicl
 - **Vehicle Minting**: Mint vehicles as NFTs
 - **Extended Device Support**: Support for additional DIMO-compatible devices
 
+### Authentication Flows
+- **Primary**: DIMO Login SDK with JWT token authentication
+- **Session Management**: Secure cookie-based session with `dimo_jwt` token
+- **Authorization**: Subscription access control via DIMO tokens and JWT validation
+- **API Access**: JWT tokens used for backend API authentication
+
+### Subscription Flows
+
+#### 1. Active Subscriptions
+- Backend proxy integration for existing subscriptions
+- Real-time subscription status and management
+- Plan updates with scheduled changes
+- Cancellation with feedback collection
+
+#### 2. Grandfathered Devices
+- Special handling for devices without existing payment methods
+- Payment method validation before activation
+- Checkout link generation for new subscriptions
+- Extended trial period support
+
+#### 3. Tesla Connections
+- Dedicated flow for Tesla vehicle connections
+- Backend proxy integration for subscription management
+- Vehicle-specific subscription activation
+
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 15.3 with App Router
 - **Frontend**: React 19, Tailwind CSS 4, TypeScript
-- **Authentication**: DIMO Login SDK + Clerk (fallback)
+- **Authentication**: DIMO Login SDK + JWT token authentication
 - **Payments**: Stripe with subscription management
+- **Backend Integration**: Backend proxy for subscription management
 - **Database**: PostgreSQL with DrizzleORM
 - **Internationalization**: next-intl
-- **Development**: ESLint, TypeScript, Vitest
+- **Development**: ESLint, TypeScript
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - Node.js 20+ and npm
-- PostgreSQL database (or use local SQLite for development)
+- Backend API service for subscription management
 - Stripe account for payment processing
 - DIMO developer account and API credentials
+- Backend API service for subscription management
 
 ### 1. Clone and Install
 
@@ -54,7 +86,8 @@ npm install
 ```
 
 ### 2. Environment Setup
-Create a .env.local file in the root directory with the following variables:
+Create a `.env.local` file in the root directory with the following variables:
+
 ```bash
 # DIMO Configuration
 NEXT_PUBLIC_DIMO_CLIENT_ID=your_dimo_client_id
@@ -62,30 +95,53 @@ NEXT_PUBLIC_DIMO_REDIRECT_URI=http://localhost:3000/auth/dimo/callback
 NEXT_PUBLIC_DIMO_API_KEY=your_dimo_api_key
 NEXT_PUBLIC_DIMO_ENV=development
 
-# Clerk Authentication (Fallback)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-CLERK_SECRET_KEY=your_clerk_secret_key
+# Backend API Configuration
+NEXT_PUBLIC_BACKEND_API_URL=http://localhost:3001
+
+# JWT Configuration
+JWKS_URI=https://your-jwks-endpoint/keys
+DIMO_JWT_COOKIE_MAX_AGE=7200
 
 # Stripe Configuration
 STRIPE_SECRET_KEY=your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 
-# Database
-DATABASE_URL=postgresql://postgres:password@localhost:5432/account-manager
-
 # Next.js
 NEXT_TELEMETRY_DISABLED=1
 ```
 
-### 3. Database Setup
-```bash
-# Generate database migrations
-npm run db:generate
-```
+## 🔧 API Structure
 
-This will create a migration file that reflects your schema changes. The migration is automatically applied during the next database interaction, so there is no need to run it manually or restart the Next.js server.
+The application uses a hybrid approach with both direct Stripe API calls and backend proxy integration:
 
-### Commit Message Format
+### Direct Stripe Operations
+- `/api/stripe/customer` - Customer management
+- `/api/subscriptions/[subscriptionId]/product-name` - Product information (read-only)
+- `/api/subscriptions/[subscriptionId]` - Subscription retrieval (read-only)
+
+### Backend Proxy Operations
+- `/api/subscriptions/cancel-subscription` - Subscription cancellation
+- `/api/subscriptions/update-plan` - Plan updates
+- `/api/subscriptions/check-user-payment-method` - Payment method validation
+- `/api/subscriptions/vehicle/[vehicleTokenId]/new-subscription-link` - Vehicle subscription links
+- `/api/subscriptions/vehicle/[vehicleTokenId]/new-subscription` - Vehicle subscription creation
+
+### Authentication Routes
+- `/api/auth/dimo/callback` - DIMO authentication callback
+- `/api/dimo-auth` - DIMO authentication endpoint
+- `/api/auth/logout` - Logout endpoint
+- `/api/auth/me` - User session information
+
+## 🔐 Authentication Flow
+
+1. **User initiates login** via DIMO Login SDK
+2. **DIMO authentication** validates user credentials and generates JWT token
+3. **JWT token validation** using DIMO's JWKS endpoint
+4. **Session creation** with DIMO user data and JWT token
+5. **Secure cookie storage** of JWT token for API authentication
+6. **API authorization** using JWT token for backend service access
+
+## 📝 Commit Message Format
 
 The project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification, meaning all commit messages must be formatted accordingly. To help you write commit messages, the project uses [Commitizen](https://github.com/commitizen/cz-cli), an interactive CLI that guides you through the commit process. To use it, run the following command:
 
@@ -149,11 +205,12 @@ NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 
 ### 🚢 Deployment
 #### Environment Variables for Production
-Update `.env.production  with your production values:
+Update `.env.production` with your production values:
 
 ```bash
 NEXT_PUBLIC_APP_URL=https://your-domain.com
-DATABASE_URL=your_production_database_url
+
+NEXT_PUBLIC_BACKEND_API_URL=https://your-backend-api.com
 # ... other production environment variables
 ```
 
@@ -166,11 +223,10 @@ npm start
 The application is configured to work with various hosting platforms including Railway, Sevalla, Vercel, and traditional hosting providers.
 
 ### 🤝 Contributing
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-feature`)
+1. Create a feature branch from `development` (`git checkout -b feature/new-feature`)
 3. Commit your changes (`git commit -m 'Add some feature'`)
 4. Push to the branch (`git push origin feature/new-feature`)
-5. Open a Pull Request
+5. Open a Pull Request merging to `development`
 
 ### 📄 License
 This project is licensed under the MIT License - see the LICENSE file for details.
