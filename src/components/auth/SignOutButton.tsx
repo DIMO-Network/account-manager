@@ -12,10 +12,10 @@ export function SignOutButton({ children }: { children: React.ReactNode }) {
       // Call our logout API (handles cookie deletion server-side)
       await fetch('/api/auth/logout', { method: 'POST' });
 
-      router.push('/sign-in');
+      router.push('/sign-in?action=signout');
     } catch (error) {
       console.error('Logout failed:', error);
-      router.push('/sign-in');
+      router.push('/sign-in?action=signout');
     }
   };
 
