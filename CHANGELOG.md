@@ -1,3 +1,10 @@
+## [2.22.1](https://github.com/DIMO-Network/account-manager/compare/v2.22.0...v2.22.1) (2025-08-05)
+
+
+### Bug Fixes
+
+* prevent duplicate Stripe customer creation with idempotency keys ([#53](https://github.com/DIMO-Network/account-manager/issues/53)) ([370c152](https://github.com/DIMO-Network/account-manager/commit/370c15272c95cfef6dd7f02da9488aa5a830be1f))
+
 # [2.22.0](https://github.com/DIMO-Network/account-manager/compare/v2.21.0...v2.22.0) (2025-08-04)
 
 
