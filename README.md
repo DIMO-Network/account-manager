@@ -63,7 +63,6 @@ A Next.js web application for managing device subscriptions and connected vehicl
 - **Authentication**: DIMO Login SDK + JWT token authentication
 - **Payments**: Stripe with subscription management
 - **Backend Integration**: Backend proxy for subscription management
-- **Database**: PostgreSQL with DrizzleORM
 - **Internationalization**: next-intl
 - **Development**: ESLint, TypeScript
 

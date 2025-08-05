@@ -1,10 +1,7 @@
 import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
 import type { SubscriptionData } from '@/types/subscription';
-import { eq } from 'drizzle-orm';
-import { getDB } from '@/libs/DB';
 import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
-import { dataSourcesSchema, subscriptionsSchema } from '@/models/Schema';
 
 export class SubscriptionService {
   static async checkDeviceSubscription(connectionId: string): Promise<SubscriptionData> {
@@ -151,24 +148,6 @@ export class SubscriptionService {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
-    }
-  }
-
-  static async getSubscriptionDetails(connectionId: string) {
-    try {
-      const db = await getDB();
-
-      const result = await db
-        .select()
-        .from(dataSourcesSchema)
-        .leftJoin(subscriptionsSchema, eq(dataSourcesSchema.subscriptionId, subscriptionsSchema.id))
-        .where(eq(dataSourcesSchema.connectionId, connectionId))
-        .limit(1);
-
-      return result[0] || null;
-    } catch (error) {
-      console.error('Error getting subscription details:', error);
-      return null;
     }
   }
 }
