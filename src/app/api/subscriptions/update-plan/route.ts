@@ -3,7 +3,6 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/libs/Session';
 import { authorizeSubscriptionAccess } from '@/libs/StripeSubscriptionService';
-import { featureFlags } from '@/utils/FeatureFlags';
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: authResult.error || 'Unauthorized' }, { status: 401 });
     }
 
-    const backendUrl = `${featureFlags.backendApiUrl}/subscription/update-plan/${subscriptionId}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001'}/subscription/update-plan/${subscriptionId}`;
 
     const requestBody: any = {
       newPriceId,

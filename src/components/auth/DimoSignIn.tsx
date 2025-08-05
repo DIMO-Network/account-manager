@@ -1,7 +1,7 @@
 'use client';
 
 import { LoginWithDimo } from '@dimo-network/login-with-dimo';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { Loading } from '@/components/Loading';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,6 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 export const DimoSignIn = () => {
   const { isSignedIn, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const action = searchParams.get('action');
 
   // Redirect if already signed in
   useEffect(() => {
@@ -18,15 +20,19 @@ export const DimoSignIn = () => {
   }, [isSignedIn, router]);
 
   if (isLoading) {
+    const isSigningOut = action === 'signout';
+
     return (
       <div className="space-y-4 max-w-72 mx-auto">
         <div className="text-center">
           <Loading className="mx-auto mb-4" />
           <h3 className="text-base font-medium leading-5">
-            Signing you in...
+            {isSigningOut ? 'Signing you out...' : 'Signing you in...'}
           </h3>
           <p className="text-text-secondary leading-5 text-sm mt-1">
-            Please wait while we complete your authentication.
+            {isSigningOut
+              ? 'Please wait while we complete your sign out.'
+              : 'Please wait while we complete your authentication.'}
           </p>
         </div>
       </div>

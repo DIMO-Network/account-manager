@@ -4,7 +4,6 @@ import { z } from 'zod';
 export const Env = createEnv({
   server: {
     ARCJET_KEY: z.string().startsWith('ajkey_').optional(),
-    DATABASE_URL: z.string().min(1).optional(),
     LOGTAIL_SOURCE_TOKEN: z.string().optional(),
   },
   client: {
@@ -18,7 +17,6 @@ export const Env = createEnv({
   },
   runtimeEnv: {
     ARCJET_KEY: process.env.ARCJET_KEY,
-    DATABASE_URL: process.env.DATABASE_URL,
     LOGTAIL_SOURCE_TOKEN: process.env.LOGTAIL_SOURCE_TOKEN,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NODE_ENV: process.env.NODE_ENV,

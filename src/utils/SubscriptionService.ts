@@ -1,105 +1,58 @@
 import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
 import type { SubscriptionData } from '@/types/subscription';
-import { eq } from 'drizzle-orm';
-import { getDB } from '@/libs/DB';
 import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
-import { dataSourcesSchema, subscriptionsSchema } from '@/models/Schema';
-import { featureFlags } from './FeatureFlags';
 
 export class SubscriptionService {
   static async checkDeviceSubscription(connectionId: string): Promise<SubscriptionData> {
-    if (featureFlags.useBackendProxy) {
-      try {
-        const session = await getSession();
-        const dimoToken = session?.dimoToken;
+    try {
+      const session = await getSession();
+      const dimoToken = session?.dimoToken;
 
-        if (!dimoToken) {
-          return {
-            hasActiveSubscription: false,
-            subscription: null,
-            source: 'local',
-            error: 'DIMO authentication required',
-          };
-        }
-
-        // URL encode the connectionId for the backend API
-        const encodedConnectionId = encodeURIComponent(connectionId);
-        const backendUrl = `${featureFlags.backendApiUrl}/subscription/status/${encodedConnectionId}`;
-
-        const response = await fetch(backendUrl, {
-          headers: {
-            Authorization: `Bearer ${dimoToken}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`Backend API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const isActive = data.status === 'active' || data.status === 'trialing';
-
-        return {
-          hasActiveSubscription: isActive,
-          subscription: isActive
-            ? {
-                id: 'backend_subscription',
-                status: data.status,
-                planType: 'basic',
-              }
-            : null,
-          source: 'backend',
-        };
-      } catch (error) {
-        console.error('Backend API call failed:', error);
+      if (!dimoToken) {
         return {
           hasActiveSubscription: false,
           subscription: null,
-          source: 'backend',
-          error: error instanceof Error ? error.message : 'Backend API failed',
+          source: 'local',
+          error: 'DIMO authentication required',
         };
       }
-    }
 
-    try {
-      const searchQuery = `metadata['connectionId']:'${connectionId}'`;
-      const subscriptions = await stripe().subscriptions.search({
-        query: searchQuery,
-        limit: 1,
+      // URL encode the connectionId for the backend API
+      const encodedConnectionId = encodeURIComponent(connectionId);
+      const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001'}/subscription/status/${encodedConnectionId}`;
+
+      const response = await fetch(backendUrl, {
+        headers: {
+          Authorization: `Bearer ${dimoToken}`,
+        },
       });
 
-      if (subscriptions.data.length > 0) {
-        const subscription = subscriptions.data[0];
-        if (subscription) {
-          const isActive = subscription.status === 'active' || subscription.status === 'trialing';
-
-          return {
-            hasActiveSubscription: isActive,
-            subscription: isActive
-              ? {
-                  id: subscription.id,
-                  status: subscription.status,
-                  planType: subscription.metadata?.planType || 'basic',
-                }
-              : null,
-            source: 'stripe',
-          };
-        }
+      if (!response.ok) {
+        throw new Error(`Backend API error: ${response.status}`);
       }
 
+      const data = await response.json();
+      const isActive = data.status === 'active' || data.status === 'trialing';
+
       return {
-        hasActiveSubscription: false,
-        subscription: null,
-        source: 'stripe',
+        hasActiveSubscription: isActive,
+        subscription: isActive
+          ? {
+              id: 'backend_subscription',
+              status: data.status,
+              planType: 'basic',
+            }
+          : null,
+        source: 'backend',
       };
     } catch (error) {
-      console.error('Error checking Stripe:', error);
+      console.error('Backend API call failed:', error);
       return {
         hasActiveSubscription: false,
         subscription: null,
-        source: 'stripe',
-        error: error instanceof Error ? error.message : 'Unknown error',
+        source: 'backend',
+        error: error instanceof Error ? error.message : 'Backend API failed',
       };
     }
   }
@@ -195,24 +148,6 @@ export class SubscriptionService {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
-    }
-  }
-
-  static async getSubscriptionDetails(connectionId: string) {
-    try {
-      const db = await getDB();
-
-      const result = await db
-        .select()
-        .from(dataSourcesSchema)
-        .leftJoin(subscriptionsSchema, eq(dataSourcesSchema.subscriptionId, subscriptionsSchema.id))
-        .where(eq(dataSourcesSchema.connectionId, connectionId))
-        .limit(1);
-
-      return result[0] || null;
-    } catch (error) {
-      console.error('Error getting subscription details:', error);
-      return null;
     }
   }
 }

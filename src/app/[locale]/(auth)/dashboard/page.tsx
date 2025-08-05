@@ -1,10 +1,8 @@
-import type { StripeEnhancedSubscription } from '@/libs/StripeSubscriptionService';
 import type { BackendSubscription } from '@/types/subscription';
 import { getTranslations } from 'next-intl/server';
 import { cookies } from 'next/headers';
 import { getSession } from '@/libs/Session';
 import { fetchBackendSubscriptions } from '@/libs/StripeSubscriptionService';
-import { featureFlags } from '@/utils/FeatureFlags';
 import { DashboardContent } from './DashboardContent';
 import { PaymentMethodSection } from './PaymentMethodSection';
 
@@ -23,19 +21,13 @@ export async function generateMetadata(props: {
 }
 
 export default async function DashboardPage() {
-  // Fetch data based on feature flag
-  const subscriptions: StripeEnhancedSubscription[] = [];
+  const session = await getSession();
+  const dimoToken = (await cookies()).get('dimo_jwt')?.value || session?.dimoToken;
   let backendStatuses: BackendSubscription[] = [];
 
-  if (featureFlags.useBackendProxy) {
-    const session = await getSession();
-    const dimoToken = (await cookies()).get('dimo_jwt')?.value
-      || session?.dimoToken;
-
-    if (dimoToken) {
-      const result = await fetchBackendSubscriptions(dimoToken);
-      backendStatuses = result || [];
-    }
+  if (dimoToken) {
+    const result = await fetchBackendSubscriptions(dimoToken);
+    backendStatuses = result || [];
   }
 
   return (
@@ -43,7 +35,6 @@ export default async function DashboardPage() {
       <PaymentMethodSection />
       <div className="w-full lg:w-3/4 order-2 lg:order-1">
         <DashboardContent
-          initialSubscriptions={subscriptions}
           initialBackendStatuses={backendStatuses}
         />
       </div>

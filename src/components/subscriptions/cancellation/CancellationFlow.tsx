@@ -8,7 +8,6 @@ import React, { useState, useTransition } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
 import { COLORS, SPACING } from '@/utils/designSystem';
-import { featureFlags } from '@/utils/FeatureFlags';
 import { ConfirmationStep } from './ConfirmationStep';
 import { ConfirmationStepSkeleton } from './ConfirmationStepSkeleton';
 import { ReasonsStep } from './ReasonsStep';
@@ -83,13 +82,8 @@ export function CancellationFlow({
     setCanceling(true);
     setError(null);
 
-    // Use the new unified cancellation endpoint
-    const endpoint = featureFlags.useBackendProxy
-      ? '/api/subscriptions/cancel-subscription'
-      : '/api/subscriptions/cancel';
-
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/subscriptions/cancel-subscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

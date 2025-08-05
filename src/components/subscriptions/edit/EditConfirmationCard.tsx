@@ -11,7 +11,6 @@ import React, { useState } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { featureFlags } from '@/utils/FeatureFlags';
 import { formatProductName } from '../utils/subscriptionDisplayHelpers';
 
 type EditConfirmationCardProps = {
@@ -129,11 +128,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
     setIsUpdating(true);
     setError(null);
     try {
-      const endpoint = featureFlags.useBackendProxy
-        ? '/api/subscriptions/update-plan'
-        : '/api/stripe/update-subscription';
-
-      const res = await fetch(endpoint, {
+      const res = await fetch('/api/subscriptions/update-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

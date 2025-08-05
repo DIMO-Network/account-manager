@@ -1049,14 +1049,6 @@ export type GetVehicleQueryVariables = Exact<{
 
 export type GetVehicleQuery = { __typename?: 'Query', vehicle: { __typename?: 'Vehicle', tokenId: number, owner: any, name: string, mintedAt: any, dcn?: { __typename?: 'DCN', id: string, name?: string | null } | null, definition?: { __typename?: 'Definition', make?: string | null, model?: string | null, year?: number | null } | null, aftermarketDevice?: { __typename?: 'AftermarketDevice', tokenId: number, tokenDID: string, serial?: string | null, owner: any, pairedAt?: any | null, manufacturer: { __typename?: 'Manufacturer', name: string } } | null, syntheticDevice?: { __typename?: 'SyntheticDevice', tokenId: number } | null } };
 
-export type GetVehiclesByOwnerQueryVariables = Exact<{
-  owner: Scalars['Address']['input'];
-  first: Scalars['Int']['input'];
-}>;
-
-
-export type GetVehiclesByOwnerQuery = { __typename?: 'Query', vehicles: { __typename?: 'VehicleConnection', totalCount: number, edges: Array<{ __typename?: 'VehicleEdge', node: { __typename?: 'Vehicle', tokenId: number, owner: any, mintedAt: any, definition?: { __typename?: 'Definition', make?: string | null, model?: string | null, year?: number | null } | null, aftermarketDevice?: { __typename?: 'AftermarketDevice', tokenId: number, tokenDID: string, serial?: string | null, owner: any, pairedAt?: any | null, manufacturer: { __typename?: 'Manufacturer', name: string } } | null } }> } };
-
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -1108,32 +1100,3 @@ export const GetVehicleDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetVehicleQuery, GetVehicleQueryVariables>;
-export const GetVehiclesByOwnerDocument = new TypedDocumentString(`
-    query GetVehiclesByOwner($owner: Address!, $first: Int!) {
-  vehicles(filterBy: {owner: $owner}, first: $first) {
-    totalCount
-    edges {
-      node {
-        tokenId
-        owner
-        mintedAt
-        definition {
-          make
-          model
-          year
-        }
-        aftermarketDevice {
-          tokenId
-          tokenDID
-          serial
-          owner
-          pairedAt
-          manufacturer {
-            name
-          }
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<GetVehiclesByOwnerQuery, GetVehiclesByOwnerQueryVariables>;
