@@ -18,7 +18,7 @@ export async function getOrCreateStripeCustomer(): Promise<{
 
     const userEmail = user.email;
 
-    // Check if we already have a customer ID stored
+    // Check if we already have a customer ID stored in session
     const existingCustomerId: string | undefined = user.stripeCustomerId;
 
     if (existingCustomerId) {
@@ -43,13 +43,16 @@ export async function getOrCreateStripeCustomer(): Promise<{
       // Use existing customer
       customerId = existingCustomers.data[0]!.id;
     } else {
-      // Create new customer
+      // Create new customer with unique request ID to prevent duplicates
+      const requestId = `create_customer_${user.id}_${userEmail}`;
       const customer = await stripe().customers.create({
         email: userEmail,
         metadata: {
           userId: user.id,
           authType: 'dimoJWT',
         },
+      }, {
+        idempotencyKey: requestId,
       });
       customerId = customer.id;
     }
