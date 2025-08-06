@@ -31,9 +31,9 @@ export function formatProductName(productName: string | null): string | null {
 export function getStatusDisplay(status: any) {
   const isActive = status.status === 'active' || status.status === 'trialing' || status.status === 'trialing_active';
   const isTrialing = status.status === 'trialing' || status.status === 'trialing_active';
-  const isIncomplete = status.new_status === 'trialing_incomplete';
+  const isIncomplete = status.status === 'trialing_incomplete';
 
-  let statusText = status.new_status;
+  let statusText = status.status;
   let statusColor = 'text-text-secondary';
 
   if (isActive) {
@@ -70,13 +70,13 @@ const formatDate = (dateString: string | null) => {
 };
 
 export function getBackendSubscriptionRenewalInfo(status: {
-  new_status: string;
+  status: string;
   cancel_at: string | null;
   next_renewal_date: string | null;
   trial_end: string | null;
 }, device?: any) {
   // For trialing_incomplete status, show trial_end if cancel_at is null
-  if (status.new_status === 'trialing_incomplete') {
+  if (status.status === 'trialing_incomplete') {
     if (status.cancel_at) {
       return { displayText: `Cancels on ${formatDate(status.cancel_at)}`, date: formatDate(status.cancel_at) };
     }
@@ -94,7 +94,7 @@ export function getBackendSubscriptionRenewalInfo(status: {
   }
 
   // For cancel_scheduled status, prioritize showing cancellation message
-  if (status.new_status === 'cancel_scheduled' && status.cancel_at) {
+  if (status.status === 'cancel_scheduled' && status.cancel_at) {
     return { displayText: `Cancels on ${formatDate(status.cancel_at)}`, date: formatDate(status.cancel_at) };
   }
 

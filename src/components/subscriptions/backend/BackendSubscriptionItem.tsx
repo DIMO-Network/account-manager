@@ -11,7 +11,7 @@ type BackendSubscriptionItemProps = {
 
 export const BackendSubscriptionItem = memo(({ status }: BackendSubscriptionItemProps) => {
   const device = status.device;
-  const key = device?.tokenId ? `device-${device.tokenId}` : `status-${status.start_date}-${status.new_status}`;
+  const key = device?.tokenId ? `device-${device.tokenId}` : `status-${status.start_date}-${status.status}`;
   const { productName, loading } = useStripeProductName(status.stripe_id ?? null);
 
   return (
