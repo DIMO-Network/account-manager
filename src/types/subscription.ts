@@ -40,7 +40,6 @@ export type BackendSubscription = {
   stripe_id?: string | null;
   device: DeviceInfo | null;
   status: string;
-  new_status: string;
   plan: string | null;
   price: number | null;
   start_date: string;
