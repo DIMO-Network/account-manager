@@ -4,7 +4,7 @@ import { BackendSubscriptionItem } from './BackendSubscriptionItem';
 
 export function BackendSubscriptions({ statuses }: { statuses: BackendSubscription[] }) {
   const filteredStatuses = useMemo(() =>
-    statuses.filter(status => status.status !== 'canceled' && status.status !== 'canceled'), [statuses]);
+    statuses.filter(status => status.status !== 'canceled'), [statuses]);
 
   if (filteredStatuses.length === 0) {
     return <p className="text-base font-medium leading-6">No devices found.</p>;
