@@ -6,6 +6,7 @@ import { WalletIcon } from '@/components/Icons';
 import { TopUpForm } from '@/components/payment/TopUpForm';
 import { TopUpReview } from '@/components/payment/TopUpReview';
 import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { getCurrentTokenConfig } from '@/utils/TokenConfig';
 
 type Step = 'form' | 'review';
 
@@ -21,7 +22,7 @@ export function TopUpPageClient() {
   const [priceLoading, setPriceLoading] = useState(true);
   const [priceError, setPriceError] = useState<string | null>(null);
 
-  const TOKEN_SYMBOL = process.env.NEXT_PUBLIC_USE_OMID_TOKEN ? 'OMID' : 'DIMO';
+  const TOKEN_SYMBOL = getCurrentTokenConfig().symbol;
 
   // Extract fetch logic into a reusable function
   const fetchData = async () => {

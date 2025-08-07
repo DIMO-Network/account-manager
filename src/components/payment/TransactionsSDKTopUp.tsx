@@ -5,6 +5,7 @@ import { encodeFunctionData } from 'viem';
 import { useKernelSigner } from '@/hooks/useKernelSigner';
 import { getDimoTokenContract } from '@/libs/TransactionsConfig';
 import { RESPONSIVE } from '@/utils/designSystem';
+import { getCurrentTokenConfig, SHARED_CONFIG } from '@/utils/TokenConfig';
 
 type TransactionsSDKTopUpProps = {
   amount: number;
@@ -16,12 +17,9 @@ export const TransactionsSDKTopUp = ({ amount, onSuccessAction, onErrorAction }:
   const [loading, setLoading] = useState(false);
   const { getActiveClient, isInitialized, hasSession, error: kernelError } = useKernelSigner();
 
-  const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_USE_OMID_TOKEN
-    ? '0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10' // OMID (Polygon Amoy)
-    : '0xE261D618a959aFfFd53168Cd07D12E37B26761db'; // DIMO (Polygon Mainnet)
-
-  const RECIPIENT = '0xCec224A21bdF3Bd2d5E95aC38A92523146b814Bd';
-  const TRANSFER_FEE = 0.5;
+  const TOKEN_CONTRACT = getCurrentTokenConfig().contract;
+  const RECIPIENT = SHARED_CONFIG.recipient;
+  const TRANSFER_FEE = SHARED_CONFIG.transferFee;
 
   function toWei(amount: number): bigint {
     // Convert to wei (18 decimals)
