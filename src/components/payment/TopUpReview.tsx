@@ -3,6 +3,8 @@
 import { ExecuteAdvancedTransactionWithDimo } from '@dimo-network/login-with-dimo';
 import { useEffect, useState } from 'react';
 import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { FEATURE_FLAGS } from '@/utils/FeatureFlags';
+import { getCurrentTokenConfig, SHARED_CONFIG } from '@/utils/TokenConfig';
 import { TransactionsSDKTopUp } from './TransactionsSDKTopUp';
 
 type TopUpReviewProps = {
@@ -15,8 +17,8 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
   const [dimoPrice, setDimoPrice] = useState<number | null>(null);
   const [priceLoading, setPriceLoading] = useState(true);
 
-  const TOKEN_SYMBOL = process.env.NEXT_PUBLIC_USE_OMID_TOKEN ? 'OMID' : 'DIMO';
-  const TRANSFER_FEE = 0.5;
+  const TOKEN_SYMBOL = getCurrentTokenConfig().symbol;
+  const TRANSFER_FEE = SHARED_CONFIG.transferFee;
 
   // Fetch price on component mount
   useEffect(() => {
@@ -61,11 +63,8 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
     },
   ];
 
-  const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_USE_OMID_TOKEN
-    ? '0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10' // OMID (Polygon Amoy)
-    : '0xE261D618a959aFfFd53168Cd07D12E37B26761db'; // DIMO (Polygon Mainnet)
-
-  const RECIPIENT = '0xCec224A21bdF3Bd2d5E95aC38A92523146b814Bd';
+  const TOKEN_CONTRACT = getCurrentTokenConfig().contract;
+  const RECIPIENT = SHARED_CONFIG.recipient;
 
   function toWei(amount: number): string {
     // Convert to wei (18 decimals)
@@ -140,7 +139,7 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
           </div>
 
           <div className="flex gap-3">
-            {process.env.NEXT_PUBLIC_USE_EXECUTE_ADVANCED_TRANSACTION
+            {FEATURE_FLAGS.useAdvancedTransactions
               ? (
                   <ExecuteAdvancedTransactionWithDimo
                     mode="popup"

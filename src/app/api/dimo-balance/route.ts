@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/libs/Session';
+import { getCurrentTokenConfig } from '@/utils/TokenConfig';
 
 async function authenticateUser() {
   const session = await getSession();
@@ -12,9 +13,9 @@ async function authenticateUser() {
 
 export async function GET(_request: NextRequest) {
   try {
-    const user = await authenticateUser();
-    const dimoToken = user.dimoToken as string;
-    const walletAddress = user.walletAddress as string;
+    const session = await authenticateUser();
+    const dimoToken = session.dimoToken as string;
+    const walletAddress = session.walletAddress as string;
 
     if (!dimoToken) {
       return NextResponse.json(
@@ -30,15 +31,10 @@ export async function GET(_request: NextRequest) {
       );
     }
 
-    const TOKEN_CONTRACT = process.env.NEXT_PUBLIC_USE_OMID_TOKEN
-      ? (process.env.OMID_TOKEN_CONTRACT || '0x21cfe003997fb7c2b3cfe5cf71e7833b7b2ece10') // OMID (Polygon Amoy)
-      : (process.env.DIMO_TOKEN_CONTRACT || '0xE261D618a959aFfFd53168Cd07D12E37B26761db'); // DIMO (Polygon Mainnet)
-
-    const TOKEN_SYMBOL = process.env.NEXT_PUBLIC_USE_OMID_TOKEN ? 'OMID' : 'DIMO';
-
-    const rpcUrl = process.env.NEXT_PUBLIC_USE_OMID_TOKEN
-      ? (process.env.POLYGON_AMOY_RPC_URL || 'https://polygon-amoy.drpc.org')
-      : (process.env.POLYGON_MAINNET_RPC_URL || 'https://polygon-rpc.com');
+    const tokenConfig = getCurrentTokenConfig();
+    const TOKEN_CONTRACT = tokenConfig.contract;
+    const TOKEN_SYMBOL = tokenConfig.symbol;
+    const rpcUrl = tokenConfig.rpcUrl;
 
     const response = await fetch(rpcUrl, {
       method: 'POST',
