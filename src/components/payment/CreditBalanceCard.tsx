@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CreditCardIcon } from '@/components/Icons';
-import { BORDER_RADIUS, COLORS, SPACING } from '@/utils/designSystem';
+import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 
 type CreditBalanceCardProps = {
   customerId: string;
@@ -23,6 +23,7 @@ export const CreditBalanceCard = ({ customerId }: CreditBalanceCardProps) => {
   useEffect(() => {
     const fetchCreditBalance = async () => {
       if (!customerId) {
+        setLoading(false);
         return;
       }
 
@@ -57,10 +58,16 @@ export const CreditBalanceCard = ({ customerId }: CreditBalanceCardProps) => {
 
   if (loading) {
     return (
-      <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs} mb-4`}>
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-600 rounded w-1/3 mb-2"></div>
-          <div className="h-6 bg-gray-600 rounded w-1/2"></div>
+      <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} p-4 mb-4 relative`}>
+        <div className="flex flex-col">
+          <div className="animate-pulse space-y-3">
+            <div className="h-4 bg-gray-800 rounded w-32"></div>
+            <div className="h-8 bg-gray-800 rounded w-24"></div>
+            <div className="h-3 bg-gray-800 rounded w-64"></div>
+            <div className="flex gap-2 mt-4">
+              <div className="h-8 w-20 bg-gray-800 rounded-full"></div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -68,12 +75,12 @@ export const CreditBalanceCard = ({ customerId }: CreditBalanceCardProps) => {
 
   if (error) {
     return (
-      <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs} mb-4`}>
+      <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} p-4 mb-4`}>
         <div className="flex items-center gap-2 mb-2">
-          <CreditCardIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+          <CreditCardIcon className="w-4 h-4 text-text-secondary" />
           <span className="text-red-500 text-sm">Error loading credit balance</span>
         </div>
-        <p className="text-xs text-grey-400">{error}</p>
+        <p className="text-xs text-text-secondary">{error}</p>
       </div>
     );
   }
@@ -82,29 +89,28 @@ export const CreditBalanceCard = ({ customerId }: CreditBalanceCardProps) => {
   const displayCurrency = creditBalance?.currency || 'usd';
 
   return (
-    <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} ${SPACING.xs} mb-4 relative`}>
-      <div className="flex flex-col mt-4">
-        <div className="absolute -top-2 right-6 px-2 py-1 rounded-full text-xs font-medium text-black bg-pill-gradient">
+    <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} p-4 mb-6 relative`}>
+      <div className="flex flex-col">
+        <div className="absolute -top-3 right-4 px-3 py-1 leading-6 rounded-full text-xs font-medium text-black bg-pill-gradient uppercase tracking-wider">
           Credit Balance
         </div>
-        <div className="flex items-center gap-2 mb-2">
-          <CreditCardIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
-          <span className="font-medium text-white">Available Credit</span>
-        </div>
-        <span className="text-2xl font-bold text-white">
+        <span className="font-medium text-white">
+          Available Credit
+        </span>
+        <span className="text-2xl font-bold text-white mt-1">
           {formatCurrency(displayBalance, displayCurrency)}
         </span>
-        <span className="text-xs text-grey-400 mt-1">
+        <span className="text-xs text-text-secondary leading-4.5 mt-1">
           {displayBalance > 0
             ? 'This credit will be automatically applied to your next invoice'
             : 'No available credit balance'}
         </span>
-        <div className="flex flex-row gap-2 mt-6">
+        <div className="flex flex-row gap-2 mt-4">
           <button
             onClick={() => {
               router.push('/payment-methods/top-up');
             }}
-            className="w-full max-w-40 gap-2 rounded-full bg-white px-4 font-medium h-10 text-black hover:bg-gray-100 transition-colors"
+            className={`${RESPONSIVE.touchSmall} ${COLORS.button.secondary} ${BORDER_RADIUS.full} font-medium text-xs px-4`}
             type="button"
           >
             Top Up

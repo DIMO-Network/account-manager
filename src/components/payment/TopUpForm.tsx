@@ -1,8 +1,8 @@
 'use client';
 
-import process from 'node:process';
 import { useCallback, useRef, useState } from 'react';
 import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { getCurrentTokenConfig, SHARED_CONFIG } from '@/utils/TokenConfig';
 
 type TopUpFormProps = {
   onReviewAction: (amount: number, usdValue: number) => void;
@@ -32,8 +32,8 @@ export const TopUpForm = ({
   const [inputUsdLoading, setInputUsdLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  const TOKEN_SYMBOL = process.env.NEXT_PUBLIC_USE_OMID_TOKEN ? 'OMID' : 'DIMO';
-  const TRANSFER_FEE = 0.5;
+  const TOKEN_SYMBOL = getCurrentTokenConfig().symbol;
+  const TRANSFER_FEE = SHARED_CONFIG.transferFee;
 
   // Debounced function to calculate USD value
   const debouncedCalculateUsd = useCallback((amount: string, price: number | null) => {
@@ -67,8 +67,8 @@ export const TopUpForm = ({
       return 'Insufficient token balance';
     }
 
-    if (numValue < 0.5) {
-      return 'Minimum amount is 0.5 tokens';
+    if (numValue < SHARED_CONFIG.minAmount) {
+      return `Minimum amount is ${SHARED_CONFIG.minAmount} tokens`;
     }
 
     return null;
@@ -141,7 +141,7 @@ export const TopUpForm = ({
             </button>
           </div>
           <p className="text-xs text-gray-400 mb-2">
-            {`There will be a 0.5 $${TOKEN_SYMBOL} conversion fee`}
+            {`There will be a ${SHARED_CONFIG.transferFee} $${TOKEN_SYMBOL} conversion fee`}
           </p>
           <div className={`relative border rounded ${BORDER_RADIUS.lg} ${
             amountError

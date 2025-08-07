@@ -3,7 +3,7 @@ import { SignOutButton } from '@/components/auth/SignOutButton';
 import { HomeIcon, LogoutIcon, WalletIcon } from '@/components/Icons';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { MenuActionButton } from '@/components/Menu/MenuActionButton';
-import { isProductionMode } from '@/utils/FeatureFlags';
+import { FEATURE_FLAGS } from '@/utils/FeatureFlags';
 
 export type AuthNavigationTranslations = {
   dashboard_link: string;
@@ -18,9 +18,9 @@ export type PublicNavigationTranslations = {
   sign_in_link: string;
 };
 
-export const createAuthNavigation = (translations: AuthNavigationTranslations): MenuItemConfig[] => {
-  const isProduction = isProductionMode();
+const hiddenFromProduction = FEATURE_FLAGS.hiddenFromProduction;
 
+export const createAuthNavigation = (translations: AuthNavigationTranslations): MenuItemConfig[] => {
   const menuItems: MenuItemConfig[] = [
     // Main menu items
     {
@@ -58,7 +58,7 @@ export const createAuthNavigation = (translations: AuthNavigationTranslations): 
   );
 
   // Show locale switcher if not in production mode
-  if (!isProduction) {
+  if (!hiddenFromProduction) {
     menuItems.push({
       label: 'Locale',
       component: <LocaleSwitcher />,
@@ -70,8 +70,6 @@ export const createAuthNavigation = (translations: AuthNavigationTranslations): 
 };
 
 export const createPublicNavigation = (translations: PublicNavigationTranslations): MenuItemConfig[] => {
-  const isProduction = isProductionMode();
-
   const menuItems: MenuItemConfig[] = [
     // Main menu items
     {
@@ -91,7 +89,7 @@ export const createPublicNavigation = (translations: PublicNavigationTranslation
   });
 
   // Only add locale switcher if not in production mode
-  if (!isProduction) {
+  if (!hiddenFromProduction) {
     menuItems.push({
       label: 'Locale',
       component: <LocaleSwitcher />,

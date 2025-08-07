@@ -1,14 +1,14 @@
 import type { NextRequest } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 
 async function authenticateUser() {
-  const user = await currentUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     throw new Error('User not authenticated');
   }
-  return user;
+  return session;
 }
 
 export async function GET(request: NextRequest) {
