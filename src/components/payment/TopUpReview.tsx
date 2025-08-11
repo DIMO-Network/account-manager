@@ -2,7 +2,7 @@
 
 import { ExecuteAdvancedTransactionWithDimo } from '@dimo-network/login-with-dimo';
 import { useEffect, useState } from 'react';
-import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { FEATURE_FLAGS } from '@/utils/FeatureFlags';
 import { getCurrentTokenConfig, SHARED_CONFIG } from '@/utils/TokenConfig';
 import { TransactionsSDKTopUp } from './TransactionsSDKTopUp';
@@ -75,13 +75,13 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
   return (
     <div className="space-y-6">
       {/* Transaction Breakdown */}
-      <div className={`${SPACING.lg} border ${COLORS.border.default} rounded-lg ${COLORS.background.secondary}`}>
-        <h3 className={`${RESPONSIVE.text.h3} font-medium ${COLORS.text.primary} mb-4`}>
+      <div className={`${BORDER_RADIUS.lg} ${COLORS.background.primary} px-4 py-3`}>
+        <h3 className={`${RESPONSIVE.text.h3} font-medium ${COLORS.text.primary}`}>
           Transaction Details
         </h3>
 
-        <div className="space-y-4">
-          <div className="space-y-3">
+        <div className="flex flex-col gap-4 mt-4">
+          <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-400">Amount to convert</span>
               <span className="text-sm font-medium text-white">
@@ -138,7 +138,7 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 mt">
             {FEATURE_FLAGS.useAdvancedTransactions
               ? (
                   <ExecuteAdvancedTransactionWithDimo

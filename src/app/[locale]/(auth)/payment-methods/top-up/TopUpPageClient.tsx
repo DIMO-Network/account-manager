@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { WalletIcon } from '@/components/Icons';
 import { TopUpForm } from '@/components/payment/TopUpForm';
 import { TopUpReview } from '@/components/payment/TopUpReview';
-import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { getCurrentTokenConfig } from '@/utils/TokenConfig';
 
 type Step = 'form' | 'review';
@@ -90,31 +90,26 @@ export function TopUpPageClient() {
   };
 
   return (
-    <div className="py-5">
+    <div className="flex flex-col gap-4">
       <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2">
         <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
         <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Top Up Credits</h1>
       </div>
 
-      <div className="space-y-6">
-        {/* Token Balance Card */}
-        <div className={`${SPACING.lg} border ${COLORS.border.default} rounded-lg ${COLORS.background.secondary}`}>
-          <h3 className={`${RESPONSIVE.text.h3} font-medium ${COLORS.text.primary} mb-2`}>
-            Your $
+      {/* Token Balance Card */}
+      <div className={`flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} px-4 py-3`}>
+        <div className="flex flex-col">
+          <span className="font-medium text-white">
+            Your
+            {' '}
             {TOKEN_SYMBOL}
             {' '}
             Balance
-          </h3>
-          <p className={`${RESPONSIVE.text.body} text-grey-400 mb-4`}>
-            Add credits to your account using your $
-            {TOKEN_SYMBOL}
-            {' '}
-            balance
-          </p>
-          <div className="text-2xl font-bold text-white">
+          </span>
+          <div className="text-2xl font-bold text-white mt-1">
             {balanceLoading
               ? (
-                  <div className="animate-pulse bg-gray-600 h-6 rounded-md"></div>
+                  <div className="animate-pulse bg-gray-600 h-8 rounded w-24"></div>
                 )
               : balanceError
                 ? (
@@ -126,15 +121,15 @@ export function TopUpPageClient() {
           </div>
           {priceLoading
             ? (
-                <div className="animate-pulse bg-gray-600 h-4 w-20 rounded-md mt-1"></div>
+                <div className="animate-pulse bg-gray-600 h-3 rounded w-32 mt-1"></div>
               )
             : priceError
               ? (
-                  <div className="text-xs text-red-400 mt-1">Error loading price</div>
+                  <div className="text-xs text-text-secondary mt-1">Error loading price</div>
                 )
               : tokenBalance !== null && dimoPrice !== null
                 ? (
-                    <div className="text-sm text-gray-400 mt-1">
+                    <div className="text-xs text-text-secondary leading-4.5 mt-1">
                       ≈ $
                       {(tokenBalance * dimoPrice).toFixed(2)}
                       {' '}
@@ -142,30 +137,37 @@ export function TopUpPageClient() {
                     </div>
                   )
                 : null}
+          <span className="text-xs text-text-secondary leading-4.5 mt-1">
+            Add credits to your account using your
+            {' '}
+            {TOKEN_SYMBOL}
+            {' '}
+            balance
+          </span>
         </div>
-
-        {/* Form or Review */}
-        {currentStep === 'form'
-          ? (
-              <TopUpForm
-                onReviewAction={handleReviewAction}
-                onCancelAction={handleCancelAction}
-                initialAmount={amount}
-                initialUsdValue={usdValue}
-                tokenBalance={tokenBalance}
-                dimoPrice={dimoPrice}
-                balanceLoading={balanceLoading}
-                priceLoading={priceLoading}
-              />
-            )
-          : (
-              <TopUpReview
-                amount={amount}
-                onBackAction={handleBackToForm}
-                onSuccessAction={handleSuccess}
-              />
-            )}
       </div>
+
+      {/* Form or Review */}
+      {currentStep === 'form'
+        ? (
+            <TopUpForm
+              onReviewAction={handleReviewAction}
+              onCancelAction={handleCancelAction}
+              initialAmount={amount}
+              initialUsdValue={usdValue}
+              tokenBalance={tokenBalance}
+              dimoPrice={dimoPrice}
+              balanceLoading={balanceLoading}
+              priceLoading={priceLoading}
+            />
+          )
+        : (
+            <TopUpReview
+              amount={amount}
+              onBackAction={handleBackToForm}
+              onSuccessAction={handleSuccess}
+            />
+          )}
     </div>
   );
 }
