@@ -31,9 +31,10 @@ export default async function ConnectionSubscriptionDetailPage({
       notFound();
     }
 
-    // Find the subscription that matches the vehicle tokenId and has a connection
+    // Find the subscription that matches the vehicle tokenId and has either a connection or manufacturer
     const subscription = backendSubscriptions.find(
-      sub => sub.device?.vehicle?.tokenId === Number.parseInt(vehicleTokenId, 10) && sub.device?.connection?.name,
+      sub => sub.device?.vehicle?.tokenId === Number.parseInt(vehicleTokenId, 10)
+        && (sub.device?.connection?.name || sub.device?.manufacturer?.name),
     );
 
     if (!subscription || !subscription.device) {

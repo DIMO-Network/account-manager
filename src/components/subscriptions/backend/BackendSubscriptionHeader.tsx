@@ -9,6 +9,7 @@ type BackendSubscriptionHeaderProps = {
   loading: boolean;
   device: any;
   children?: React.ReactNode;
+  status?: string; // Add status to determine routing for canceled subscriptions
 };
 
 export function BackendSubscriptionHeader({
@@ -17,6 +18,7 @@ export function BackendSubscriptionHeader({
   loading,
   device,
   children,
+  status,
 }: BackendSubscriptionHeaderProps) {
   const headerContent = (
     <div className="border-b border-gray-600 pb-2">
@@ -37,6 +39,19 @@ export function BackendSubscriptionHeader({
       </div>
     </div>
   );
+
+  // For canceled Ruptela and AutoPi subscriptions, route to connection page
+  if (status === 'canceled' && device?.manufacturer?.name) {
+    const manufacturerName = device.manufacturer.name;
+    if ((manufacturerName === 'Ruptela' || manufacturerName === 'AutoPi') && device?.vehicle?.tokenId) {
+      return (
+        <Link href={`/subscriptions/connection/${device.vehicle.tokenId}`} className="block">
+          {headerContent}
+          {children}
+        </Link>
+      );
+    }
+  }
 
   // For grandfathered devices (no stripeId), link to device tokenId
   // For Tesla connections, link to connection page using vehicle tokenId

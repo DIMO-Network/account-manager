@@ -24,8 +24,23 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
 
   const vehicleTokenId = device.vehicle?.tokenId;
   const connectionName = device.connection?.name || 'Unknown Connection';
+  const isCanceled = subscription.status === 'canceled';
 
   const renewalInfo = getBackendSubscriptionRenewalInfo(subscription, device);
+
+  // Get manufacturer display name
+  const getManufacturerDisplayName = (manufacturerName: string) => {
+    switch (manufacturerName) {
+      case 'Ruptela':
+        return 'R1';
+      case 'AutoPi':
+        return 'AutoPi';
+      case 'HashDog':
+        return 'Macaron';
+      default:
+        return manufacturerName;
+    }
+  };
 
   const handleActivateSubscription = async () => {
     setIsActivating(true);
@@ -125,18 +140,14 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
 
   return (
     <>
-      <PageHeader icon={<CarIcon />} title={`${connectionName} Connection Details`} className="mb-4" />
+      <PageHeader
+        icon={<CarIcon />}
+        title={isCanceled ? 'Connection Details' : `${connectionName} Connection Details`}
+        className="mb-4"
+      />
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="space-y-4">
-          {/* Connection Type */}
-          <div>
-            <div className={labelStyle}>Connection Type</div>
-            <div className={`${valueStyle} ${borderStyle}`}>
-              {connectionName}
-            </div>
-          </div>
-
-          {/* Connected To */}
+          {/* Connected To - Always show first */}
           <div>
             <div className={labelStyle}>Connected To</div>
             <div className={`${valueStyle} ${borderStyle}`}>
@@ -161,32 +172,80 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
             </div>
           </div>
 
-          {/* Connection Date */}
-          <div>
-            <div className={labelStyle}>Connection Date</div>
-            <div className={`${valueStyle} ${borderStyle}`}>
-              {device.connection?.mintedAt
-                ? new Date(device.connection.mintedAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })
-                : 'N/A'}
+          {/* Serial Number - Show for canceled subscriptions */}
+          {isCanceled && device.serial && (
+            <div>
+              <div className={labelStyle}>Serial Number</div>
+              <div className={`${valueStyle} ${borderStyle}`}>
+                {device.serial}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Schedule */}
-          <div>
-            <div className={labelStyle}>Schedule</div>
-            <div className={valueStyle}>
-              <div>{renewalInfo.displayText}</div>
-              {renewalInfo.secondaryText && (
-                <div className="text-xs text-text-secondary">
-                  {renewalInfo.secondaryText}
-                </div>
-              )}
+          {/* Connection Type - Show for canceled subscriptions */}
+          {isCanceled && device.manufacturer?.name && (
+            <div>
+              <div className={labelStyle}>Connection Type</div>
+              <div className={`${valueStyle} ${borderStyle}`}>
+                {getManufacturerDisplayName(device.manufacturer.name)}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Last Connected - Show for canceled subscriptions */}
+          {isCanceled && subscription.ended_at && (
+            <div>
+              <div className={labelStyle}>Last Connected</div>
+              <div className={`${valueStyle} ${borderStyle}`}>
+                {new Date(subscription.ended_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Connection Type - Only show for non-canceled subscriptions */}
+          {!isCanceled && (
+            <div>
+              <div className={labelStyle}>Connection Type</div>
+              <div className={`${valueStyle} ${borderStyle}`}>
+                {connectionName}
+              </div>
+            </div>
+          )}
+
+          {/* Connection Date - Only show for non-canceled subscriptions */}
+          {!isCanceled && (
+            <div>
+              <div className={labelStyle}>Connection Date</div>
+              <div className={`${valueStyle} ${borderStyle}`}>
+                {device.connection?.mintedAt
+                  ? new Date(device.connection.mintedAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })
+                  : 'N/A'}
+              </div>
+            </div>
+          )}
+
+          {/* Schedule - Only show for non-canceled subscriptions */}
+          {!isCanceled && (
+            <div>
+              <div className={labelStyle}>Schedule</div>
+              <div className={valueStyle}>
+                <div>{renewalInfo.displayText}</div>
+                {renewalInfo.secondaryText && (
+                  <div className="text-xs text-text-secondary">
+                    {renewalInfo.secondaryText}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col mt-4 px-4 gap-2">
@@ -202,7 +261,9 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
                   }`}
                   type="button"
                 >
-                  {isActivating ? 'Activating...' : 'Activate Subscription'}
+                  {isActivating
+                    ? (isCanceled ? 'Reactivating...' : 'Activating...')
+                    : (isCanceled ? 'Reactivate Subscription' : 'Activate Subscription')}
                 </button>
               )
             : (
@@ -217,7 +278,9 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
                     }`}
                     type="button"
                   >
-                    {isActivating ? 'Activating...' : 'Confirm'}
+                    {isActivating
+                      ? (isCanceled ? 'Creating...' : 'Activating...')
+                      : (isCanceled ? 'Confirm' : 'Confirm')}
                   </button>
                   <button
                     onClick={handleCancelActivation}

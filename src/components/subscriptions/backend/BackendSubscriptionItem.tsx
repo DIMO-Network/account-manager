@@ -21,6 +21,7 @@ export const BackendSubscriptionItem = memo(({ status }: BackendSubscriptionItem
         productName={productName}
         loading={loading}
         device={device}
+        status={status.status}
       >
         <BackendSubscriptionDetails status={status} device={device} />
       </BackendSubscriptionHeader>
