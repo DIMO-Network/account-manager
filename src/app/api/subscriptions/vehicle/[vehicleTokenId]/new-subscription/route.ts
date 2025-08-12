@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/libs/Session';
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ vehicleTokenId: string }> },
 ) {
   try {
@@ -31,6 +31,17 @@ export async function POST(
       );
     }
 
+    // Read the plan from the request body
+    const requestBody = await request.json();
+    const { plan } = requestBody;
+
+    if (!plan || !['monthly', 'annual'].includes(plan)) {
+      return NextResponse.json(
+        { error: 'Valid plan (monthly or annual) is required' },
+        { status: 400 },
+      );
+    }
+
     const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001'}/subscription/vehicle/${vehicleTokenId}/new-subscription`;
 
     const response = await fetch(backendUrl, {
@@ -40,7 +51,7 @@ export async function POST(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        plan: 'monthly',
+        plan,
       }),
     });
 

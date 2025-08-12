@@ -15,7 +15,6 @@ type ConnectionSubscriptionDetailCardProps = {
 export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDetailCardProps> = ({ subscription }) => {
   const router = useRouter();
   const [isActivating, setIsActivating] = useState(false);
-  const [showConfirmActivation, setShowConfirmActivation] = useState(false);
   const device = subscription.device;
 
   if (!device) {
@@ -60,8 +59,10 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
       const { hasValidPaymentMethod } = await checkResponse.json();
 
       if (hasValidPaymentMethod) {
-        // Show confirmation for direct subscription activation
-        setShowConfirmActivation(true);
+        // For users with valid payment methods, route to edit page for plan selection
+        if (vehicleTokenId) {
+          router.push(`/subscriptions/connection/${vehicleTokenId}/edit`);
+        }
         setIsActivating(false);
         return;
       }
@@ -95,42 +96,6 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
     } finally {
       setIsActivating(false);
     }
-  };
-
-  const handleConfirmActivation = async () => {
-    setIsActivating(true);
-    try {
-      if (!vehicleTokenId) {
-        throw new Error('No vehicle token ID found');
-      }
-
-      const response = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to activate subscription');
-      }
-
-      // Subscription activated successfully
-      setShowConfirmActivation(false);
-      // TODO: Add success notification and refresh data
-      console.warn('Subscription activated successfully');
-
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Error confirming subscription activation:', error);
-      // TODO: Add proper error handling/notification
-    } finally {
-      setIsActivating(false);
-    }
-  };
-
-  const handleCancelActivation = () => {
-    setShowConfirmActivation(false);
   };
 
   // Reusable styles
@@ -249,49 +214,20 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
         </div>
 
         <div className="flex flex-col mt-4 px-4 gap-2">
-          {!showConfirmActivation
-            ? (
-                <button
-                  onClick={handleActivateSubscription}
-                  disabled={isActivating || !vehicleTokenId}
-                  className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
-                    isActivating || !vehicleTokenId
-                      ? COLORS.button.disabled
-                      : COLORS.button.primary
-                  }`}
-                  type="button"
-                >
-                  {isActivating
-                    ? (isCanceled ? 'Reactivating...' : 'Activating...')
-                    : (isCanceled ? 'Reactivate Subscription' : 'Activate Subscription')}
-                </button>
-              )
-            : (
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={handleConfirmActivation}
-                    disabled={isActivating}
-                    className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium flex-1 ${
-                      isActivating
-                        ? COLORS.button.disabledTransparent
-                        : COLORS.button.primary
-                    }`}
-                    type="button"
-                  >
-                    {isActivating
-                      ? (isCanceled ? 'Creating...' : 'Activating...')
-                      : (isCanceled ? 'Confirm' : 'Confirm')}
-                  </button>
-                  <button
-                    onClick={handleCancelActivation}
-                    disabled={isActivating}
-                    className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium flex-1 ${COLORS.button.secondaryTransparent}`}
-                    type="button"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
+          <button
+            onClick={handleActivateSubscription}
+            disabled={isActivating || !vehicleTokenId}
+            className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
+              isActivating || !vehicleTokenId
+                ? COLORS.button.disabled
+                : COLORS.button.primary
+            }`}
+            type="button"
+          >
+            {isActivating
+              ? (isCanceled ? 'Checking...' : 'Activating...')
+              : (isCanceled ? 'Reactivate Subscription' : 'Activate Subscription')}
+          </button>
 
           <button
             onClick={() => router.push('/dashboard')}
