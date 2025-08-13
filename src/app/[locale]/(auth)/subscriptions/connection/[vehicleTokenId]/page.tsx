@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { ConnectionSubscriptionDetailCard } from '@/components/subscriptions/ConnectionSubscriptionDetailCard';
 import { getSession } from '@/libs/Session';
-import { fetchBackendSubscriptions } from '@/libs/StripeSubscriptionService';
+import { authorizeConnectionSubscriptionAccess } from '@/libs/StripeSubscriptionService';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 export default async function ConnectionSubscriptionPage({
@@ -15,46 +15,36 @@ export default async function ConnectionSubscriptionPage({
     notFound();
   }
 
-  try {
-    const session = await getSession();
-    if (!session) {
-      notFound();
-    }
-
-    const dimoToken = session.dimoToken;
-    if (!dimoToken) {
-      notFound();
-    }
-
-    const backendSubscriptions = await fetchBackendSubscriptions(dimoToken);
-    if (!backendSubscriptions) {
-      notFound();
-    }
-
-    // Find the subscription that matches the vehicle tokenId and has either a connection or manufacturer
-    const subscription = backendSubscriptions.find(
-      sub => sub.device?.vehicle?.tokenId === Number.parseInt(vehicleTokenId, 10)
-        && (sub.device?.connection?.name || sub.device?.manufacturer?.name),
-    );
-
-    if (!subscription || !subscription.device) {
-      notFound();
-    }
-
-    // Only allow access to canceled subscriptions for reactivation
-    if (subscription.status !== 'canceled') {
-      redirect('/dashboard');
-    }
-
-    return (
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="w-full lg:w-3/4">
-          <ConnectionSubscriptionDetailCard subscription={subscription} />
-        </div>
-        <PaymentMethodSection />
-      </div>
-    );
-  } catch {
+  // Get current session and check authorization
+  const session = await getSession();
+  if (!session) {
     notFound();
   }
+
+  const dimoToken = session.dimoToken;
+  if (!dimoToken) {
+    notFound();
+  }
+
+  // Check authorization and get subscription data
+  const authResult = await authorizeConnectionSubscriptionAccess(vehicleTokenId, dimoToken);
+
+  if (!authResult.authorized) {
+    redirect('/dashboard');
+  }
+
+  const { subscription } = authResult;
+
+  if (!subscription) {
+    notFound();
+  }
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-6">
+      <div className="w-full lg:w-3/4">
+        <ConnectionSubscriptionDetailCard subscription={subscription} />
+      </div>
+      <PaymentMethodSection />
+    </div>
+  );
 }
