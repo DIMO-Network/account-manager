@@ -63,7 +63,6 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
         if (vehicleTokenId) {
           router.push(`/subscriptions/connection/${vehicleTokenId}/edit`);
         }
-        setIsActivating(false);
         return;
       }
 
@@ -93,8 +92,6 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
     } catch (error) {
       console.error('Error activating subscription:', error);
       // TODO: Add proper error handling/notification
-    } finally {
-      setIsActivating(false);
     }
   };
 
@@ -225,7 +222,7 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
             type="button"
           >
             {isActivating
-              ? (isCanceled ? 'Checking...' : 'Activating...')
+              ? (isCanceled ? 'Checking Payment Method...' : 'Activating...')
               : (isCanceled ? 'Reactivate Subscription' : 'Activate Subscription')}
           </button>
 

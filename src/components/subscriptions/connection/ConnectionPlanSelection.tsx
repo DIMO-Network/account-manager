@@ -27,7 +27,7 @@ type PricingData = {
 
 export function ConnectionPlanSelection({ subscription, vehicleTokenId }: ConnectionPlanSelectionProps) {
   const router = useRouter();
-  const [isCreating, setIsCreating] = useState(false);
+  const [isReactivating, setIsReactivating] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
   const [pricing, setPricing] = useState<PricingData | null>(null);
   const [isLoadingPricing, setIsLoadingPricing] = useState(true);
@@ -117,8 +117,8 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
     return null;
   }
 
-  const handleCreateSubscription = async () => {
-    setIsCreating(true);
+  const handleReactivateSubscription = async () => {
+    setIsReactivating(true);
     try {
       const response = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription`, {
         method: 'POST',
@@ -137,10 +137,8 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
       // Subscription created successfully
       router.push('/dashboard');
     } catch (error) {
-      console.error('Error creating subscription:', error);
+      console.error('Error reactivating subscription:', error);
       // TODO: Add proper error handling/notification
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -179,10 +177,28 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
               {vehicleDisplay}
             </h3>
           </div>
-          <div className="px-4">
-            <div className="text-center py-8">
-              <div className="text-text-secondary">Loading pricing information...</div>
+
+          {/* Skeleton for plan selection */}
+          <div className="px-4 space-y-3 mb-4">
+            {/* Annual plan skeleton */}
+            <div className="p-4 rounded-xl min-h-20 bg-surface-raised animate-pulse">
+              <div className="h-4 bg-surface-sunken rounded w-20 mb-2"></div>
+              <div className="h-3 bg-surface-sunken rounded w-24 mb-1"></div>
+              <div className="h-3 bg-surface-sunken rounded w-16"></div>
             </div>
+
+            {/* Monthly plan skeleton */}
+            <div className="p-4 rounded-xl min-h-20 bg-surface-raised animate-pulse">
+              <div className="h-4 bg-surface-sunken rounded w-20 mb-2"></div>
+              <div className="h-3 bg-surface-sunken rounded w-24 mb-1"></div>
+              <div className="h-3 bg-surface-sunken rounded w-16"></div>
+            </div>
+          </div>
+
+          {/* Button skeleton */}
+          <div className="px-4">
+            <div className="h-10 bg-surface-raised rounded-full animate-pulse mb-2"></div>
+            <div className="h-10 bg-surface-raised rounded-full animate-pulse"></div>
           </div>
         </div>
       </>
@@ -253,8 +269,8 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
           </h3>
           {subscription.stripe_id && subscription.status === 'canceled'
             ? (
-                <p className="text-sm text-text-secondary mt-2">
-                  Choose your plan below. No trial period - you'll be charged immediately.
+                <p className="text-sm text-text-secondary mt-1">
+                  Select your plan below. You'll be charged right away when you reactivate. Your data connection should be restored within 24 hours.
                 </p>
               )
             : (
@@ -352,17 +368,17 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
 
         <div className="px-4">
           <button
-            onClick={handleCreateSubscription}
+            onClick={handleReactivateSubscription}
             className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
-              isCreating
+              isReactivating
                 ? COLORS.button.disabled
                 : COLORS.button.primary
             }`}
             type="button"
-            disabled={isCreating}
+            disabled={isReactivating}
           >
-            {isCreating
-              ? 'Creating...'
+            {isReactivating
+              ? 'Reactivating...'
               : (subscription.stripe_id && subscription.status === 'canceled')
                   ? 'Reactivate Subscription'
                   : 'Continue to Review'}
