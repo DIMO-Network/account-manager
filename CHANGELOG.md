@@ -1,3 +1,10 @@
+# [2.23.0](https://github.com/DIMO-Network/account-manager/compare/v2.22.1...v2.23.0) (2025-08-13)
+
+
+### Features
+
+* enable reactivation flow for lapsed R1 and AutoPi ([#59](https://github.com/DIMO-Network/account-manager/issues/59)) ([be76f76](https://github.com/DIMO-Network/account-manager/commit/be76f762c5259702a27753c85be68002e44e3711))
+
 ## [2.22.1](https://github.com/DIMO-Network/account-manager/compare/v2.22.0...v2.22.1) (2025-08-05)
 
 
