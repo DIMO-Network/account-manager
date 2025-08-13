@@ -15,7 +15,6 @@ type ConnectionSubscriptionDetailCardProps = {
 export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDetailCardProps> = ({ subscription }) => {
   const router = useRouter();
   const [isActivating, setIsActivating] = useState(false);
-  const [showConfirmActivation, setShowConfirmActivation] = useState(false);
   const device = subscription.device;
 
   if (!device) {
@@ -24,8 +23,23 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
 
   const vehicleTokenId = device.vehicle?.tokenId;
   const connectionName = device.connection?.name || 'Unknown Connection';
+  const isCanceled = subscription.status === 'canceled';
 
   const renewalInfo = getBackendSubscriptionRenewalInfo(subscription, device);
+
+  // Get manufacturer display name
+  const getManufacturerDisplayName = (manufacturerName: string) => {
+    switch (manufacturerName) {
+      case 'Ruptela':
+        return 'R1';
+      case 'AutoPi':
+        return 'AutoPi';
+      case 'HashDog':
+        return 'Macaron';
+      default:
+        return manufacturerName;
+    }
+  };
 
   const handleActivateSubscription = async () => {
     setIsActivating(true);
@@ -45,9 +59,10 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
       const { hasValidPaymentMethod } = await checkResponse.json();
 
       if (hasValidPaymentMethod) {
-        // Show confirmation for direct subscription activation
-        setShowConfirmActivation(true);
-        setIsActivating(false);
+        // For users with valid payment methods, route to edit page for plan selection
+        if (vehicleTokenId) {
+          router.push(`/subscriptions/connection/${vehicleTokenId}/edit`);
+        }
         return;
       }
 
@@ -69,53 +84,10 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
 
       const { checkout_url } = await subscriptionResponse.json();
 
-      // Open checkout session in new tab
-      window.open(checkout_url, '_blank');
-
-      // TODO: Make redirect_uri in backend customizable
-      router.push('/dashboard');
+      window.location.href = checkout_url;
     } catch (error) {
       console.error('Error activating subscription:', error);
-      // TODO: Add proper error handling/notification
-    } finally {
-      setIsActivating(false);
     }
-  };
-
-  const handleConfirmActivation = async () => {
-    setIsActivating(true);
-    try {
-      if (!vehicleTokenId) {
-        throw new Error('No vehicle token ID found');
-      }
-
-      const response = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to activate subscription');
-      }
-
-      // Subscription activated successfully
-      setShowConfirmActivation(false);
-      // TODO: Add success notification and refresh data
-      console.warn('Subscription activated successfully');
-
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Error confirming subscription activation:', error);
-      // TODO: Add proper error handling/notification
-    } finally {
-      setIsActivating(false);
-    }
-  };
-
-  const handleCancelActivation = () => {
-    setShowConfirmActivation(false);
   };
 
   // Reusable styles
@@ -125,18 +97,14 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
 
   return (
     <>
-      <PageHeader icon={<CarIcon />} title={`${connectionName} Connection Details`} className="mb-4" />
+      <PageHeader
+        icon={<CarIcon />}
+        title={isCanceled ? 'Connection Details' : `${connectionName} Connection Details`}
+        className="mb-4"
+      />
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="space-y-4">
-          {/* Connection Type */}
-          <div>
-            <div className={labelStyle}>Connection Type</div>
-            <div className={`${valueStyle} ${borderStyle}`}>
-              {connectionName}
-            </div>
-          </div>
-
-          {/* Connected To */}
+          {/* Connected To - Always show first */}
           <div>
             <div className={labelStyle}>Connected To</div>
             <div className={`${valueStyle} ${borderStyle}`}>
@@ -161,74 +129,97 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
             </div>
           </div>
 
-          {/* Connection Date */}
-          <div>
-            <div className={labelStyle}>Connection Date</div>
-            <div className={`${valueStyle} ${borderStyle}`}>
-              {device.connection?.mintedAt
-                ? new Date(device.connection.mintedAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })
-                : 'N/A'}
+          {/* Serial Number - Show for canceled subscriptions */}
+          {isCanceled && device.serial && (
+            <div>
+              <div className={labelStyle}>Serial Number</div>
+              <div className={`${valueStyle} ${borderStyle}`}>
+                {device.serial}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Schedule */}
-          <div>
-            <div className={labelStyle}>Schedule</div>
-            <div className={valueStyle}>
-              <div>{renewalInfo.displayText}</div>
-              {renewalInfo.secondaryText && (
-                <div className="text-xs text-text-secondary">
-                  {renewalInfo.secondaryText}
-                </div>
-              )}
+          {/* Connection Type - Show for canceled subscriptions */}
+          {isCanceled && device.manufacturer?.name && (
+            <div>
+              <div className={labelStyle}>Connection Type</div>
+              <div className={`${valueStyle} ${borderStyle}`}>
+                {getManufacturerDisplayName(device.manufacturer.name)}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Last Connected - Show for canceled subscriptions */}
+          {isCanceled && subscription.ended_at && (
+            <div>
+              <div className={labelStyle}>Last Connected</div>
+              <div className={`${valueStyle} ${borderStyle}`}>
+                {new Date(subscription.ended_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Connection Type - Only show for non-canceled subscriptions */}
+          {!isCanceled && (
+            <div>
+              <div className={labelStyle}>Connection Type</div>
+              <div className={`${valueStyle} ${borderStyle}`}>
+                {connectionName}
+              </div>
+            </div>
+          )}
+
+          {/* Connection Date - Only show for non-canceled subscriptions */}
+          {!isCanceled && (
+            <div>
+              <div className={labelStyle}>Connection Date</div>
+              <div className={`${valueStyle} ${borderStyle}`}>
+                {device.connection?.mintedAt
+                  ? new Date(device.connection.mintedAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })
+                  : 'N/A'}
+              </div>
+            </div>
+          )}
+
+          {/* Schedule - Only show for non-canceled subscriptions */}
+          {!isCanceled && (
+            <div>
+              <div className={labelStyle}>Schedule</div>
+              <div className={valueStyle}>
+                <div>{renewalInfo.displayText}</div>
+                {renewalInfo.secondaryText && (
+                  <div className="text-xs text-text-secondary">
+                    {renewalInfo.secondaryText}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col mt-4 px-4 gap-2">
-          {!showConfirmActivation
-            ? (
-                <button
-                  onClick={handleActivateSubscription}
-                  disabled={isActivating || !vehicleTokenId}
-                  className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
-                    isActivating || !vehicleTokenId
-                      ? COLORS.button.disabled
-                      : COLORS.button.primary
-                  }`}
-                  type="button"
-                >
-                  {isActivating ? 'Activating...' : 'Activate Subscription'}
-                </button>
-              )
-            : (
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={handleConfirmActivation}
-                    disabled={isActivating}
-                    className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium flex-1 ${
-                      isActivating
-                        ? COLORS.button.disabledTransparent
-                        : COLORS.button.primary
-                    }`}
-                    type="button"
-                  >
-                    {isActivating ? 'Activating...' : 'Confirm'}
-                  </button>
-                  <button
-                    onClick={handleCancelActivation}
-                    disabled={isActivating}
-                    className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium flex-1 ${COLORS.button.secondaryTransparent}`}
-                    type="button"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
+          <button
+            onClick={handleActivateSubscription}
+            disabled={isActivating || !vehicleTokenId}
+            className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
+              isActivating || !vehicleTokenId
+                ? COLORS.button.disabled
+                : COLORS.button.primary
+            }`}
+            type="button"
+          >
+            {isActivating
+              ? (isCanceled ? 'Checking Payment Method...' : 'Activating...')
+              : (isCanceled ? 'Reactivate Subscription' : 'Activate Subscription')}
+          </button>
 
           <button
             onClick={() => router.push('/dashboard')}

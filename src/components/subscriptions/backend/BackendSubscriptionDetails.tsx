@@ -65,9 +65,12 @@ export function BackendSubscriptionDetails({ status, device }: BackendSubscripti
             : null
       )}
 
-      <div className={`text-xs text-text-secondary ${COLORS.text.secondary}`}>
-        {getBackendSubscriptionRenewalInfo(status).displayText}
-      </div>
+      {/* Only show renewal info for non-canceled subscriptions */}
+      {status.status !== 'canceled' && (
+        <div className={`text-xs text-text-secondary ${COLORS.text.secondary}`}>
+          {getBackendSubscriptionRenewalInfo(status).displayText}
+        </div>
+      )}
     </div>
   );
 }

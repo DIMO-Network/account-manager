@@ -31,6 +31,8 @@ export async function POST(
       );
     }
 
+    const cancelUrl = `${process.env.NEXT_PUBLIC_APP_URL}/subscriptions/connection/${vehicleTokenId}`;
+    const successUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
     const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001'}/subscription/vehicle/${vehicleTokenId}/new-subscription-link`;
 
     const response = await fetch(backendUrl, {
@@ -41,6 +43,9 @@ export async function POST(
       },
       body: JSON.stringify({
         plan: 'monthly',
+        trial_period_days: 0, // No trial period for reactivation
+        success_url: successUrl,
+        cancel_url: cancelUrl,
       }),
     });
 

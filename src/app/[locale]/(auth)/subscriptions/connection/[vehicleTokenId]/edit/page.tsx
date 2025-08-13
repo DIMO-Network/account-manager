@@ -1,10 +1,10 @@
 import { notFound, redirect } from 'next/navigation';
-import { ConnectionSubscriptionDetailCard } from '@/components/subscriptions/ConnectionSubscriptionDetailCard';
+import { ConnectionPlanSelection } from '@/components/subscriptions/connection/ConnectionPlanSelection';
 import { getSession } from '@/libs/Session';
 import { authorizeConnectionSubscriptionAccess } from '@/libs/StripeSubscriptionService';
-import { PaymentMethodSection } from '../../PaymentMethodSection';
+import { PaymentMethodSection } from '../../../PaymentMethodSection';
 
-export default async function ConnectionSubscriptionPage({
+export default async function EditSubscriptionPage({
   params,
 }: {
   params: Promise<{ vehicleTokenId: string }>;
@@ -42,7 +42,7 @@ export default async function ConnectionSubscriptionPage({
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       <div className="w-full lg:w-3/4">
-        <ConnectionSubscriptionDetailCard subscription={subscription} />
+        <ConnectionPlanSelection subscription={subscription} vehicleTokenId={vehicleTokenId} />
       </div>
       <PaymentMethodSection />
     </div>
