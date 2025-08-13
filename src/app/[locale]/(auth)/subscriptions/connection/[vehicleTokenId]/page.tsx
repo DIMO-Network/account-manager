@@ -1,6 +1,8 @@
 import { notFound, redirect } from 'next/navigation';
 import { ConnectionSubscriptionDetailCard } from '@/components/subscriptions/ConnectionSubscriptionDetailCard';
 import { getSession } from '@/libs/Session';
+import { fetchBackendSubscriptions } from '@/libs/StripeSubscriptionService';
+import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 export default async function ConnectionSubscriptionPage({
   params,
@@ -9,42 +11,50 @@ export default async function ConnectionSubscriptionPage({
 }) {
   const { vehicleTokenId } = await params;
 
-  // Check authentication
-  const session = await getSession();
-  if (!session?.dimoToken) {
-    redirect('/auth/signin');
+  if (!vehicleTokenId) {
+    notFound();
   }
 
   try {
-    // Fetch subscription data for this vehicle
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001';
-    const response = await fetch(`${backendUrl}/subscription/vehicle/${vehicleTokenId}`, {
-      headers: {
-        Authorization: `Bearer ${session.dimoToken}`,
-        accept: 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        notFound();
-      }
-      if (response.status === 403) {
-        redirect('/dashboard');
-      }
-      throw new Error(`Failed to fetch subscription: ${response.status}`);
+    const session = await getSession();
+    if (!session) {
+      notFound();
     }
 
-    const subscription = await response.json();
+    const dimoToken = session.dimoToken;
+    if (!dimoToken) {
+      notFound();
+    }
 
-    // Check if user owns this subscription
-    if (!subscription || !subscription.device?.vehicle?.tokenId) {
+    const backendSubscriptions = await fetchBackendSubscriptions(dimoToken);
+    if (!backendSubscriptions) {
+      notFound();
+    }
+
+    // Find the subscription that matches the vehicle tokenId and has either a connection or manufacturer
+    const subscription = backendSubscriptions.find(
+      sub => sub.device?.vehicle?.tokenId === Number.parseInt(vehicleTokenId, 10)
+        && (sub.device?.connection?.name || sub.device?.manufacturer?.name),
+    );
+
+    if (!subscription || !subscription.device) {
+      notFound();
+    }
+
+    // Only allow access to canceled subscriptions for reactivation
+    if (subscription.status !== 'canceled') {
       redirect('/dashboard');
     }
 
-    return <ConnectionSubscriptionDetailCard subscription={subscription} />;
-  } catch (error) {
-    console.error('Error fetching subscription:', error);
-    redirect('/dashboard');
+    return (
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="w-full lg:w-3/4">
+          <ConnectionSubscriptionDetailCard subscription={subscription} />
+        </div>
+        <PaymentMethodSection />
+      </div>
+    );
+  } catch {
+    notFound();
   }
 }
