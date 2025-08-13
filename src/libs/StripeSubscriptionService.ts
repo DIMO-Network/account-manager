@@ -305,3 +305,44 @@ export async function authorizeSubscriptionAccess(subscriptionId: string, dimoTo
     return { authorized: false, error: 'Authorization failed' };
   }
 }
+
+// Authorization function for connection subscriptions
+export async function authorizeConnectionSubscriptionAccess(
+  vehicleTokenId: string,
+  dimoToken: string | null,
+): Promise<{
+  authorized: boolean;
+  subscription?: BackendSubscription;
+  error?: string;
+}> {
+  try {
+    if (!dimoToken) {
+      return { authorized: false, error: 'DIMO authentication required' };
+    }
+
+    const backendSubscriptions = await fetchBackendSubscriptions(dimoToken);
+    if (!backendSubscriptions) {
+      return { authorized: false, error: 'Failed to fetch subscriptions' };
+    }
+
+    // Find the subscription that matches the vehicle tokenId and has either a connection or manufacturer
+    const subscription = backendSubscriptions.find(
+      sub => sub.device?.vehicle?.tokenId === Number.parseInt(vehicleTokenId, 10)
+        && (sub.device?.connection?.name || sub.device?.manufacturer?.name),
+    );
+
+    if (!subscription || !subscription.device) {
+      return { authorized: false, error: 'Subscription not found for this vehicle' };
+    }
+
+    // Only allow access to canceled subscriptions for reactivation
+    if (subscription.status !== 'canceled') {
+      return { authorized: false, error: 'Subscription is not canceled', subscription };
+    }
+
+    return { authorized: true, subscription };
+  } catch (error) {
+    console.error('Error in connection subscription authorization:', error);
+    return { authorized: false, error: 'Authorization failed' };
+  }
+}
