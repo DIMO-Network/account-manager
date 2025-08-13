@@ -84,14 +84,9 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
 
       const { checkout_url } = await subscriptionResponse.json();
 
-      // Open checkout session in new tab
-      window.open(checkout_url, '_blank');
-
-      // TODO: Make redirect_uri in backend customizable
-      router.push('/dashboard');
+      window.location.href = checkout_url;
     } catch (error) {
       console.error('Error activating subscription:', error);
-      // TODO: Add proper error handling/notification
     }
   };
 
