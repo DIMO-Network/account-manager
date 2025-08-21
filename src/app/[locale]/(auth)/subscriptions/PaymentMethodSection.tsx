@@ -19,8 +19,8 @@ export function PaymentMethodSection() {
             <WalletIcon className="w-4 h-4" />
           </div>
           <div className="animate-pulse">
-            <div className="h-5 bg-gray-300 rounded w-3/4 mb-2"></div>
-            <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+            <div className="h-5 bg-gray-800 rounded w-3/4 mb-2"></div>
+            <div className="h-3 bg-gray-800 rounded w-1/2"></div>
           </div>
           <div className="mt-6 flex justify-center">
             <Link
@@ -38,27 +38,26 @@ export function PaymentMethodSection() {
     );
   }
 
-  // Hide payment method section if all stripe_id values are null
-  if (allStripeIdsNull) {
-    return null;
-  }
-
   return (
     <div className="hidden lg:flex flex-col lg:w-1/4 gap-4">
-      <div className={`hidden lg:flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} px-4 py-3`}>
-        <div className="mb-4">
-          <WalletIcon className="w-4 h-4" />
-        </div>
-        <PaymentMethodClient />
-        <div className="mt-6 flex justify-center">
-          <Link
-            href="/payment-methods"
-            className="inline-flex flex-row items-center justify-center gap-2 rounded-full bg-surface-raised px-4 font-medium w-full h-10"
-          >
-            Edit
-          </Link>
-        </div>
-      </div>
+      {allStripeIdsNull
+        ? null
+        : (
+            <div className={`hidden lg:flex flex-col ${BORDER_RADIUS.lg} ${COLORS.background.primary} px-4 py-3`}>
+              <div className="mb-4">
+                <WalletIcon className="w-4 h-4" />
+              </div>
+              <PaymentMethodClient />
+              <div className="mt-6 flex justify-center">
+                <Link
+                  href="/payment-methods"
+                  className="inline-flex flex-row items-center justify-center gap-2 rounded-full bg-surface-raised px-4 font-medium w-full h-10"
+                >
+                  Edit
+                </Link>
+              </div>
+            </div>
+          )}
       <div className="hidden lg:flex">
         <PaymentMethodsNote />
       </div>

@@ -19,12 +19,14 @@ export function PaymentMethodContent() {
           </div>
           <div className="flex-1">
             <div className="animate-pulse">
-              <div className="h-5 bg-gray-300 rounded w-3/4 mb-2"></div>
-              <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+              <div className="h-5 bg-gray-800 rounded w-3/4 mb-2"></div>
+              <div className="h-3 bg-gray-800 rounded w-1/2"></div>
             </div>
           </div>
         </div>
-        <PaymentMethodButtons />
+        <div className="mt-6 flex justify-center">
+          <div className="animate-pulse bg-surface-raised h-10 w-full rounded-full" />
+        </div>
       </div>
     );
   }
