@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { ConnectionSubscriptionDetailCard } from '@/components/subscriptions/ConnectionSubscriptionDetailCard';
+import { authorizeConnectionSubscriptionAccess } from '@/libs/BackendSubscriptionService';
 import { getSession } from '@/libs/Session';
-import { authorizeConnectionSubscriptionAccess } from '@/libs/StripeSubscriptionService';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 export default async function ConnectionSubscriptionPage({

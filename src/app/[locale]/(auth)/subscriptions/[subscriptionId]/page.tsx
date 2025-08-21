@@ -1,8 +1,9 @@
 import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import SubscriptionDetailCard from '@/components/subscriptions/SubscriptionDetailCard';
+import { authorizeSubscriptionAccess } from '@/libs/BackendSubscriptionService';
 import { getSession } from '@/libs/Session';
-import { authorizeSubscriptionAccess, fetchSubscriptionWithSchedule } from '@/libs/StripeSubscriptionService';
+import { fetchSubscriptionWithSchedule } from '@/libs/StripeSubscriptionService';
 import { PaymentMethodSection } from '../PaymentMethodSection';
 
 export default async function SubscriptionDetailPage({ params }: { params: Promise<{ subscriptionId: string }> }) {
