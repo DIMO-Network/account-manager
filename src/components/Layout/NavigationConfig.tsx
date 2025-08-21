@@ -18,7 +18,10 @@ export type PublicNavigationTranslations = {
   sign_in_link: string;
 };
 
-export const createAuthNavigation = (translations: AuthNavigationTranslations): MenuItemConfig[] => {
+export const createAuthNavigation = (
+  translations: AuthNavigationTranslations,
+  options?: { hidePaymentMethods?: boolean },
+): MenuItemConfig[] => {
   const isProduction = isProductionMode();
 
   const menuItems: MenuItemConfig[] = [
@@ -30,14 +33,18 @@ export const createAuthNavigation = (translations: AuthNavigationTranslations): 
       link: '/dashboard/',
       section: 'main',
     },
-    {
+  ];
+
+  // Only add payment methods link if not hidden
+  if (!options?.hidePaymentMethods) {
+    menuItems.push({
       label: translations.payment_methods_link,
       icon: WalletIcon,
       iconClassName: 'h-5 w-5 text-text-secondary',
       link: '/payment-methods/',
       section: 'main',
-    },
-  ];
+    });
+  }
 
   // Bottom navigation items
   menuItems.push(
