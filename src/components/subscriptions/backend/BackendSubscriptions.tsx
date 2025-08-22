@@ -5,13 +5,23 @@ import { BackendSubscriptionItem } from './BackendSubscriptionItem';
 export function BackendSubscriptions({ statuses }: { statuses: BackendSubscription[] }) {
   const filteredStatuses = useMemo(() =>
     statuses.filter((status) => {
+      // Exclude subscriptions without device info
+      if (!status.device) {
+        return false;
+      }
+
+      // Exclude subscriptions where vehicle is null
+      if (!status.device.vehicle) {
+        return false;
+      }
+
       // Include all non-canceled subscriptions
       if (status.status !== 'canceled') {
         return true;
       }
 
       // For canceled subscriptions, only include Ruptela and AutoPi devices
-      if (status.device?.manufacturer?.name) {
+      if (status.device.manufacturer?.name) {
         const manufacturerName = status.device.manufacturer.name;
         return manufacturerName === 'Ruptela' || manufacturerName === 'AutoPi';
       }

@@ -39,13 +39,13 @@ export function getStatusDisplay(status: any) {
   if (isActive) {
     statusColor = 'text-green-500';
     if (isTrialing) {
-      statusText = 'Trial Active';
+      statusText = 'Active';
     } else {
       statusText = 'Active';
     }
   } else if (isIncomplete) {
     statusColor = 'text-yellow-500';
-    statusText = 'Trial Incomplete';
+    statusText = 'Trial Ongoing';
   } else if (status.status === 'canceled') {
     statusColor = 'text-red-500';
     statusText = 'Canceled';
@@ -273,7 +273,7 @@ export function getStripeStatusDisplay(subscription: any) {
   if (isActive) {
     statusColor = 'text-green-500';
     if (isTrialing) {
-      statusText = 'Trial Active';
+      statusText = 'Active';
     } else {
       statusText = 'Active';
     }

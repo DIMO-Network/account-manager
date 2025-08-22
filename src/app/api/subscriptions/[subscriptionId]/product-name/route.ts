@@ -1,9 +1,9 @@
 import type { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { authorizeSubscriptionAccess } from '@/libs/BackendSubscriptionService';
 import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
-import { authorizeSubscriptionAccess } from '@/libs/StripeSubscriptionService';
 
 export async function GET(
   _request: NextRequest,
