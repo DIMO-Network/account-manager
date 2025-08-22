@@ -34,7 +34,7 @@ export const COLORS = {
     menu: {
       default: 'text-text-secondary',
       active: 'bg-surface-raised text-white font-bold',
-      disabled: 'bg-surface-raised text-gray-400 cursor-not-allowed',
+      disabled: 'text-gray-400 cursor-not-allowed',
     },
   },
 
