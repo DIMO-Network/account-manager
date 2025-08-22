@@ -1,3 +1,10 @@
+## [2.24.1](https://github.com/DIMO-Network/account-manager/compare/v2.24.0...v2.24.1) (2025-08-22)
+
+
+### Bug Fixes
+
+* remove background from disabled menu items ([ba1094b](https://github.com/DIMO-Network/account-manager/commit/ba1094b2e84c85a74e5e3a08bcc6661f84100173))
+
 # [2.24.0](https://github.com/DIMO-Network/account-manager/compare/v2.23.0...v2.24.0) (2025-08-22)
 
 
