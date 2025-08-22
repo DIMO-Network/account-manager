@@ -13,11 +13,17 @@ type LayoutWrapperProps = {
 };
 
 export function LayoutWrapper({ children, layoutType, translations, className }: LayoutWrapperProps) {
-  const { allStripeIdsNull } = useBackendSubscriptions();
+  const { loading, allStripeIdsNull } = useBackendSubscriptions();
+
+  // During loading: disable payment methods (visible but not clickable)
+  // After loading: hide payment methods only if all stripe IDs are null
+  const disablePaymentMethods = loading;
+  const hidePaymentMethods = !loading && allStripeIdsNull;
 
   const menuItems = layoutType === 'auth'
     ? createAuthNavigation(translations as AuthNavigationTranslations, {
-        hidePaymentMethods: allStripeIdsNull,
+        hidePaymentMethods,
+        disablePaymentMethods,
       })
     : createPublicNavigation(translations as PublicNavigationTranslations);
 

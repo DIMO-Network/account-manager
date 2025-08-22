@@ -20,7 +20,7 @@ export type PublicNavigationTranslations = {
 
 export const createAuthNavigation = (
   translations: AuthNavigationTranslations,
-  options?: { hidePaymentMethods?: boolean },
+  options?: { hidePaymentMethods?: boolean; disablePaymentMethods?: boolean },
 ): MenuItemConfig[] => {
   const isProduction = isProductionMode();
 
@@ -35,8 +35,20 @@ export const createAuthNavigation = (
     },
   ];
 
-  // Only add payment methods link if not hidden
-  if (!options?.hidePaymentMethods) {
+  // Add payment methods link based on options
+  if (options?.hidePaymentMethods) {
+    // Don't add the link at all
+  } else if (options?.disablePaymentMethods) {
+    menuItems.push({
+      label: translations.payment_methods_link,
+      icon: WalletIcon,
+      iconClassName: 'h-5 w-5 text-text-secondary opacity-50',
+      link: '#',
+      section: 'main',
+      disabled: true,
+    });
+  } else {
+    // Add normal payment methods link
     menuItems.push({
       label: translations.payment_methods_link,
       icon: WalletIcon,
