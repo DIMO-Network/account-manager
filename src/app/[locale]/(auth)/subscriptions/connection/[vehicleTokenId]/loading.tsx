@@ -84,8 +84,7 @@ export default function ConnectionSubscriptionDetailLoading() {
             </div>
           </div>
           <div className="mt-4 space-y-2">
-            <SkeletonBox className="w-full h-10" />
-            <SkeletonBox className="w-full h-10" />
+            <SkeletonBox className="w-full h-10 rounded-full" />
           </div>
         </div>
 
