@@ -20,8 +20,10 @@ export function MenuActionButton({
       type="button"
       disabled={disabled}
       className={classNames(
-        'flex flex-row gap-3 items-center h-10 text-base rounded-full px-3 transition-colors font-medium w-full text-left cursor-pointer',
+        'flex flex-row gap-3 items-center h-10 text-base rounded-full px-3 transition-colors font-medium w-full text-left',
         {
+          'cursor-pointer': !disabled,
+          'cursor-not-allowed': disabled,
           [COLORS.button.menu.disabled]: disabled,
           [COLORS.button.menu.active]: active,
           [COLORS.button.menu.default]: !disabled && !active,

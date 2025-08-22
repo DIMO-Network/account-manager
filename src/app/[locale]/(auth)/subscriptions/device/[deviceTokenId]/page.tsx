@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import GrandfatheredSubscriptionDetailCard from '@/components/subscriptions/GrandfatheredSubscriptionDetailCard';
+import { fetchBackendSubscriptions } from '@/libs/BackendSubscriptionService';
 import { getSession } from '@/libs/Session';
-import { fetchBackendSubscriptions } from '@/libs/StripeSubscriptionService';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 export default async function GrandfatheredDeviceDetailPage({

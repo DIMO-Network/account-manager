@@ -10,10 +10,10 @@ export function PaymentMethodButtons() {
   const { customerId } = useStripeCustomer();
   const { paymentMethods, defaultPaymentMethodId, loading } = usePaymentMethods(customerId);
 
-  if (loading || !customerId) {
+  if (loading || !customerId || !paymentMethods) {
     return (
       <div className="mt-6 flex justify-center">
-        <div className="animate-pulse bg-surface-sunken h-6 w-full rounded-full" />
+        <div className="animate-pulse bg-surface-raised h-10 w-full rounded-full" />
       </div>
     );
   }

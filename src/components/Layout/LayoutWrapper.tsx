@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import type { AuthNavigationTranslations, PublicNavigationTranslations } from './index';
+import { useBackendSubscriptions } from '@/hooks/useBackendSubscriptions';
 import { createAuthNavigation, createPublicNavigation, SidebarLayout } from './index';
 
 type LayoutWrapperProps = {
@@ -12,8 +13,18 @@ type LayoutWrapperProps = {
 };
 
 export function LayoutWrapper({ children, layoutType, translations, className }: LayoutWrapperProps) {
+  const { loading, allStripeIdsNull } = useBackendSubscriptions();
+
+  // During loading: disable payment methods (visible but not clickable)
+  // After loading: hide payment methods only if all stripe IDs are null
+  const disablePaymentMethods = loading;
+  const hidePaymentMethods = !loading && allStripeIdsNull;
+
   const menuItems = layoutType === 'auth'
-    ? createAuthNavigation(translations as AuthNavigationTranslations)
+    ? createAuthNavigation(translations as AuthNavigationTranslations, {
+        hidePaymentMethods,
+        disablePaymentMethods,
+      })
     : createPublicNavigation(translations as PublicNavigationTranslations);
 
   return (
