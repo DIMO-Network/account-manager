@@ -1,3 +1,10 @@
+# [2.24.0](https://github.com/DIMO-Network/account-manager/compare/v2.23.0...v2.24.0) (2025-08-22)
+
+
+### Features
+
+* hide payment methods theres no stripe subscription ([#62](https://github.com/DIMO-Network/account-manager/issues/62)) ([764d0b5](https://github.com/DIMO-Network/account-manager/commit/764d0b57723de210edca1d4232248a00907b4023))
+
 # [2.23.0](https://github.com/DIMO-Network/account-manager/compare/v2.22.1...v2.23.0) (2025-08-13)
 
 
