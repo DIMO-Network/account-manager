@@ -161,6 +161,7 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
           },
           body: JSON.stringify({
             plan: selectedPlan,
+            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscriptions/connection/${vehicleTokenId}`,
           }),
         });
 
