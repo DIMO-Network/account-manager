@@ -2,7 +2,7 @@
 
 import type { BackendSubscription } from '@/types/subscription';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React from 'react';
 import { CarIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
@@ -14,7 +14,6 @@ type ConnectionSubscriptionDetailCardProps = {
 
 export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDetailCardProps> = ({ subscription }) => {
   const router = useRouter();
-  const [isActivating, setIsActivating] = useState(false);
   const device = subscription.device;
 
   if (!device) {
@@ -41,52 +40,9 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
     }
   };
 
-  const handleActivateSubscription = async () => {
-    setIsActivating(true);
-    try {
-      // Check if user has a valid payment method
-      const checkResponse = await fetch('/api/subscriptions/check-user-payment-method', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!checkResponse.ok) {
-        throw new Error('Failed to check payment method');
-      }
-
-      const { hasValidPaymentMethod } = await checkResponse.json();
-
-      if (hasValidPaymentMethod) {
-        // For users with valid payment methods, route to edit page for plan selection
-        if (vehicleTokenId) {
-          router.push(`/subscriptions/connection/${vehicleTokenId}/edit`);
-        }
-        return;
-      }
-
-      // Create subscription link for users without payment method
-      if (!vehicleTokenId) {
-        throw new Error('No vehicle token ID found');
-      }
-
-      const subscriptionResponse = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription-link`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!subscriptionResponse.ok) {
-        throw new Error('Failed to create subscription link');
-      }
-
-      const { checkout_url } = await subscriptionResponse.json();
-
-      window.location.href = checkout_url;
-    } catch (error) {
-      console.error('Error activating subscription:', error);
+  const handleActivateSubscription = () => {
+    if (vehicleTokenId) {
+      router.push(`/subscriptions/connection/${vehicleTokenId}/edit`);
     }
   };
 
@@ -212,17 +168,15 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
         <div className="flex flex-col mt-4 px-4 gap-2">
           <button
             onClick={handleActivateSubscription}
-            disabled={isActivating || !vehicleTokenId}
+            disabled={!vehicleTokenId}
             className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
-              isActivating || !vehicleTokenId
+              !vehicleTokenId
                 ? COLORS.button.disabled
                 : COLORS.button.primary
             }`}
             type="button"
           >
-            {isActivating
-              ? (isCanceled ? 'Checking Payment Method...' : 'Activating...')
-              : (isCanceled ? 'Reactivate Subscription' : 'Activate Subscription')}
+            {isCanceled ? 'Reactivate Subscription' : 'Activate Subscription'}
           </button>
 
           <button

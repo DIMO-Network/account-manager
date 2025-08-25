@@ -120,25 +120,62 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
   const handleReactivateSubscription = async () => {
     setIsReactivating(true);
     try {
-      const response = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription`, {
-        method: 'POST',
+      // Check if user has a valid payment method
+      const checkResponse = await fetch('/api/subscriptions/check-user-payment-method', {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          plan: selectedPlan,
-        }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create subscription');
+      if (!checkResponse.ok) {
+        throw new Error('Failed to check payment method');
       }
 
-      // Subscription created successfully
-      router.push('/dashboard');
+      const { hasValidPaymentMethod } = await checkResponse.json();
+
+      if (hasValidPaymentMethod) {
+        // For users with valid payment methods, create subscription directly
+        const response = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            plan: selectedPlan,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create subscription');
+        }
+
+        // Subscription created successfully
+        router.push('/dashboard');
+      } else {
+        // For users without valid payment methods, create subscription link
+        const response = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription-link`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            plan: selectedPlan,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create subscription link');
+        }
+
+        const { checkout_url } = await response.json();
+        window.location.href = checkout_url;
+      }
     } catch (error) {
       console.error('Error reactivating subscription:', error);
       // TODO: Add proper error handling/notification
+    } finally {
+      setIsReactivating(false);
     }
   };
 
@@ -273,14 +310,20 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
                   Select your plan below. You'll be charged right away when you reactivate. Your data connection should be restored within 24 hours.
                 </p>
               )
-            : (
-                <p className="text-sm text-text-secondary mt-2">
-                  Choose your plan below. You'll receive a
-                  {' '}
-                  {devicePricing?.annual.trial_period_days}
-                  -day trial period.
-                </p>
-              )}
+            : subscription.trial_end && new Date(subscription.trial_end) < new Date()
+              ? (
+                  <p className="text-sm text-text-secondary mt-2">
+                    Choose your plan below. You'll be charged right away when you subscribe. Your data connection should be restored within 24 hours.
+                  </p>
+                )
+              : (
+                  <p className="text-sm text-text-secondary mt-2">
+                    Choose your plan below. You'll receive a
+                    {' '}
+                    {devicePricing?.[selectedPlan]?.trial_period_days}
+                    -day trial period.
+                  </p>
+                )}
         </div>
 
         <div className="flex flex-col px-4 gap-3 mb-4">
@@ -311,7 +354,7 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
                 {' '}
                 / year
               </div>
-              {!(subscription.stripe_id && subscription.status === 'canceled') && (
+              {!(subscription.stripe_id && subscription.status === 'canceled') && !(subscription.trial_end && new Date(subscription.trial_end) < new Date()) && (
                 <div className="text-xs text-text-tertiary mt-1">
                   {devicePricing.annual.trial_period_days}
                   {' '}
@@ -355,7 +398,7 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
                 {' '}
                 / month
               </div>
-              {!(subscription.stripe_id && subscription.status === 'canceled') && (
+              {!(subscription.stripe_id && subscription.status === 'canceled') && !(subscription.trial_end && new Date(subscription.trial_end) < new Date()) && (
                 <div className="text-xs text-text-tertiary mt-1">
                   {devicePricing.monthly.trial_period_days}
                   {' '}
