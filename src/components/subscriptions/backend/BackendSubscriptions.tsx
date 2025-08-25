@@ -20,10 +20,15 @@ export function BackendSubscriptions({ statuses }: { statuses: BackendSubscripti
         return true;
       }
 
-      // For canceled subscriptions, only include Ruptela and AutoPi devices
+      // For canceled subscriptions, only include Ruptela, AutoPi, and Tesla devices
       if (status.device.manufacturer?.name) {
         const manufacturerName = status.device.manufacturer.name;
         return manufacturerName === 'Ruptela' || manufacturerName === 'AutoPi';
+      }
+
+      // Include canceled Tesla subscriptions
+      if (status.device.connection?.name === 'Tesla') {
+        return true;
       }
 
       // Exclude canceled subscriptions without device/manufacturer info

@@ -140,21 +140,25 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
           )}
 
           {/* Connection Type - Show for canceled subscriptions */}
-          {isCanceled && device.manufacturer?.name && (
+          {isCanceled && (device.manufacturer?.name || device.connection?.name) && (
             <div>
               <div className={labelStyle}>Connection Type</div>
               <div className={`${valueStyle} ${borderStyle}`}>
-                {getManufacturerDisplayName(device.manufacturer.name)}
+                {device.manufacturer?.name
+                  ? getManufacturerDisplayName(device.manufacturer.name)
+                  : device.connection?.name}
               </div>
             </div>
           )}
 
-          {/* Last Connected - Show for canceled subscriptions */}
-          {isCanceled && subscription.ended_at && (
+          {/* Date Information - Show for canceled subscriptions */}
+          {isCanceled && (subscription.ended_at || subscription.trial_end) && (
             <div>
-              <div className={labelStyle}>Last Connected</div>
+              <div className={labelStyle}>
+                {subscription.ended_at ? 'Last Connected' : 'Trial Ended'}
+              </div>
               <div className={`${valueStyle} ${borderStyle}`}>
-                {new Date(subscription.ended_at).toLocaleDateString('en-US', {
+                {new Date((subscription.ended_at || subscription.trial_end)!).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
