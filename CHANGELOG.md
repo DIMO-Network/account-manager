@@ -1,3 +1,10 @@
+## [2.25.1](https://github.com/DIMO-Network/account-manager/compare/v2.25.0...v2.25.1) (2025-08-25)
+
+
+### Bug Fixes
+
+* correct plan selection in subscription link API route ([#66](https://github.com/DIMO-Network/account-manager/issues/66)) ([e6660a2](https://github.com/DIMO-Network/account-manager/commit/e6660a29458d704dc4ddfb59e22a75a21de3f1c0))
+
 # [2.25.0](https://github.com/DIMO-Network/account-manager/compare/v2.24.3...v2.25.0) (2025-08-25)
 
 
