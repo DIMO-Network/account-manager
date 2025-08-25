@@ -1,3 +1,10 @@
+## [2.24.2](https://github.com/DIMO-Network/account-manager/compare/v2.24.1...v2.24.2) (2025-08-25)
+
+
+### Bug Fixes
+
+* show canceled Teslas ([#64](https://github.com/DIMO-Network/account-manager/issues/64)) ([7baa28e](https://github.com/DIMO-Network/account-manager/commit/7baa28e47791a7213aa1ef0812eaf85671f24dad))
+
 ## [2.24.1](https://github.com/DIMO-Network/account-manager/compare/v2.24.0...v2.24.1) (2025-08-22)
 
 
