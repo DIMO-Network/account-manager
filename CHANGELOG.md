@@ -1,3 +1,10 @@
+# [2.25.0](https://github.com/DIMO-Network/account-manager/compare/v2.24.3...v2.25.0) (2025-08-25)
+
+
+### Features
+
+* allow users to select plans for canceled subscriptions ([#65](https://github.com/DIMO-Network/account-manager/issues/65)) ([a0563c3](https://github.com/DIMO-Network/account-manager/commit/a0563c301d83e4bca3a2d4d0d1386f78da27cf80))
+
 ## [2.24.3](https://github.com/DIMO-Network/account-manager/compare/v2.24.2...v2.24.3) (2025-08-25)
 
 
