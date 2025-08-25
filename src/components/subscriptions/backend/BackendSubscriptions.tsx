@@ -1,8 +1,60 @@
 import type { BackendSubscription } from '@/types/subscription';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { BackendSubscriptionItem } from './BackendSubscriptionItem';
 
+function SkeletonBox({ className = '' }: { className?: string }) {
+  return (
+    <div className={`animate-pulse bg-gray-900 rounded ${className}`} />
+  );
+}
+
 export function BackendSubscriptions({ statuses }: { statuses: BackendSubscription[] }) {
+  const [vehicleStatuses, setVehicleStatuses] = useState<Record<number, boolean>>({});
+  // Start with loading true if we have subscriptions to check
+  const [isLoadingVehicleStatuses, setIsLoadingVehicleStatuses] = useState(() => {
+    const hasVehiclesToCheck = statuses.some(status => status.device?.vehicle?.tokenId);
+    return hasVehiclesToCheck;
+  });
+
+  // Check vehicle statuses on mount
+  useEffect(() => {
+    const checkVehicleStatuses = async () => {
+      const vehicleTokenIds = statuses
+        .map(status => status.device?.vehicle?.tokenId)
+        .filter((tokenId): tokenId is number => tokenId !== undefined);
+
+      if (vehicleTokenIds.length === 0) {
+        setIsLoadingVehicleStatuses(false);
+        setVehicleStatuses({});
+        return;
+      }
+
+      setIsLoadingVehicleStatuses(true);
+
+      try {
+        const response = await fetch('/api/subscriptions/vehicle-status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ vehicleTokenIds }),
+        });
+
+        if (response.ok) {
+          const { vehicleStatuses } = await response.json();
+          setVehicleStatuses(vehicleStatuses);
+        }
+      } catch (error) {
+        console.error('Error checking vehicle statuses:', error);
+      } finally {
+        setIsLoadingVehicleStatuses(false);
+      }
+    };
+
+    checkVehicleStatuses();
+  }, [statuses]);
+
   const filteredStatuses = useMemo(() =>
     statuses.filter((status) => {
       // Exclude subscriptions without device info
@@ -12,6 +64,12 @@ export function BackendSubscriptions({ statuses }: { statuses: BackendSubscripti
 
       // Exclude subscriptions where vehicle is null
       if (!status.device.vehicle) {
+        return false;
+      }
+
+      // Exclude subscriptions where vehicle returns 404 (burned tokens)
+      // Only filter out if we have confirmed the vehicle doesn't exist
+      if (!isLoadingVehicleStatuses && status.device.vehicle.tokenId && vehicleStatuses[status.device.vehicle.tokenId] === false) {
         return false;
       }
 
@@ -33,7 +91,35 @@ export function BackendSubscriptions({ statuses }: { statuses: BackendSubscripti
 
       // Exclude canceled subscriptions without device/manufacturer info
       return false;
-    }), [statuses]);
+    }), [statuses, vehicleStatuses, isLoadingVehicleStatuses]);
+
+  // Show loading state while checking vehicle statuses
+  if (isLoadingVehicleStatuses) {
+    return (
+      <div className="w-full lg:w-3/4 order-2 lg:order-1">
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className={`${BORDER_RADIUS.lg} ${COLORS.background.primary} p-4`}>
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1 space-y-3">
+                  <SkeletonBox className="w-3/4 h-6" />
+                  <SkeletonBox className="w-1/2 h-4" />
+                  <div className="flex gap-2">
+                    <SkeletonBox className="w-16 h-6" />
+                    <SkeletonBox className="w-20 h-6" />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 lg:w-1/4">
+                  <SkeletonBox className="w-full h-10" />
+                  <SkeletonBox className="w-full h-8" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (filteredStatuses.length === 0) {
     return <p className="text-base font-medium leading-6">No devices found.</p>;
