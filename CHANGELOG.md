@@ -1,3 +1,10 @@
+## [2.24.3](https://github.com/DIMO-Network/account-manager/compare/v2.24.2...v2.24.3) (2025-08-25)
+
+
+### Bug Fixes
+
+* adjust width of subscriptions skeleton ([d3ef57e](https://github.com/DIMO-Network/account-manager/commit/d3ef57e7a28552361bc7c2ce00265ff8ced6ff1a))
+
 ## [2.24.2](https://github.com/DIMO-Network/account-manager/compare/v2.24.1...v2.24.2) (2025-08-25)
 
 
