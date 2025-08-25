@@ -41,9 +41,7 @@ export const ConnectionSubscriptionDetailCard: React.FC<ConnectionSubscriptionDe
   };
 
   const handleActivateSubscription = () => {
-    if (vehicleTokenId) {
-      router.push(`/subscriptions/connection/${vehicleTokenId}/edit`);
-    }
+    router.push(`/subscriptions/connection/${vehicleTokenId}/edit`);
   };
 
   // Reusable styles
