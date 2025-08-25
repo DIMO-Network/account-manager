@@ -7,9 +7,9 @@ import { CarIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 
-type ConnectionPlanSelectionProps = {
+type DevicePlanSelectionProps = {
   subscription: BackendSubscription;
-  vehicleTokenId: string;
+  deviceTokenId: string;
 };
 
 type PlanDetails = {
@@ -25,7 +25,7 @@ type PricingData = {
   };
 };
 
-export function ConnectionPlanSelection({ subscription, vehicleTokenId }: ConnectionPlanSelectionProps) {
+export function DevicePlanSelection({ subscription, deviceTokenId }: DevicePlanSelectionProps) {
   const router = useRouter();
   const [isReactivating, setIsReactivating] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
@@ -40,9 +40,9 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
       case 'Ruptela':
         return 'R1';
       case 'AutoPi':
-        return 'AUTO_PI';
+        return 'AutoPi';
       case 'HashDog':
-        return 'MACARON';
+        return 'Macaron';
       default:
         return manufacturerName;
     }
@@ -136,6 +136,11 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
 
       if (hasValidPaymentMethod) {
         // For users with valid payment methods, create subscription directly
+        const vehicleTokenId = device.vehicle?.tokenId;
+        if (!vehicleTokenId) {
+          throw new Error('No vehicle token ID found');
+        }
+
         const response = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription`, {
           method: 'POST',
           headers: {
@@ -154,6 +159,11 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
         router.push('/dashboard');
       } else {
         // For users without valid payment methods, create subscription link
+        const vehicleTokenId = device.vehicle?.tokenId;
+        if (!vehicleTokenId) {
+          throw new Error('No vehicle token ID found');
+        }
+
         const response = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription-link`, {
           method: 'POST',
           headers: {
@@ -180,7 +190,7 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
   };
 
   const handleBack = () => {
-    router.push(`/subscriptions/connection/${vehicleTokenId}`);
+    router.push(`/subscriptions/device/${deviceTokenId}`);
   };
 
   // Get device-specific pricing
@@ -195,17 +205,17 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
   const productName = getManufacturerDisplayName(device.manufacturer?.name || '');
   const vehicleDisplay = device.vehicle?.definition?.year && device.vehicle.definition?.make && device.vehicle.definition?.model
     ? `${device.vehicle.definition.year} ${device.vehicle.definition.make} ${device.vehicle.definition.model}`
-    : `Vehicle ${vehicleTokenId}`;
+    : `Vehicle ${device.vehicle?.tokenId || 'Not Connected'}`;
 
   // Show loading state while fetching pricing
   if (isLoadingPricing) {
     return (
       <>
-        <PageHeader icon={<CarIcon />} title="Edit Subscription" className="mb-4" />
+        <PageHeader icon={<CarIcon />} title="Edit Device Subscription" className="mb-4" />
         <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
           <div className="mb-8 px-4">
             <h3 className="font-medium text-base leading-6">
-              Reactivate your subscription for
+              Activate your subscription for
               {' '}
               {productName}
               {' '}
@@ -246,11 +256,11 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
   if (pricingError || !devicePricing) {
     return (
       <>
-        <PageHeader icon={<CarIcon />} title="Edit Subscription" className="mb-4" />
+        <PageHeader icon={<CarIcon />} title="Edit Device Subscription" className="mb-4" />
         <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
           <div className="mb-8 px-4">
             <h3 className="font-medium text-base leading-6">
-              Reactivate your subscription for
+              Activate your subscription for
               {' '}
               {productName}
               {' '}
@@ -292,11 +302,11 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
 
   return (
     <>
-      <PageHeader icon={<CarIcon />} title="Edit Subscription" className="mb-4" />
+      <PageHeader icon={<CarIcon />} title="Edit Device Subscription" className="mb-4" />
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         <div className="mb-8 px-4">
           <h3 className="font-medium text-base leading-6">
-            Reactivate your subscription for
+            Activate your subscription for
             {' '}
             {productName}
             {' '}
@@ -304,26 +314,20 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
             {' '}
             {vehicleDisplay}
           </h3>
-          {subscription.stripe_id && subscription.status === 'canceled'
+          {subscription.trial_end
             ? (
-                <p className="text-sm text-text-secondary mt-1">
-                  Select your plan below. You'll be charged right away when you reactivate. Your data connection should be restored within 24 hours.
+                <p className="text-sm text-text-secondary mt-2">
+                  Choose your plan below. You'll be charged right away when you subscribe. Your data connection should be restored within 24 hours.
                 </p>
               )
-            : subscription.trial_end && new Date(subscription.trial_end) < new Date()
-              ? (
-                  <p className="text-sm text-text-secondary mt-2">
-                    Choose your plan below. You'll be charged right away when you subscribe. Your data connection should be restored within 24 hours.
-                  </p>
-                )
-              : (
-                  <p className="text-sm text-text-secondary mt-2">
-                    Choose your plan below. You'll receive a
-                    {' '}
-                    {devicePricing?.[selectedPlan]?.trial_period_days}
-                    -day trial period.
-                  </p>
-                )}
+            : (
+                <p className="text-sm text-text-secondary mt-2">
+                  Choose your plan below. You'll receive a
+                  {' '}
+                  {devicePricing?.[selectedPlan]?.trial_period_days}
+                  -day trial period.
+                </p>
+              )}
         </div>
 
         <div className="flex flex-col px-4 gap-3 mb-4">
@@ -354,7 +358,7 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
                 {' '}
                 / year
               </div>
-              {!(subscription.stripe_id && subscription.status === 'canceled') && !(subscription.trial_end && new Date(subscription.trial_end) < new Date()) && (
+              {!subscription.trial_end && (
                 <div className="text-xs text-text-tertiary mt-1">
                   {devicePricing.annual.trial_period_days}
                   {' '}
@@ -398,7 +402,7 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
                 {' '}
                 / month
               </div>
-              {!(subscription.stripe_id && subscription.status === 'canceled') && !(subscription.trial_end && new Date(subscription.trial_end) < new Date()) && (
+              {!subscription.trial_end && (
                 <div className="text-xs text-text-tertiary mt-1">
                   {devicePricing.monthly.trial_period_days}
                   {' '}
@@ -421,10 +425,8 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
             disabled={isReactivating}
           >
             {isReactivating
-              ? 'Reactivating...'
-              : (subscription.stripe_id && subscription.status === 'canceled')
-                  ? 'Reactivate Subscription'
-                  : 'Continue to Review'}
+              ? 'Activating...'
+              : 'Activate Subscription'}
           </button>
           <button
             onClick={handleBack}

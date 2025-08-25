@@ -2,7 +2,7 @@
 
 import type { BackendSubscription } from '@/types/subscription';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React from 'react';
 import { CarIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
@@ -14,8 +14,6 @@ type GrandfatheredSubscriptionDetailCardProps = {
 
 export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscriptionDetailCardProps> = ({ subscription }) => {
   const router = useRouter();
-  const [isActivating, setIsActivating] = useState(false);
-  const [showConfirmActivation, setShowConfirmActivation] = useState(false);
   const device = subscription.device;
 
   if (!device) {
@@ -27,97 +25,8 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
 
   const renewalInfo = getBackendSubscriptionRenewalInfo(subscription, device);
 
-  const handleActivateSubscription = async () => {
-    setIsActivating(true);
-    try {
-      // Check if user has a valid payment method
-      const checkResponse = await fetch('/api/subscriptions/check-user-payment-method', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!checkResponse.ok) {
-        throw new Error('Failed to check payment method');
-      }
-
-      const { hasValidPaymentMethod } = await checkResponse.json();
-
-      if (hasValidPaymentMethod) {
-        // Show confirmation for direct subscription activation
-        setShowConfirmActivation(true);
-        setIsActivating(false);
-        return;
-      }
-
-      // Create subscription link for users without payment method
-      const vehicleTokenId = device.vehicle?.tokenId;
-      if (!vehicleTokenId) {
-        throw new Error('No vehicle token ID found');
-      }
-
-      const subscriptionResponse = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription-link`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!subscriptionResponse.ok) {
-        throw new Error('Failed to create subscription link');
-      }
-
-      const { checkout_url } = await subscriptionResponse.json();
-
-      // Open checkout session in new tab
-      window.open(checkout_url, '_blank');
-
-      // TODO: Make redirect_uri in backend customizable
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Error activating subscription:', error);
-      // TODO: Add proper error handling/notification
-    } finally {
-      setIsActivating(false);
-    }
-  };
-
-  const handleConfirmActivation = async () => {
-    setIsActivating(true);
-    try {
-      const vehicleTokenId = device.vehicle?.tokenId;
-      if (!vehicleTokenId) {
-        throw new Error('No vehicle token ID found');
-      }
-
-      const response = await fetch(`/api/subscriptions/vehicle/${vehicleTokenId}/new-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to activate subscription');
-      }
-
-      // Subscription activated successfully
-      setShowConfirmActivation(false);
-      // TODO: Add success notification and refresh data
-      console.warn('Subscription activated successfully');
-
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Error confirming subscription activation:', error);
-      // TODO: Add proper error handling/notification
-    } finally {
-      setIsActivating(false);
-    }
-  };
-
-  const handleCancelActivation = () => {
-    setShowConfirmActivation(false);
+  const handleActivateSubscription = () => {
+    router.push(`/subscriptions/device/${device.tokenId}/edit`);
   };
 
   // Reusable styles
@@ -208,45 +117,13 @@ export const GrandfatheredSubscriptionDetailCard: React.FC<GrandfatheredSubscrip
         </div>
 
         <div className="flex flex-col mt-4 px-4 gap-2">
-          {!showConfirmActivation
-            ? (
-                <button
-                  onClick={handleActivateSubscription}
-                  disabled={isActivating || !device.vehicle?.tokenId}
-                  className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
-                    isActivating || !device.vehicle?.tokenId
-                      ? COLORS.button.disabled
-                      : COLORS.button.primary
-                  }`}
-                  type="button"
-                >
-                  {isActivating ? 'Activating...' : 'Activate Subscription'}
-                </button>
-              )
-            : (
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={handleConfirmActivation}
-                    disabled={isActivating}
-                    className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium flex-1 ${
-                      isActivating
-                        ? COLORS.button.disabledTransparent
-                        : COLORS.button.primary
-                    }`}
-                    type="button"
-                  >
-                    {isActivating ? 'Activating...' : 'Confirm'}
-                  </button>
-                  <button
-                    onClick={handleCancelActivation}
-                    disabled={isActivating}
-                    className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium flex-1 ${COLORS.button.secondaryTransparent}`}
-                    type="button"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
+          <button
+            onClick={handleActivateSubscription}
+            className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${COLORS.button.primary}`}
+            type="button"
+          >
+            Activate Subscription
+          </button>
 
           <button
             onClick={() => router.push('/dashboard')}
