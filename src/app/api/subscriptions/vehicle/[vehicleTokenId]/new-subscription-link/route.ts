@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/libs/Session';
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ vehicleTokenId: string }> },
 ) {
   try {
@@ -31,7 +31,26 @@ export async function POST(
       );
     }
 
-    const cancelUrl = `${process.env.NEXT_PUBLIC_APP_URL}/subscriptions/connection/${vehicleTokenId}`;
+    // Read the plan from the request body
+    let requestBody;
+    try {
+      requestBody = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 },
+      );
+    }
+
+    const { plan } = requestBody;
+    if (!plan || (plan !== 'monthly' && plan !== 'annual')) {
+      return NextResponse.json(
+        { error: 'Valid plan (monthly or annual) is required' },
+        { status: 400 },
+      );
+    }
+
+    const cancelUrl = requestBody.cancel_url || `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
     const successUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
     const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001'}/subscription/vehicle/${vehicleTokenId}/new-subscription-link`;
 
@@ -42,7 +61,7 @@ export async function POST(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        plan: 'monthly',
+        plan, // Use the plan from the request body
         trial_period_days: 0, // No trial period for reactivation
         success_url: successUrl,
         cancel_url: cancelUrl,
