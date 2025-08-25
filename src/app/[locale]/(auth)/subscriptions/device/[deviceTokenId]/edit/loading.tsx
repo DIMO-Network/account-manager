@@ -6,66 +6,48 @@ function SkeletonBox({ className = '' }: { className?: string }) {
   );
 }
 
-export default function DeviceSubscriptionDetailLoading() {
+export default function DeviceEditSubscriptionLoading() {
   return (
     <div className="flex flex-col lg:flex-row gap-6">
-      {/* Main Content Section */}
+      {/* Page Header Skeleton */}
       <div className="w-full lg:w-3/4">
-        {/* Page Header Skeleton */}
         <div className="flex items-center gap-2 mb-4">
           <SkeletonBox className="w-6 h-6" />
-          <SkeletonBox className="w-64 h-6" />
+          <SkeletonBox className="w-48 h-6" />
         </div>
 
-        {/* Grandfathered Subscription Detail Card Skeleton */}
+        {/* Edit Subscription Card Skeleton */}
         <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
-          <div className="space-y-4">
-            {/* Serial Number / Token ID Section */}
-            <div className="px-4">
-              <SkeletonBox className="w-32 h-3 mb-1" />
-              <div className="pb-3 border-b border-gray-700">
-                <SkeletonBox className="w-3/4 h-5" />
+          {/* Description Section */}
+          <div className="mb-8 px-4">
+            <div className="space-y-2">
+              <SkeletonBox className="w-3/4 h-6" />
+              <SkeletonBox className="w-1/2 h-6" />
+            </div>
+          </div>
+
+          {/* Plan Options Section */}
+          <div className="flex flex-col px-4 gap-3 mb-4">
+            {/* Plan Option 1 */}
+            <div className="relative p-4 rounded-xl border border-surface-raised min-h-20 bg-surface-raised">
+              <div className="flex flex-col">
+                <SkeletonBox className="w-24 h-4 mb-1" />
+                <SkeletonBox className="w-16 h-3" />
               </div>
             </div>
 
-            {/* Connected To Section */}
-            <div className="px-4">
-              <SkeletonBox className="w-24 h-3 mb-1" />
-              <div className="pb-3 border-b border-gray-700">
-                <SkeletonBox className="w-2/3 h-5 mb-1" />
-                <SkeletonBox className="w-1/2 h-3" />
-              </div>
-            </div>
-
-            {/* Device Type Section */}
-            <div className="px-4">
-              <SkeletonBox className="w-20 h-3 mb-1" />
-              <div className="pb-3 border-b border-gray-700">
-                <SkeletonBox className="w-1/3 h-5" />
-              </div>
-            </div>
-
-            {/* Claimed Date Section */}
-            <div className="px-4">
-              <SkeletonBox className="w-24 h-3 mb-1" />
-              <div className="pb-3 border-b border-gray-700">
-                <SkeletonBox className="w-1/2 h-5" />
-              </div>
-            </div>
-
-            {/* Schedule Section */}
-            <div className="px-4">
-              <SkeletonBox className="w-16 h-3 mb-1" />
-              <div className="pb-3">
-                <SkeletonBox className="w-3/4 h-5 mb-1" />
-                <SkeletonBox className="w-2/3 h-3" />
+            {/* Plan Option 2 */}
+            <div className="relative p-4 rounded-xl border border-surface-raised min-h-20 bg-surface-raised">
+              <div className="flex flex-col">
+                <SkeletonBox className="w-24 h-4 mb-1" />
+                <SkeletonBox className="w-16 h-3" />
               </div>
             </div>
           </div>
 
-          {/* Action Button Skeleton */}
-          <div className="flex flex-col mt-4 px-4 gap-2">
-            <SkeletonBox className="w-full h-12 rounded-full" />
+          {/* Action Buttons Skeleton */}
+          <div className="px-4">
+            <SkeletonBox className="w-full h-12 rounded-full mb-2" />
             <SkeletonBox className="w-full h-12 rounded-full" />
           </div>
         </div>
