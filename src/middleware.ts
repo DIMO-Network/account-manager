@@ -35,6 +35,8 @@ const isProtectedApiRoute = (pathname: string) => {
     /^\/api\/stripe\/customer/,
     /^\/api\/payment-methods/,
     /^\/api\/subscriptions/,
+    /^\/api\/credit-balance/,
+    /^\/api\/dimo-balance/,
   ];
   return protectedApiPatterns.some(pattern => pattern.test(pathname));
 };
