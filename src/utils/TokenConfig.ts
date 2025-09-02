@@ -19,4 +19,4 @@ export const SHARED_CONFIG = {
 } as const;
 
 export const getCurrentTokenConfig = () =>
-  process.env.NEXT_PUBLIC_USE_OMID_TOKEN ? TOKEN_CONFIG.OMID : TOKEN_CONFIG.DIMO;
+  process.env.NEXT_PUBLIC_USE_OMID_TOKEN === 'true' ? TOKEN_CONFIG.OMID : TOKEN_CONFIG.DIMO;

@@ -142,7 +142,7 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
             {FEATURE_FLAGS.useAdvancedTransactions
               ? (
                   <ExecuteAdvancedTransactionWithDimo
-                    mode="popup"
+                    mode="redirect"
                     onSuccess={() => onSuccessAction()}
                     onError={(error: unknown) => {
                       console.error('Error:', error);
@@ -151,7 +151,7 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
                     value="0"
                     abi={ERC20_TRANSFER_ABI}
                     functionName="transfer"
-                    args={[RECIPIENT, toWei(amount)]}
+                    args={[RECIPIENT, toWei(totalCost)]}
                     authenticatedLabel="Add Credits"
                     unAuthenticatedLabel="Add Credits"
                   />
