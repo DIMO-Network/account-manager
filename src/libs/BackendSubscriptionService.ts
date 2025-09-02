@@ -123,9 +123,8 @@ export async function authorizeConnectionSubscriptionAccess(
       return { authorized: false, error: 'Subscription not found for this vehicle' };
     }
 
-    // Only allow access to canceled subscriptions for reactivation
-    if (subscription.status !== 'canceled') {
-      return { authorized: false, error: 'Subscription is not canceled', subscription };
+    if (subscription.status !== 'canceled' && subscription.status !== 'trialing_incomplete') {
+      return { authorized: false, error: 'Subscription is not available for reactivation', subscription };
     }
 
     return { authorized: true, subscription };
