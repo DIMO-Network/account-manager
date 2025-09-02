@@ -3,9 +3,8 @@
 import { ExecuteAdvancedTransactionWithDimo } from '@dimo-network/login-with-dimo';
 import { useEffect, useState } from 'react';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { FEATURE_FLAGS } from '@/utils/FeatureFlags';
+
 import { getCurrentTokenConfig, SHARED_CONFIG } from '@/utils/TokenConfig';
-import { TransactionsSDKTopUp } from './TransactionsSDKTopUp';
 
 type TopUpReviewProps = {
   amount: number;
@@ -139,32 +138,20 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
           </div>
 
           <div className="flex gap-3 mt">
-            {FEATURE_FLAGS.useAdvancedTransactions
-              ? (
-                  <ExecuteAdvancedTransactionWithDimo
-                    mode="redirect"
-                    onSuccess={() => onSuccessAction()}
-                    onError={(error: unknown) => {
-                      console.error('Error:', error);
-                    }}
-                    address={TOKEN_CONTRACT}
-                    value="0"
-                    abi={ERC20_TRANSFER_ABI}
-                    functionName="transfer"
-                    args={[RECIPIENT, toWei(totalCost)]}
-                    authenticatedLabel="Add Credits"
-                    unAuthenticatedLabel="Add Credits"
-                  />
-                )
-              : (
-                  <TransactionsSDKTopUp
-                    amount={amount}
-                    onSuccessAction={onSuccessAction}
-                    onErrorAction={(error: unknown) => {
-                      console.error('Error:', error);
-                    }}
-                  />
-                )}
+            <ExecuteAdvancedTransactionWithDimo
+              mode="redirect"
+              onSuccess={() => onSuccessAction()}
+              onError={(error: unknown) => {
+                console.error('Error:', error);
+              }}
+              address={TOKEN_CONTRACT}
+              value="0"
+              abi={ERC20_TRANSFER_ABI}
+              functionName="transfer"
+              args={[RECIPIENT, toWei(totalCost)]}
+              authenticatedLabel="Add Credits"
+              unAuthenticatedLabel="Add Credits"
+            />
             <button
               type="button"
               onClick={onBackAction}
