@@ -1,3 +1,10 @@
+## [2.25.2](https://github.com/DIMO-Network/account-manager/compare/v2.25.1...v2.25.2) (2025-09-02)
+
+
+### Bug Fixes
+
+* display correct status for lapsed trials ([#68](https://github.com/DIMO-Network/account-manager/issues/68)) ([47f7462](https://github.com/DIMO-Network/account-manager/commit/47f7462ab60c2116bd643d7c9b1e17e66a6bbc58))
+
 ## [2.25.1](https://github.com/DIMO-Network/account-manager/compare/v2.25.0...v2.25.1) (2025-08-25)
 
 
