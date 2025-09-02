@@ -44,8 +44,18 @@ export function getStatusDisplay(status: any) {
       statusText = 'Active';
     }
   } else if (isIncomplete) {
-    statusColor = 'text-yellow-500';
-    statusText = 'Trial Ongoing';
+    // Check if trial has ended
+    const now = new Date();
+    const trialEnd = status.trial_end ? new Date(status.trial_end) : null;
+    const isTrialEnded = trialEnd && now > trialEnd;
+
+    if (isTrialEnded) {
+      statusColor = 'text-red-500';
+      statusText = 'Trial Ended';
+    } else {
+      statusColor = 'text-yellow-500';
+      statusText = 'Trial Ongoing';
+    }
   } else if (status.status === 'canceled') {
     statusColor = 'text-red-500';
     statusText = 'Canceled';
@@ -81,15 +91,28 @@ export function getBackendSubscriptionRenewalInfo(status: {
       return { displayText: `Cancels on ${formatDate(status.cancel_at)}`, date: formatDate(status.cancel_at) };
     }
     if (status.trial_end) {
+      // Check if trial has ended
+      const now = new Date();
+      const trialEnd = new Date(status.trial_end);
+      const isTrialEnded = now > trialEnd;
+
       // Only show grandfathered device message for actual grandfathered devices (not Tesla connections)
       const isGrandfatheredDevice = device?.manufacturer?.name === 'Ruptela' || device?.manufacturer?.name === 'HashDog' || device?.manufacturer?.name === 'AutoPi';
       const secondaryText = isGrandfatheredDevice ? 'This is a grandfathered device with extended trial period.' : undefined;
 
-      return {
-        displayText: `Trial ends on ${formatDate(status.trial_end)}`,
-        secondaryText,
-        date: formatDate(status.trial_end),
-      };
+      if (isTrialEnded) {
+        return {
+          displayText: `Trial ended on ${formatDate(status.trial_end)}`,
+          secondaryText,
+          date: formatDate(status.trial_end),
+        };
+      } else {
+        return {
+          displayText: `Trial ends on ${formatDate(status.trial_end)}`,
+          secondaryText,
+          date: formatDate(status.trial_end),
+        };
+      }
     }
   }
 
