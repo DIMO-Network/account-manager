@@ -25,6 +25,9 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
   const hasSerial = !!vehicleInfo?.aftermarketDevice?.serial;
   const hasVehicleToken = vehicleTokenId !== 'N/A';
 
+  // Check if this is an S1 connection
+  const isS1Connection = metadata.connectionType === 'S1';
+
   const serialNumber = hasSerial
     ? `${vehicleInfo?.aftermarketDevice?.serial || 'N/A'}`
     : hasVehicleToken
@@ -78,36 +81,66 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
           {/* Type */}
           <div>
             <div className={labelStyle}>Type</div>
-            <button
-              className={`${clickableValueStyle} ${borderStyle} w-full text-left pb-4`}
-              onClick={() => window.location.href = `/subscriptions/${subscription.id}/edit`}
-              type="button"
-            >
-              {getSubscriptionTypeAndPrice(subscription, nextScheduledPrice).displayText}
-              <EditIcon className="w-4 h-4 text-gray-400" />
-            </button>
+            {isS1Connection
+              ? (
+                  <div className={`${valueStyle} ${borderStyle}`}>
+                    {getSubscriptionTypeAndPrice(subscription, nextScheduledPrice).type}
+                  </div>
+                )
+              : (
+                  <button
+                    className={`${clickableValueStyle} ${borderStyle} w-full text-left pb-4`}
+                    onClick={() => window.location.href = `/subscriptions/${subscription.id}/edit`}
+                    type="button"
+                  >
+                    {getSubscriptionTypeAndPrice(subscription, nextScheduledPrice).displayText}
+                    <EditIcon className="w-4 h-4 text-gray-400" />
+                  </button>
+                )}
           </div>
 
           {/* Schedule */}
           <div>
             <div className={labelStyle}>Schedule</div>
             <div className={`${valueStyle} ${borderStyle}`}>
-              <div>{renewalInfo.displayText}</div>
-              {renewalInfo.secondaryText && (
-                <div className="text-xs text-text-secondary mt-1">
-                  {renewalInfo.secondaryText}
-                </div>
-              )}
+              {isS1Connection
+                ? (
+                    <div>
+                      {renewalInfo.date ? `Renews ${renewalInfo.date}` : 'Renews annually'}
+                    </div>
+                  )
+                : (
+                    <>
+                      <div>{renewalInfo.displayText}</div>
+                      {renewalInfo.secondaryText && (
+                        <div className="text-xs text-text-secondary mt-1">
+                          {renewalInfo.secondaryText}
+                        </div>
+                      )}
+                    </>
+                  )}
             </div>
           </div>
 
           {/* Status */}
           <div>
             <div className={labelStyle}>Status</div>
-            <div className={`${valueStyle} ${getStripeStatusDisplay(subscription).color}`}>
+            <div className={`${valueStyle} ${getStripeStatusDisplay(subscription).color} ${borderStyle}`}>
               {getStripeStatusDisplay(subscription).text}
             </div>
           </div>
+
+          {/* S1 Note */}
+          {isS1Connection && (
+            <div>
+              <div className={labelStyle}>Note</div>
+              <div className={`${valueStyle}`}>
+                <div className="text-text-secondary">
+                  To manage your subscription, please reach out to Kaufmann.
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col mt-4 px-4 gap-2">
@@ -118,18 +151,20 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
           >
             Back to Dashboard
           </button>
-          <button
-            className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
-              shouldDisableCancel
-                ? COLORS.button.disabledTransparent
-                : `${COLORS.button.tertiary}`
-            }`}
-            type="button"
-            onClick={() => window.location.href = `/subscriptions/${subscription.id}/cancel`}
-            disabled={shouldDisableCancel}
-          >
-            {shouldDisableCancel ? 'Subscription Canceled' : 'Cancel Subscription'}
-          </button>
+          {!isS1Connection && (
+            <button
+              className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${
+                shouldDisableCancel
+                  ? COLORS.button.disabledTransparent
+                  : `${COLORS.button.tertiary}`
+              }`}
+              type="button"
+              onClick={() => window.location.href = `/subscriptions/${subscription.id}/cancel`}
+              disabled={shouldDisableCancel}
+            >
+              {shouldDisableCancel ? 'Subscription Canceled' : 'Cancel Subscription'}
+            </button>
+          )}
         </div>
       </div>
     </>
