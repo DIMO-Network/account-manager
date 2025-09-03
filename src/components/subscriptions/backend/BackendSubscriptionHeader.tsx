@@ -66,6 +66,16 @@ export function BackendSubscriptionHeader({
       );
     }
 
+    // Check if this is an S1 connection subscription (Kaufmann-Oracle)
+    if (device?.connection?.name === 'Kaufmann-Oracle' && device?.vehicle?.tokenId) {
+      return (
+        <Link href={`/subscriptions/connection/${device.vehicle.tokenId}`} className="block">
+          {headerContent}
+          {children}
+        </Link>
+      );
+    }
+
     // For other grandfathered devices, link to device page
     return (
       <Link href={`/subscriptions/device/${device.tokenId}`} className="block">

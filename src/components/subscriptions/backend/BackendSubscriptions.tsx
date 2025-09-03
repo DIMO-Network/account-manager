@@ -11,16 +11,20 @@ function SkeletonBox({ className = '' }: { className?: string }) {
 
 export function BackendSubscriptions({ statuses }: { statuses: BackendSubscription[] }) {
   const [vehicleStatuses, setVehicleStatuses] = useState<Record<number, boolean>>({});
-  // Start with loading true if we have subscriptions to check
+  // Start with loading true if we have subscriptions to check (excluding S1 connections)
   const [isLoadingVehicleStatuses, setIsLoadingVehicleStatuses] = useState(() => {
-    const hasVehiclesToCheck = statuses.some(status => status.device?.vehicle?.tokenId);
+    const hasVehiclesToCheck = statuses.some(status =>
+      status.device?.vehicle?.tokenId && status.device?.connection?.name !== 'Kaufmann-Oracle',
+    );
     return hasVehiclesToCheck;
   });
 
   // Check vehicle statuses on mount
   useEffect(() => {
     const checkVehicleStatuses = async () => {
+      // Skip vehicle status check for S1 connections (Kaufmann-Oracle)
       const vehicleTokenIds = statuses
+        .filter(status => status.device?.connection?.name !== 'Kaufmann-Oracle')
         .map(status => status.device?.vehicle?.tokenId)
         .filter((tokenId): tokenId is number => tokenId !== undefined);
 
@@ -67,9 +71,17 @@ export function BackendSubscriptions({ statuses }: { statuses: BackendSubscripti
         return false;
       }
 
+      // For S1 connections, skip vehicle status check entirely (rely on Identity API data)
+      if (status.device.connection?.name === 'Kaufmann-Oracle') {
+        // S1 vehicles are always valid since we get data directly from Identity API
+        return true;
+      }
+
       // Exclude subscriptions where vehicle returns 404 (burned tokens)
       // Only filter out if we have confirmed the vehicle doesn't exist
-      if (!isLoadingVehicleStatuses && status.device.vehicle.tokenId && vehicleStatuses[status.device.vehicle.tokenId] === false) {
+      if (!isLoadingVehicleStatuses
+        && status.device.vehicle.tokenId
+        && vehicleStatuses[status.device.vehicle.tokenId] === false) {
         return false;
       }
 
@@ -78,7 +90,7 @@ export function BackendSubscriptions({ statuses }: { statuses: BackendSubscripti
         return true;
       }
 
-      // For canceled subscriptions, only include Ruptela, AutoPi, and Tesla devices
+      // For canceled subscriptions, only include Ruptela, AutoPi, Tesla, and S1 devices
       if (status.device.manufacturer?.name) {
         const manufacturerName = status.device.manufacturer.name;
         return manufacturerName === 'Ruptela' || manufacturerName === 'AutoPi';
@@ -86,6 +98,11 @@ export function BackendSubscriptions({ statuses }: { statuses: BackendSubscripti
 
       // Include canceled Tesla subscriptions
       if (status.device.connection?.name === 'Tesla') {
+        return true;
+      }
+
+      // Include canceled S1 subscriptions (Kaufmann-Oracle)
+      if (status.device.connection?.name === 'Kaufmann-Oracle') {
         return true;
       }
 

@@ -155,16 +155,16 @@ export function getDeviceDisplayName(device: any): string {
     return 'R1';
   }
 
+  // For S1 connections (Kaufmann-Oracle), show "S1"
+  if (device?.connection?.name === 'Kaufmann-Oracle') {
+    return 'S1';
+  }
+
   return device?.manufacturer?.name || 'Unknown Device';
 }
 
 // Helper function to get device header name (for non-Stripe subscriptions)
 export function getDeviceHeaderName(device: any): string {
-  // For Ruptela, HashDog, AutoPi devices, and Tesla software subscriptions, show "DIMO Pro" consistently
-  if (device?.manufacturer?.name === 'Ruptela' || device?.manufacturer?.name === 'HashDog' || device?.manufacturer?.name === 'AutoPi' || device?.connection?.name === 'Tesla') {
-    return 'DIMO Pro';
-  }
-
   // For devices with vehicle definitions, show vehicle info
   if (device?.vehicle?.definition) {
     return `${device.vehicle.definition.make} ${device.vehicle.definition.model}`;
