@@ -1,3 +1,10 @@
+# [2.26.0](https://github.com/DIMO-Network/account-manager/compare/v2.25.2...v2.26.0) (2025-09-03)
+
+
+### Features
+
+* add S1 support ([#70](https://github.com/DIMO-Network/account-manager/issues/70)) ([2f0f61c](https://github.com/DIMO-Network/account-manager/commit/2f0f61c1860c1db1fe5edd6fd7b2db2b954fc327))
+
 ## [2.25.2](https://github.com/DIMO-Network/account-manager/compare/v2.25.1...v2.25.2) (2025-09-02)
 
 
