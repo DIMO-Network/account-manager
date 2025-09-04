@@ -15,7 +15,6 @@ export default async function TransactionsPage(props: {
     <TransactionsClient
       translations={{
         title: t('title'),
-        subtitle: t('subtitle'),
         loading: t('loading'),
         no_transactions: t('no_transactions'),
       }}
