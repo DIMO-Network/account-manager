@@ -105,24 +105,16 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
                 {TOKEN_SYMBOL}
               </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-400">Credits you'll receive</span>
-              <span className="text-sm font-medium text-white">
-                {netCredits.toFixed(2)}
-                {' '}
-                {TOKEN_SYMBOL}
-              </span>
-            </div>
             {priceLoading
               ? (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-400">USD value</span>
+                    <span className="text-sm text-gray-400">Credits you'll receive</span>
                     <div className="animate-pulse bg-gray-600 h-4 w-20 rounded"></div>
                   </div>
                 )
               : dimoPrice && (
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">USD value</span>
+                  <span className="text-sm text-gray-400">Credits you'll receive</span>
                   <span className="text-sm font-medium text-white">
                     ≈ $
                     {netCreditsUsd.toFixed(2)}
