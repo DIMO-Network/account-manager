@@ -1,3 +1,10 @@
+## [2.26.1](https://github.com/DIMO-Network/account-manager/compare/v2.26.0...v2.26.1) (2025-09-04)
+
+
+### Bug Fixes
+
+* remove S1 override ([#71](https://github.com/DIMO-Network/account-manager/issues/71)) ([b1dbb13](https://github.com/DIMO-Network/account-manager/commit/b1dbb13f1f1ace9cbfba1a59125366b67543d574))
+
 # [2.26.0](https://github.com/DIMO-Network/account-manager/compare/v2.25.2...v2.26.0) (2025-09-03)
 
 
