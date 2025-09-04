@@ -11,10 +11,10 @@ function SkeletonBox({ className = '' }: { className?: string }) {
 
 export function BackendSubscriptions({ statuses }: { statuses: BackendSubscription[] }) {
   const [vehicleStatuses, setVehicleStatuses] = useState<Record<number, boolean>>({});
-  // Start with loading true if we have subscriptions to check (excluding S1 connections)
+  // Start with loading true if we have subscriptions to check
   const [isLoadingVehicleStatuses, setIsLoadingVehicleStatuses] = useState(() => {
     const hasVehiclesToCheck = statuses.some(status =>
-      status.device?.vehicle?.tokenId && status.device?.connection?.name !== 'Kaufmann-Oracle',
+      status.device?.vehicle?.tokenId,
     );
     return hasVehiclesToCheck;
   });
@@ -22,9 +22,7 @@ export function BackendSubscriptions({ statuses }: { statuses: BackendSubscripti
   // Check vehicle statuses on mount
   useEffect(() => {
     const checkVehicleStatuses = async () => {
-      // Skip vehicle status check for S1 connections (Kaufmann-Oracle)
       const vehicleTokenIds = statuses
-        .filter(status => status.device?.connection?.name !== 'Kaufmann-Oracle')
         .map(status => status.device?.vehicle?.tokenId)
         .filter((tokenId): tokenId is number => tokenId !== undefined);
 
@@ -69,12 +67,6 @@ export function BackendSubscriptions({ statuses }: { statuses: BackendSubscripti
       // Exclude subscriptions where vehicle is null
       if (!status.device.vehicle) {
         return false;
-      }
-
-      // For S1 connections, skip vehicle status check entirely (rely on Identity API data)
-      if (status.device.connection?.name === 'Kaufmann-Oracle') {
-        // S1 vehicles are always valid since we get data directly from Identity API
-        return true;
       }
 
       // Exclude subscriptions where vehicle returns 404 (burned tokens)
