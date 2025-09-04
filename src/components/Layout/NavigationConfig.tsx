@@ -1,6 +1,6 @@
 import type { MenuItemConfig } from '@/types/menu';
 import { SignOutButton } from '@/components/auth/SignOutButton';
-import { HomeIcon, LogoutIcon, WalletIcon } from '@/components/Icons';
+import { HomeIcon, LogoutIcon, TransactionIcon, WalletIcon } from '@/components/Icons';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { MenuActionButton } from '@/components/Menu/MenuActionButton';
 import { FEATURE_FLAGS } from '@/utils/FeatureFlags';
@@ -8,6 +8,7 @@ import { FEATURE_FLAGS } from '@/utils/FeatureFlags';
 export type AuthNavigationTranslations = {
   dashboard_link: string;
   payment_methods_link: string;
+  transactions_link: string;
   user_profile_link: string;
   sign_out: string;
   subscriptions_link: string;
@@ -57,6 +58,15 @@ export const createAuthNavigation = (
       section: 'main',
     });
   }
+
+  // Add transactions link
+  menuItems.push({
+    label: translations.transactions_link,
+    icon: TransactionIcon,
+    iconClassName: 'h-5 w-5 text-text-secondary',
+    link: '/transactions/',
+    section: 'main',
+  });
 
   // Bottom navigation items
   menuItems.push(

@@ -13,4 +13,5 @@ export { EditIcon } from './EditIcon';
 export { HomeIcon } from './HomeIcon';
 export { LogoutIcon } from './LogoutIcon';
 export { SettingsIcon } from './SettingsIcon';
+export { TransactionIcon } from './TransactionIcon';
 export { WalletIcon } from './WalletIcon';

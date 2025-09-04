@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { LayoutWrapper } from '@/components/Layout';
+import { TransactionsLayoutClient } from './TransactionsLayoutClient';
 
-export default async function SubscriptionsLayout(props: {
+export default async function TransactionsLayout(props: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
@@ -13,8 +13,7 @@ export default async function SubscriptionsLayout(props: {
   });
 
   return (
-    <LayoutWrapper
-      layoutType="auth"
+    <TransactionsLayoutClient
       translations={{
         dashboard_link: t('dashboard_link'),
         subscriptions_link: t('subscriptions_link'),
@@ -25,6 +24,6 @@ export default async function SubscriptionsLayout(props: {
       }}
     >
       {props.children}
-    </LayoutWrapper>
+    </TransactionsLayoutClient>
   );
 }
