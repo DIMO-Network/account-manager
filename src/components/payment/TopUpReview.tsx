@@ -132,7 +132,10 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
           <div className="flex gap-3 mt">
             <ExecuteAdvancedTransactionWithDimo
               mode="redirect"
-              onSuccess={() => onSuccessAction()}
+              onSuccess={() => {
+                // Transaction hash will come through URL params in redirect mode
+                onSuccessAction();
+              }}
               onError={(error: unknown) => {
                 console.error('Error:', error);
               }}

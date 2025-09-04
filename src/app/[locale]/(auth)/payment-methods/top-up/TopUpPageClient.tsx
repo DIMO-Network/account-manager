@@ -85,7 +85,7 @@ export function TopUpPageClient() {
   };
 
   const handleSuccess = () => {
-    // TODO: Handle success - maybe redirect to payment methods or show success message?
+    // Transaction hash will be extracted from URL params by the payment methods page
     router.push('/payment-methods');
   };
 

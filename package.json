@@ -31,7 +31,6 @@
   "dependencies": {
     "@arcjet/next": "^1.0.0-beta.6",
     "@dimo-network/login-with-dimo": "^0.0.27",
-
     "@hookform/resolvers": "^5.1.1",
     "@logtail/pino": "^0.5.4",
     "@sentry/nextjs": "^9.34.0",
@@ -51,6 +50,7 @@
     "react-hook-form": "^7.59.0",
     "react-hot-toast": "^2.5.2",
     "stripe": "^18.3.0",
+    "viem": "^2.37.3",
     "zod": "^3.25.67"
   },
   "devDependencies": {

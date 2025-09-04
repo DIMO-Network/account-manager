@@ -7,6 +7,7 @@ import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 
 type CreditBalanceCardProps = {
   customerId: string;
+  refreshTrigger?: number; // Increment this to trigger a refresh
 };
 
 type CreditBalance = {
@@ -14,7 +15,7 @@ type CreditBalance = {
   currency: string;
 };
 
-export const CreditBalanceCard = ({ customerId }: CreditBalanceCardProps) => {
+export const CreditBalanceCard = ({ customerId, refreshTrigger }: CreditBalanceCardProps) => {
   const router = useRouter();
   const [creditBalance, setCreditBalance] = useState<CreditBalance | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,7 +48,7 @@ export const CreditBalanceCard = ({ customerId }: CreditBalanceCardProps) => {
     };
 
     fetchCreditBalance();
-  }, [customerId]);
+  }, [customerId, refreshTrigger]);
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('en-US', {
