@@ -27,6 +27,7 @@
     "dashboard_link": "Dashboard",
     "subscriptions_link": "Subscriptions",
     "payment_methods_link": "Payment Methods",
+    "transactions_link": "Transactions",
     "user_profile_link": "Account",
     "sign_out": "Sign out"
   },
@@ -46,6 +47,12 @@
       "monthly": "Monthly",
       "annually": "Annually"
     }
+  },
+  "Transactions": {
+    "meta_title": "Transactions",
+    "title": "Transactions",
+    "loading": "Loading transactions...",
+    "no_transactions": "No transactions found"
   },
 
   "monthly": "monthly",
