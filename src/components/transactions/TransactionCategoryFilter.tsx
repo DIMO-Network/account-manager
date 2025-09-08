@@ -19,7 +19,6 @@ export function TransactionCategoryFilter({
     baseline: 'Baseline',
     referrals: 'Referrals',
     marketplace: 'Marketplace',
-    creditTopUp: 'Credit Top-up',
     other: 'Other',
   };
 

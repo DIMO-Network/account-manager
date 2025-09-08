@@ -60,12 +60,12 @@ export function TransactionsClient({ translations }: TransactionsClientProps) {
     fetchData();
   }, []);
 
-  // Group transactions by category (similar to mobile app)
+  // Group transactions by category
   const categories = useMemo(() => {
     const groupedTransactions = transactions.reduce(
       (accum, curr) => {
         const rewardType = curr.type ? curr.type.toLowerCase() : 'other';
-        const categoryKey = rewardType === 'credittopup' ? 'creditTopUp' : rewardType;
+        const categoryKey = rewardType;
 
         if (accum[categoryKey]) {
           accum[categoryKey].push(curr);
@@ -83,7 +83,6 @@ export function TransactionsClient({ translations }: TransactionsClientProps) {
       baseline: groupedTransactions.baseline || [],
       referrals: groupedTransactions.referrals || [],
       marketplace: groupedTransactions.marketplace || [],
-      creditTopUp: groupedTransactions.creditTopUp || [],
       other: groupedTransactions.other || [],
     };
   }, [transactions]);

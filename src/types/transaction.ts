@@ -7,7 +7,7 @@ export type TransactionHistoryEntry = {
   description: string;
 };
 
-export type TransactionCategory = 'all' | 'baseline' | 'referrals' | 'marketplace' | 'creditTopUp' | 'other';
+export type TransactionCategory = 'all' | 'baseline' | 'referrals' | 'marketplace' | 'other';
 
 export type TransactionFilters = {
   category: TransactionCategory;
