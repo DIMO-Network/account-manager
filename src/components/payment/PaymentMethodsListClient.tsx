@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { CreditBalanceCard } from '@/components/payment/CreditBalanceCard';
 import { PaymentMethodCard } from '@/components/payment/PaymentMethodCard';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
-import { TransactionStatusBanner } from '@/components/payment/TransactionStatusBanner';
 
 type PaymentMethodsListClientProps = {
   paymentMethods: Stripe.PaymentMethod[];
@@ -19,11 +18,6 @@ export function PaymentMethodsListClient({
   customerId,
 }: PaymentMethodsListClientProps) {
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
-
-  const handleTransactionConfirmedAction = () => {
-    // Transaction confirmed - but don't auto-refresh credit balance yet
-    console.warn('Transaction confirmed - credit balance will need manual refresh');
-  };
 
   const handleSetDefault = async (paymentMethodId: string) => {
     setLoadingStates(prev => ({ ...prev, [paymentMethodId]: true }));
@@ -83,7 +77,6 @@ export function PaymentMethodsListClient({
   if (paymentMethods.length === 0) {
     return (
       <div className="space-y-6">
-        <TransactionStatusBanner onTransactionConfirmedAction={handleTransactionConfirmedAction} />
         <CreditBalanceCard customerId={customerId} />
         <div className="flex flex-col justify-between min-w-full bg-surface-default rounded-xl py-4 px-3">
           <h3 className="font-medium text-base leading-6">No payment methods found</h3>
@@ -98,7 +91,6 @@ export function PaymentMethodsListClient({
 
   return (
     <div className="space-y-6">
-      <TransactionStatusBanner onTransactionConfirmedAction={handleTransactionConfirmedAction} />
       <CreditBalanceCard customerId={customerId} />
       {paymentMethods
         .sort((a, b) => {
