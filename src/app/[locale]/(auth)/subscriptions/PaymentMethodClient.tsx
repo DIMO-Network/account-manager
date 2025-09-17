@@ -1,10 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { DefaultPaymentMethodCard } from '@/components/payment/DefaultPaymentMethodCard';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { useState } from 'react';
 
 // Simple component to show a non-default payment method
 function NonDefaultPaymentMethodCard({ paymentMethod }: { paymentMethod: any }) {

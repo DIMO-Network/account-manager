@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import type { FC, ReactNode } from 'react';
+import Link from 'next/link';
 import { MenuActionButton } from './MenuActionButton';
 
 type MenuItemProps = {

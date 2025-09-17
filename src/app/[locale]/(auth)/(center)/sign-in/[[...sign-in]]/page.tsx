@@ -1,7 +1,7 @@
-import { DimoAuthWrapper } from '@/components/auth/DimoAuthWrapper';
-import { SignInContent } from '@/components/auth/SignInContent';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Suspense } from 'react';
+import { DimoAuthWrapper } from '@/components/auth/DimoAuthWrapper';
+import { SignInContent } from '@/components/auth/SignInContent';
 
 type ISignInPageProps = {
   params: Promise<{ locale: string }>;

@@ -1,10 +1,10 @@
+import type { NextRequest } from 'next/server';
+import type { DIMOProfile } from '@/types/dimo';
+import { NextResponse } from 'next/server';
 import { logger } from '@/libs/Logger';
 import { createSession } from '@/libs/Session';
 import { getBaseUrl } from '@/utils/Helpers';
 import { verifyDimoJwt } from '@/utils/verifyDimoJwt';
-import { NextResponse } from 'next/server';
-import type { DIMOProfile } from '@/types/dimo';
-import type { NextRequest } from 'next/server';
 
 async function fetchDimoProfile(dimoToken: string): Promise<DIMOProfile> {
   const profilesApiUrl = process.env.DIMO_PROFILES_API_URL || 'https://profiles.dimo.co/v1/account';
@@ -45,11 +45,11 @@ async function createUserSession(dimoProfile: DIMOProfile, dimoToken: string) {
     dimoToken,
   });
 
-  logger.info('Created user session with DIMO data', {
+  logger.info({
     userId: dimoUserId,
     email: userEmail,
     walletAddress: walletAddress || 'none',
-  });
+  }, 'Created user session with DIMO data');
 
   return { userId: dimoUserId, userEmail, walletAddress };
 }
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get('error');
 
   if (error) {
-    logger.error('DIMO OAuth error:', error);
+    logger.error({ error }, 'DIMO OAuth error');
     return NextResponse.redirect(new URL('/sign-in?error=dimo_failed', getBaseUrl()));
   }
 
@@ -83,11 +83,11 @@ export async function GET(request: NextRequest) {
   try {
     // 1. Validate DIMO JWT
     const payload = await verifyDimoJwt(token);
-    logger.info('DIMO JWT validated successfully', { sub: payload.sub });
+    logger.info({ sub: payload.sub }, 'DIMO JWT validated successfully');
 
     // 2. Get user details from DIMO Profiles API
     const dimoProfile = await fetchDimoProfile(token);
-    logger.info('DIMO profile fetched successfully', { email: dimoProfile.email?.address });
+    logger.info({ email: dimoProfile.email?.address }, 'DIMO profile fetched successfully');
 
     // 3. Create user session with DIMO data
     const userData = await createUserSession(dimoProfile, token);
@@ -102,10 +102,10 @@ export async function GET(request: NextRequest) {
       path: '/',
     });
 
-    logger.info('Redirecting to dashboard with authenticated session', { userId: userData.userId });
+    logger.info({ userId: userData.userId }, 'Redirecting to dashboard with authenticated session');
     return response;
   } catch (error) {
-    logger.error('DIMO auth error:', error);
+    logger.error({ error }, 'DIMO auth error');
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.redirect(
       new URL(`/sign-in?error=auth_failed&details=${encodeURIComponent(errorMessage)}`, getBaseUrl()),

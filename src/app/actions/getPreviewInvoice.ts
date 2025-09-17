@@ -1,5 +1,5 @@
-import { stripe } from '@/libs/Stripe';
 import type Stripe from 'stripe';
+import { stripe } from '@/libs/Stripe';
 
 export type PreviewInvoice = {
   id: string;

@@ -1,9 +1,9 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { WalletIcon } from '@/components/Icons';
 import { AddCardForm } from '@/components/payment/AddCardForm';
 import { PageHeader } from '@/components/ui';
-import { useRouter } from 'next/navigation';
 
 export default function AddPaymentMethodPage() {
   const router = useRouter();

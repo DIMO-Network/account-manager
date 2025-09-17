@@ -1,9 +1,9 @@
 'use client';
 
+import type { BackendSubscription } from '@/types/subscription';
 import { CarIcon } from '@/components/Icons';
 import { BackendSubscriptions } from '@/components/subscriptions/backend';
 import { PageHeader } from '@/components/ui';
-import type { BackendSubscription } from '@/types/subscription';
 
 type SubscriptionsClientProps = {
   backendStatuses: BackendSubscription[];

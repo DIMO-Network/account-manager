@@ -1,7 +1,7 @@
-import { DIMOLogo } from '@/components/Icons';
-import { usePathname, useRouter } from 'next/navigation';
-import type { MenuItemConfig } from '@/types/menu';
 import type { FC } from 'react';
+import type { MenuItemConfig } from '@/types/menu';
+import { usePathname, useRouter } from 'next/navigation';
+import { DIMOLogo } from '@/components/Icons';
 import { MenuItem } from './MenuItem';
 
 type MenuProps = {

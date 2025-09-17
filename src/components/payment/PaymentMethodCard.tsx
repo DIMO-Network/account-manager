@@ -1,10 +1,10 @@
 'use client';
 
-import { WalletIcon } from '@/components/Icons';
-import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import type Stripe from 'stripe';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import type Stripe from 'stripe';
+import { WalletIcon } from '@/components/Icons';
+import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
 
 type PaymentMethodCardProps = {
   paymentMethod: Stripe.PaymentMethod;

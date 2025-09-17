@@ -1,6 +1,6 @@
-import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
-import { useEffect, useMemo, useState } from 'react';
 import type { BackendSubscription } from '@/types/subscription';
+import { useEffect, useMemo, useState } from 'react';
+import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { BackendSubscriptionItem } from './BackendSubscriptionItem';
 
 function SkeletonBox({ className = '' }: { className?: string }) {

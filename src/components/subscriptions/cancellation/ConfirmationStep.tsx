@@ -1,10 +1,10 @@
 'use client';
 
-import { getSubscriptionTypeAndPrice } from '@/libs/StripeSubscriptionService';
-import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import React from 'react';
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeSubscription } from '@/types/subscription';
+import React from 'react';
+import { getSubscriptionTypeAndPrice } from '@/libs/StripeSubscriptionService';
+import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { getStripeSubscriptionRenewalInfo } from '../utils/subscriptionDisplayHelpers';
 
 type ConfirmationStepProps = {

@@ -1,5 +1,5 @@
-import { COLORS } from '@/utils/designSystem';
 import type { ReactNode } from 'react';
+import { COLORS } from '@/utils/designSystem';
 
 type PageHeaderProps = {
   icon: ReactNode;

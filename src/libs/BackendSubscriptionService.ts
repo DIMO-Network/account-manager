@@ -99,10 +99,10 @@ export async function authorizeConnectionSubscriptionAccess(
   vehicleTokenId: string,
   dimoToken: string | null,
 ): Promise<{
-    authorized: boolean;
-    subscription?: BackendSubscription;
-    error?: string;
-  }> {
+  authorized: boolean;
+  subscription?: BackendSubscription;
+  error?: string;
+}> {
   try {
     if (!dimoToken) {
       return { authorized: false, error: 'DIMO authentication required' };
@@ -141,10 +141,10 @@ export async function authorizeDeviceSubscriptionAccess(
   deviceTokenId: string,
   dimoToken: string | null,
 ): Promise<{
-    authorized: boolean;
-    subscription?: BackendSubscription;
-    error?: string;
-  }> {
+  authorized: boolean;
+  subscription?: BackendSubscription;
+  error?: string;
+}> {
   try {
     if (!dimoToken) {
       return { authorized: false, error: 'DIMO authentication required' };

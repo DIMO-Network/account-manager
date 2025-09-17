@@ -1,8 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
-import Link from 'next/link';
 
 export function PaymentMethodButtons() {
   const buttonStyle = 'inline-flex flex-row items-center justify-center gap-2 rounded-full bg-surface-raised px-4 py-2 text-sm w-full';

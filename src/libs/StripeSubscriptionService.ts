@@ -1,6 +1,6 @@
+import type Stripe from 'stripe';
 import { getDimoVehicleDetails } from '@/app/actions/getDimoVehicleDetails';
 import { stripe } from '@/libs/Stripe';
-import type Stripe from 'stripe';
 
 // ============================================================================
 // SHARED CONSTANTS

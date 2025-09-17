@@ -1,6 +1,6 @@
-import { getSession } from '@/libs/Session';
-import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { getSession } from '@/libs/Session';
 
 export async function POST(
   request: NextRequest,

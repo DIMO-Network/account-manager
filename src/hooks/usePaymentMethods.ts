@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import type { PaymentMethodsResponse } from '@/types/paymentMethod';
 import type Stripe from 'stripe';
+import type { PaymentMethodsResponse } from '@/types/paymentMethod';
+import { useCallback, useEffect, useState } from 'react';
 
 export function usePaymentMethods(customerId: string | null) {
   const [paymentMethods, setPaymentMethods] = useState<Stripe.PaymentMethod[]>([]);

@@ -1,9 +1,9 @@
 'use client';
 
-import { useBackendSubscriptions } from '@/hooks/useBackendSubscriptions';
 import type { ReactNode } from 'react';
-import { createAuthNavigation, createPublicNavigation, SidebarLayout } from './index';
 import type { AuthNavigationTranslations, PublicNavigationTranslations } from './index';
+import { useBackendSubscriptions } from '@/hooks/useBackendSubscriptions';
+import { createAuthNavigation, createPublicNavigation, SidebarLayout } from './index';
 
 type LayoutWrapperProps = {
   children: ReactNode;

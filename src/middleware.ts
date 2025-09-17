@@ -1,10 +1,10 @@
+import type { NextFetchEvent, NextRequest } from 'next/server';
+import { detectBot } from '@arcjet/next';
+import createMiddleware from 'next-intl/middleware';
+import { NextResponse } from 'next/server';
 import arcjet from '@/libs/Arcjet';
 import { isAuthenticated, redirectToSignIn } from '@/libs/MiddlewareAuth';
 import { AppConfig } from '@/utils/AppConfig';
-import { detectBot } from '@arcjet/next';
-import { NextResponse } from 'next/server';
-import createMiddleware from 'next-intl/middleware';
-import type { NextFetchEvent, NextRequest } from 'next/server';
 import { routing } from './libs/i18nRouting';
 
 const handleI18nRouting = createMiddleware(routing);

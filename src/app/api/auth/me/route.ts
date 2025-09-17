@@ -1,5 +1,5 @@
-import { verifyUserSession } from '@/libs/DAL';
 import { NextResponse } from 'next/server';
+import { verifyUserSession } from '@/libs/DAL';
 
 export async function GET() {
   try {

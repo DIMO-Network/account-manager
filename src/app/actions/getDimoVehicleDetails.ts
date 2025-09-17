@@ -1,7 +1,7 @@
 'use server';
 
-import { graphql } from '@/generated';
 import type { GetVehicleQuery } from '@/generated/graphql';
+import { graphql } from '@/generated';
 
 const GET_VEHICLE_DETAILS = graphql(`
   query GetVehicle($tokenId: Int!) {

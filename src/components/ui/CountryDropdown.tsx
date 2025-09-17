@@ -1,9 +1,9 @@
 'use client';
 
-import { getCountries } from '@/utils/locationData';
-import { useEffect, useState } from 'react';
-import { Dropdown } from './Dropdown';
 import type { Option } from './Dropdown';
+import { useEffect, useState } from 'react';
+import { getCountries } from '@/utils/locationData';
+import { Dropdown } from './Dropdown';
 
 type CountryDropdownProps = {
   value?: string;

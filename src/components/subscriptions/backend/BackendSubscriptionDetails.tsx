@@ -1,5 +1,5 @@
-import { COLORS } from '@/utils/designSystem';
 import type { BackendSubscription, DeviceInfo } from '@/types/subscription';
+import { COLORS } from '@/utils/designSystem';
 import { getBackendSubscriptionRenewalInfo, getDeviceDisplayName, getStatusDisplay } from '../utils/subscriptionDisplayHelpers';
 
 type BackendSubscriptionDetailsProps = {

@@ -1,6 +1,6 @@
-import { deleteSession } from '@/libs/Session';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { deleteSession } from '@/libs/Session';
 
 export async function POST() {
   try {

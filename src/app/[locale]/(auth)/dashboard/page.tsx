@@ -1,8 +1,8 @@
+import type { BackendSubscription } from '@/types/subscription';
+import { getTranslations } from 'next-intl/server';
+import { cookies } from 'next/headers';
 import { fetchBackendSubscriptions } from '@/libs/BackendSubscriptionService';
 import { getSession } from '@/libs/Session';
-import { cookies } from 'next/headers';
-import { getTranslations } from 'next-intl/server';
-import type { BackendSubscription } from '@/types/subscription';
 import { DashboardContent } from './DashboardContent';
 import { PaymentMethodSection } from './PaymentMethodSection';
 

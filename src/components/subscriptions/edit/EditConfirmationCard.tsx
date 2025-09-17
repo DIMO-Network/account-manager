@@ -1,16 +1,16 @@
 'use client';
 
-import { CarIcon } from '@/components/Icons';
-import { PageHeader } from '@/components/ui';
-import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import React, { useState } from 'react';
+import type Stripe from 'stripe';
 import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview, ScheduledSubscriptionPreview } from '@/app/actions/getPreviewInvoice';
 import type { ProductPrice } from '@/app/actions/getProductPrices';
 import type { StripeSubscription } from '@/types/subscription';
-import type Stripe from 'stripe';
+import { useTranslations } from 'next-intl';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState } from 'react';
+import { CarIcon } from '@/components/Icons';
+import { PageHeader } from '@/components/ui';
+import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { formatProductName } from '../utils/subscriptionDisplayHelpers';
 
 type EditConfirmationCardProps = {

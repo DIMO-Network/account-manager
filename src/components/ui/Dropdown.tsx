@@ -1,8 +1,8 @@
 'use client';
 
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronIcon } from '@/components/Icons';
 import { COLORS } from '@/utils/designSystem';
-import { useEffect, useMemo, useRef, useState } from 'react';
 
 export type Option = {
   label: string;

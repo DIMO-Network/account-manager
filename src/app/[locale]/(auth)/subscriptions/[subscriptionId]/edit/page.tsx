@@ -1,12 +1,12 @@
+import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview, ScheduledSubscriptionPreview } from '@/app/actions/getPreviewInvoice';
+import { cookies } from 'next/headers';
+import { notFound, redirect } from 'next/navigation';
 import { getPreviewInvoice } from '@/app/actions/getPreviewInvoice';
 import { getProductPrices } from '@/app/actions/getProductPrices';
 import { EditSubscriptionFlow } from '@/components/subscriptions/edit/EditSubscriptionFlow';
 import { authorizeSubscriptionAccess } from '@/libs/BackendSubscriptionService';
 import { getSession } from '@/libs/Session';
 import { fetchSubscriptionWithSchedule } from '@/libs/StripeSubscriptionService';
-import { cookies } from 'next/headers';
-import { notFound, redirect } from 'next/navigation';
-import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview, ScheduledSubscriptionPreview } from '@/app/actions/getPreviewInvoice';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 export default async function EditSubscriptionPage({

@@ -1,5 +1,5 @@
-import { LayoutWrapper } from '@/components/Layout';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { LayoutWrapper } from '@/components/Layout';
 
 export default async function SubscriptionsLayout(props: {
   children: React.ReactNode;

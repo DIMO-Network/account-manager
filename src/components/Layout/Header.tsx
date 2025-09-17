@@ -1,10 +1,10 @@
 'use client';
 
+import type { FC } from 'react';
+import Link from 'next/link';
 import { UserIcon } from '@/components/Icons/UserIcon';
 import { useAuth } from '@/hooks/useAuth';
 import { COLORS } from '@/utils/designSystem';
-import Link from 'next/link';
-import type { FC } from 'react';
 
 export const Header: FC = () => {
   const { user } = useAuth();

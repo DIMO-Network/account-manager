@@ -1,10 +1,10 @@
 'use client';
 
-import { Loading } from '@/components/Loading';
-import { useAuth } from '@/hooks/useAuth';
 import { LoginWithDimo } from '@dimo-network/login-with-dimo';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
+import { Loading } from '@/components/Loading';
+import { useAuth } from '@/hooks/useAuth';
 
 export const DimoSignIn = () => {
   const { isSignedIn, isLoading } = useAuth();

@@ -1,7 +1,7 @@
+import { notFound, redirect } from 'next/navigation';
 import { DevicePlanSelection } from '@/components/subscriptions/device/DevicePlanSelection';
 import { authorizeDeviceSubscriptionAccess } from '@/libs/BackendSubscriptionService';
 import { getSession } from '@/libs/Session';
-import { notFound, redirect } from 'next/navigation';
 import { PaymentMethodSection } from '../../../PaymentMethodSection';
 
 export default async function EditDeviceSubscriptionPage({

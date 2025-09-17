@@ -1,5 +1,5 @@
-import { createRemoteJWKSet, jwtVerify } from 'jose';
 import type { JWTPayload } from 'jose';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 
 function getJWKS() {
   const jwksUrl = process.env.DIMO_JWKS_URL;
