@@ -85,7 +85,7 @@ export function EditSubscriptionFlow({
         previewInvoiceMeta={previewInvoiceMeta}
         previewInvoice={previewInvoiceMeta}
         nextScheduledDate={nextScheduledDate}
-        onBack={handleBack}
+        onBackAction={handleBack}
       />
     );
   }
@@ -99,7 +99,7 @@ export function EditSubscriptionFlow({
       productPrices={productPrices}
       nextScheduledPrice={nextScheduledPrice}
       nextScheduledDate={nextScheduledDate}
-      onContinue={handleStepChange}
+      onContinueAction={handleStepChange}
     />
   );
 }

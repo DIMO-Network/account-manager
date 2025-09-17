@@ -22,10 +22,10 @@ export default function EditPaymentMethodPage() {
       <EditCardForm
         cardId={cardId as string}
         customerId={customerId}
-        onSuccess={() => {
+        onSuccessAction={() => {
           router.push('/payment-methods');
         }}
-        onCancel={() => {
+        onCancelAction={() => {
           router.push('/payment-methods');
         }}
       />

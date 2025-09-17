@@ -160,9 +160,9 @@ export const CreditBalanceCard = ({ customerId, refreshTrigger }: CreditBalanceC
   const { status, isLoading, error: pollingError, confirmations } = useTransactionPolling({
     txHash: pendingTxHash || undefined,
     enabled: !!pendingTxHash,
-    onConfirmed: handleTransactionConfirmed,
-    onFailed: handleTransactionFailed,
-    onAlreadyProcessed: handleTransactionAlreadyProcessed,
+    onConfirmedAction: handleTransactionConfirmed,
+    onFailedAction: handleTransactionFailed,
+    onAlreadyProcessedAction: handleTransactionAlreadyProcessed,
   });
 
   useEffect(() => {

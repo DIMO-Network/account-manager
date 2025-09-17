@@ -10,9 +10,9 @@ type TransactionStatus = 'pending' | 'confirmed' | 'failed' | 'not-found';
 type UseTransactionPollingProps = {
   txHash?: string;
   enabled?: boolean;
-  onConfirmed?: (usdValue?: number) => void;
-  onFailed?: (errorMessage?: string) => void;
-  onAlreadyProcessed?: () => void;
+  onConfirmedAction?: (usdValue?: number) => void;
+  onFailedAction?: (errorMessage?: string) => void;
+  onAlreadyProcessedAction?: () => void;
   pollInterval?: number;
 };
 
@@ -74,9 +74,9 @@ async function validateTransactionAndExtractUsdValue(txHash: `0x${string}`): Pro
 export function useTransactionPolling({
   txHash,
   enabled = true,
-  onConfirmed,
-  onFailed,
-  onAlreadyProcessed,
+  onConfirmedAction,
+  onFailedAction,
+  onAlreadyProcessedAction,
   pollInterval = 2000, // Poll every 2 seconds
 }: UseTransactionPollingProps): UseTransactionPollingReturn {
   const [status, setStatus] = useState<TransactionStatus>('pending');
@@ -85,16 +85,16 @@ export function useTransactionPolling({
   const [confirmations, setConfirmations] = useState(0);
 
   // Store callbacks in refs to avoid dependency issues
-  const onConfirmedRef = useRef(onConfirmed);
-  const onFailedRef = useRef(onFailed);
-  const onAlreadyProcessedRef = useRef(onAlreadyProcessed);
+  const onConfirmedRef = useRef(onConfirmedAction);
+  const onFailedRef = useRef(onFailedAction);
+  const onAlreadyProcessedRef = useRef(onAlreadyProcessedAction);
 
   // Update refs when callbacks change
   useEffect(() => {
-    onConfirmedRef.current = onConfirmed;
-    onFailedRef.current = onFailed;
-    onAlreadyProcessedRef.current = onAlreadyProcessed;
-  }, [onConfirmed, onFailed, onAlreadyProcessed]);
+    onConfirmedRef.current = onConfirmedAction;
+    onFailedRef.current = onFailedAction;
+    onAlreadyProcessedRef.current = onAlreadyProcessedAction;
+  }, [onConfirmedAction, onFailedAction, onAlreadyProcessedAction]);
 
   useEffect(() => {
     clientLogger.info('useTransactionPolling: Effect triggered', { enabled, txHash });

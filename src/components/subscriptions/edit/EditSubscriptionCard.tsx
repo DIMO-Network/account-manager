@@ -20,7 +20,7 @@ type EditSubscriptionCardProps = {
   productPrices: ProductPrice[];
   nextScheduledPrice?: Stripe.Price | null;
   nextScheduledDate?: number | null;
-  onContinue?: (step: string, priceId: string) => void;
+  onContinueAction?: (step: string, priceId: string) => void;
 };
 
 export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
@@ -31,7 +31,7 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
   productPrices,
   nextScheduledPrice,
   nextScheduledDate,
-  onContinue,
+  onContinueAction,
 }) => {
   const t = useTranslations('Subscriptions.interval');
   const router = useRouter();
@@ -87,8 +87,8 @@ export const EditSubscriptionCard: React.FC<EditSubscriptionCardProps> = ({
   };
 
   const handleContinue = () => {
-    if (selectedPriceId && onContinue) {
-      onContinue('confirm', selectedPriceId);
+    if (selectedPriceId && onContinueAction) {
+      onContinueAction('confirm', selectedPriceId);
     }
   };
 
