@@ -1,3 +1,10 @@
+# [2.27.0](https://github.com/DIMO-Network/account-manager/compare/v2.26.1...v2.27.0) (2025-09-17)
+
+
+### Features
+
+* support DIMO to stripe credit workflow ([#58](https://github.com/DIMO-Network/account-manager/issues/58)) ([b566f9c](https://github.com/DIMO-Network/account-manager/commit/b566f9c5b930b67036b894976a627dffab3c367d)), closes [#74](https://github.com/DIMO-Network/account-manager/issues/74)
+
 ## [2.26.1](https://github.com/DIMO-Network/account-manager/compare/v2.26.0...v2.26.1) (2025-09-04)
 
 
