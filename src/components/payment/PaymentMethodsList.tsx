@@ -1,11 +1,14 @@
 'use client';
 
+import Link from 'next/link';
+import { CreditBalanceCard } from '@/components/payment/CreditBalanceCard';
 import { PaymentMethodCard } from '@/components/payment/PaymentMethodCard';
 import { PaymentMethodSkeleton } from '@/components/payment/PaymentMethodSkeleton';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { WalletIcon } from '../Icons';
 
 export const PaymentMethodsList = () => {
   const { customerId, loading: customerLoading, error: customerError } = useStripeCustomer();
@@ -65,7 +68,7 @@ export const PaymentMethodsList = () => {
 
   // Show loading state while getting customer
   if (customerLoading) {
-    return <PaymentMethodSkeleton count={2} showNote={true} />;
+    return <PaymentMethodSkeleton count={2} showNote />;
   }
 
   // Show customer error
@@ -113,13 +116,31 @@ export const PaymentMethodsList = () => {
   }
 
   if (loading) {
-    return <PaymentMethodSkeleton count={2} showNote={true} />;
+    return <PaymentMethodSkeleton count={2} showNote />;
   }
 
   // Only show "No payment methods found" if we're not loading and have confirmed there are no payment methods
   if (paymentMethods.length === 0) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="space-y-6">
+        <div className="flex flex-row items-center justify-between border-b border-gray-700 pb-2">
+          <div className="flex flex-row items-center gap-2">
+            <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+            <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Payment Method</h1>
+          </div>
+          <Link
+            href="/payment-methods/add"
+            className="px-4 py-2 text-sm bg-white text-black rounded-full font-medium hover:bg-gray-100 transition-colors"
+          >
+            Add a Card
+          </Link>
+        </div>
+
+        {/* Only show for specific Stripe customer IDs */}
+        {process.env.NEXT_PUBLIC_ALLOWED_TOP_UP_USERS?.split(',').map(id => id.trim()).includes(customerId) && (
+          <CreditBalanceCard customerId={customerId} />
+        )}
+
         <div className="flex flex-col justify-between min-w-full bg-surface-default rounded-xl py-4 px-3">
           <h3 className="font-medium text-base leading-6">No payment methods found</h3>
           <p className="text-xs text-text-secondary font-light leading-4.5 mt-1">
@@ -132,7 +153,22 @@ export const PaymentMethodsList = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <div className="flex flex-row items-center justify-between border-b border-gray-700 pb-2">
+        <div className="flex flex-row items-center gap-2">
+          <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+          <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Payment Method</h1>
+        </div>
+        <Link
+          href="/payment-methods/add"
+          className="px-4 py-2 text-sm bg-white text-black rounded-full font-medium hover:bg-gray-100 transition-colors"
+        >
+          Add a Card
+        </Link>
+      </div>
+      {process.env.NEXT_PUBLIC_ALLOWED_TOP_UP_USERS?.split(',').map(id => id.trim()).includes(customerId) && (
+        <CreditBalanceCard customerId={customerId} />
+      )}
       {paymentMethods
         .sort((a, b) => {
           // Default payment method first

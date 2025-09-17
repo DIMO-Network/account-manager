@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import type { BackendSubscription } from '@/types/subscription';
 import { getTranslations } from 'next-intl/server';
 import { cookies } from 'next/headers';
@@ -8,7 +9,7 @@ import { PaymentMethodSection } from './PaymentMethodSection';
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string }>;
-}) {
+}): Promise<Metadata> {
   const { locale } = await props.params;
   const t = await getTranslations({
     locale,

@@ -2,6 +2,7 @@
 
 import type Stripe from 'stripe';
 import { useState } from 'react';
+import { CreditBalanceCard } from '@/components/payment/CreditBalanceCard';
 import { PaymentMethodCard } from '@/components/payment/PaymentMethodCard';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
 
@@ -75,7 +76,11 @@ export function PaymentMethodsListClient({
   // Only show "No payment methods found" if we have confirmed there are no payment methods
   if (paymentMethods.length === 0) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="space-y-6">
+        {/* Only show for specific Stripe customer IDs */}
+        {process.env.NEXT_PUBLIC_ALLOWED_TOP_UP_USERS?.split(',').map(id => id.trim()).includes(customerId) && (
+          <CreditBalanceCard customerId={customerId} />
+        )}
         <div className="flex flex-col justify-between min-w-full bg-surface-default rounded-xl py-4 px-3">
           <h3 className="font-medium text-base leading-6">No payment methods found</h3>
           <p className="text-xs text-text-secondary font-light leading-4.5 mt-1">
@@ -88,7 +93,10 @@ export function PaymentMethodsListClient({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {process.env.NEXT_PUBLIC_ALLOWED_TOP_UP_USERS?.split(',').map(id => id.trim()).includes(customerId) && (
+        <CreditBalanceCard customerId={customerId} />
+      )}
       {paymentMethods
         .sort((a, b) => {
           // Default payment method first

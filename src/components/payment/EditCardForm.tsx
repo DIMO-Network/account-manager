@@ -9,11 +9,11 @@ import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem
 type EditCardFormProps = {
   cardId: string;
   customerId: string;
-  onSuccess?: () => void;
-  onCancel?: () => void;
+  onSuccessAction?: () => void;
+  onCancelAction?: () => void;
 };
 
-export const EditCardForm = ({ cardId, customerId, onSuccess, onCancel }: EditCardFormProps) => {
+export const EditCardForm = ({ cardId, customerId, onSuccessAction, onCancelAction }: EditCardFormProps) => {
   const [card, setCard] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -90,8 +90,8 @@ export const EditCardForm = ({ cardId, customerId, onSuccess, onCancel }: EditCa
         throw new Error(data.error || 'Failed to update card');
       }
       setSuccess(true);
-      if (onSuccess) {
-        onSuccess();
+      if (onSuccessAction) {
+        onSuccessAction();
       }
     } catch (e) {
       setError((e as Error).message);
@@ -101,7 +101,7 @@ export const EditCardForm = ({ cardId, customerId, onSuccess, onCancel }: EditCa
   };
 
   if (loading) {
-    return <FormSkeleton fieldCount={5} showButtons={true} />;
+    return <FormSkeleton fieldCount={5} showButtons />;
   }
   if (error) {
     return <div className="p-8 text-center text-red-500">{error}</div>;
@@ -222,10 +222,10 @@ export const EditCardForm = ({ cardId, customerId, onSuccess, onCancel }: EditCa
           >
             {submitting ? 'Saving...' : 'Save Changes'}
           </button>
-          {onCancel && (
+          {onCancelAction && (
             <button
               type="button"
-              onClick={onCancel}
+              onClick={onCancelAction}
               disabled={submitting}
               className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${COLORS.button.tertiary}`}
             >

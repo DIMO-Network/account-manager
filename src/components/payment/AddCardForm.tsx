@@ -9,11 +9,11 @@ import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
 
 type AddCardFormProps = {
-  onSuccess?: () => void;
-  onCancel?: () => void;
+  onSuccessAction?: () => void;
+  onCancelAction?: () => void;
 };
 
-export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
+export const AddCardForm = ({ onSuccessAction, onCancelAction }: AddCardFormProps) => {
   const { customerId } = useStripeCustomer();
   const { fetchPaymentMethods } = usePaymentMethods(customerId);
   const [loading, setLoading] = useState(false);
@@ -159,8 +159,8 @@ export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
       setSuccess(true);
       await fetchPaymentMethods();
 
-      if (onSuccess) {
-        onSuccess();
+      if (onSuccessAction) {
+        onSuccessAction();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add card');
@@ -280,10 +280,10 @@ export const AddCardForm = ({ onSuccess, onCancel }: AddCardFormProps) => {
           >
             {loading ? 'Adding Card...' : 'Add Card'}
           </button>
-          {onCancel && (
+          {onCancelAction && (
             <button
               type="button"
-              onClick={onCancel}
+              onClick={onCancelAction}
               disabled={loading}
               className={`${RESPONSIVE.touch} ${BORDER_RADIUS.full} font-medium w-full ${COLORS.button.tertiary}`}
             >

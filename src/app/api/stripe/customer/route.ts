@@ -1,32 +1,65 @@
+import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
-import { getSession } from '@/libs/Session';
+import { getUser } from '@/libs/DAL';
+import { stripe } from '@/libs/Stripe';
 
-export async function GET() {
+export async function GET(_request: NextRequest) {
   try {
-    const session = await getSession();
+    const user = await getUser();
 
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 },
-      );
+    if (!user) {
+      return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
     }
 
-    const result = await getOrCreateStripeCustomer();
+    const userEmail = user.email;
 
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 401 },
-      );
+    // Check if we already have a customer ID stored in session
+    const existingCustomerId: string | undefined = user.stripeCustomerId;
+
+    if (existingCustomerId) {
+      // Verify the customer still exists in Stripe
+      try {
+        await stripe().customers.retrieve(existingCustomerId);
+        return NextResponse.json({ customerId: existingCustomerId });
+      } catch (error) {
+        console.warn('Stored customer ID not found in Stripe, will create new one:', error);
+      }
     }
 
-    return NextResponse.json({ customerId: result.customerId });
+    // Search for existing customer by email
+    const existingCustomers = await stripe().customers.search({
+      query: `email:'${userEmail}'`,
+      limit: 1,
+    });
+
+    let customerId: string;
+
+    if (existingCustomers.data.length > 0) {
+      // Use existing customer
+      customerId = existingCustomers.data[0]!.id;
+    } else {
+      // Create new customer with unique request ID to prevent duplicates
+      const requestId = `create_customer_${user.id}_${userEmail}`;
+      const customer = await stripe().customers.create({
+        email: userEmail,
+        metadata: {
+          userId: user.id,
+          authType: 'dimoJWT',
+        },
+      }, {
+        idempotencyKey: requestId,
+      });
+      customerId = customer.id;
+    }
+
+    // Note: We don't update the session here to avoid cookie modification issues
+    // The customer ID will be stored when the user performs an action that requires it
+
+    return NextResponse.json({ customerId });
   } catch (error) {
-    console.error('Error in customer API route:', error);
+    console.error('Error getting/creating Stripe customer:', error);
     return NextResponse.json(
-      { error: 'Failed to get customer' },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 },
     );
   }
