@@ -1,6 +1,6 @@
-import type { PaymentMethodsResponse } from '@/types/paymentMethod';
 import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
+import type { PaymentMethodsResponse } from '@/types/paymentMethod';
 
 export async function getPaymentMethods(customerId: string): Promise<PaymentMethodsResponse> {
   const session = await getSession();

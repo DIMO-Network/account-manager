@@ -1,7 +1,7 @@
-import { notFound, redirect } from 'next/navigation';
 import { ConnectionPlanSelection } from '@/components/subscriptions/connection/ConnectionPlanSelection';
 import { authorizeConnectionSubscriptionAccess } from '@/libs/BackendSubscriptionService';
 import { getSession } from '@/libs/Session';
+import { notFound, redirect } from 'next/navigation';
 import { PaymentMethodSection } from '../../../PaymentMethodSection';
 
 export default async function EditSubscriptionPage({

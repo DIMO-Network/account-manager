@@ -1,9 +1,9 @@
 'use client';
 
-import type Stripe from 'stripe';
-import { useState } from 'react';
 import { PaymentMethodCard } from '@/components/payment/PaymentMethodCard';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
+import { useState } from 'react';
+import type Stripe from 'stripe';
 
 type PaymentMethodsListClientProps = {
   paymentMethods: Stripe.PaymentMethod[];

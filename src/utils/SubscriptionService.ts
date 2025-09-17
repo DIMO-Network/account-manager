@@ -1,7 +1,7 @@
-import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
-import type { SubscriptionData } from '@/types/subscription';
 import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
+import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
+import type { SubscriptionData } from '@/types/subscription';
 
 export class SubscriptionService {
   static async checkDeviceSubscription(connectionId: string): Promise<SubscriptionData> {
@@ -64,9 +64,9 @@ export class SubscriptionService {
       comment?: string;
     },
   ): Promise<{
-    success: boolean;
-    error?: string;
-  }> {
+      success: boolean;
+      error?: string;
+    }> {
     try {
       const stripeCancellationDetails = cancellationDetails
         ? {
@@ -125,9 +125,9 @@ export class SubscriptionService {
       comment?: string;
     },
   ): Promise<{
-    success: boolean;
-    error?: string;
-  }> {
+      success: boolean;
+      error?: string;
+    }> {
     try {
       const stripeCancellationDetails = cancellationDetails
         ? {

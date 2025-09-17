@@ -1,7 +1,7 @@
-import type { BackendSubscription } from '@/types/subscription';
-import { memo } from 'react';
 import { useStripeProductName } from '@/hooks/useStripeProductName';
 import { BORDER_RADIUS } from '@/utils/designSystem';
+import { memo } from 'react';
+import type { BackendSubscription } from '@/types/subscription';
 import { BackendSubscriptionDetails } from './BackendSubscriptionDetails';
 import { BackendSubscriptionHeader } from './BackendSubscriptionHeader';
 

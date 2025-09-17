@@ -1,8 +1,8 @@
-import type { NextRequest } from 'next/server';
-import type { PaymentMethodsResponse } from '@/types/paymentMethod';
-import { NextResponse } from 'next/server';
 import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
+import { NextResponse } from 'next/server';
+import type { PaymentMethodsResponse } from '@/types/paymentMethod';
+import type { NextRequest } from 'next/server';
 
 async function authenticateUser() {
   const session = await getSession();

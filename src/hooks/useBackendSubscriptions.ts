@@ -1,6 +1,6 @@
-import type { BackendSubscription } from '@/types/subscription';
-import { useEffect, useState } from 'react';
 import { areAllStripeIdsNull, fetchBackendSubscriptions } from '@/libs/BackendSubscriptionService';
+import { useEffect, useState } from 'react';
+import type { BackendSubscription } from '@/types/subscription';
 import { useAuth } from './useAuth';
 
 export function useBackendSubscriptions() {

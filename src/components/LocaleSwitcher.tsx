@@ -1,10 +1,10 @@
 'use client';
 
-import type { ChangeEventHandler } from 'react';
-import { useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { usePathname } from '@/libs/i18nNavigation';
 import { routing } from '@/libs/i18nRouting';
+import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import type { ChangeEventHandler } from 'react';
 
 export const LocaleSwitcher = () => {
   const router = useRouter();

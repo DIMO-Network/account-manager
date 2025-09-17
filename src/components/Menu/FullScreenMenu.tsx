@@ -1,9 +1,9 @@
-import type { FC } from 'react';
-import type { MenuItemConfig } from '@/types/menu';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { CloseIcon, DIMOLogo } from '@/components/Icons';
 import { COLORS, SPACING } from '@/utils/designSystem';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { MenuItemConfig } from '@/types/menu';
+import type { FC } from 'react';
 import { Menu } from './Menu';
 
 type FullScreenMenuProps = {

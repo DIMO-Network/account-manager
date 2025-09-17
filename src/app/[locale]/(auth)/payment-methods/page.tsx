@@ -1,11 +1,11 @@
-import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
 import { getPaymentMethods } from '@/app/actions/getPaymentMethods';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
 import { WalletIcon } from '@/components/Icons';
 import { PaymentMethodsListClient } from '@/components/payment/PaymentMethodsListClient';
 import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
+import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string }>;

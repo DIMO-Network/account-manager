@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { ChevronIcon, ConnectionIcon } from '@/components/Icons';
 import { COLORS } from '@/utils/designSystem';
+import Link from 'next/link';
 import { formatProductName, getDeviceHeaderName } from '../utils/subscriptionDisplayHelpers';
 
 type BackendSubscriptionHeaderProps = {

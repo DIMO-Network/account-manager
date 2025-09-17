@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { FormField } from '@/components/FormField';
 import { FormSkeleton } from '@/components/payment/FormSkeleton';
 import { CountryDropdown } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE, SPACING } from '@/utils/designSystem';
+import { useEffect, useState } from 'react';
 
 type EditCardFormProps = {
   cardId: string;
@@ -101,7 +101,7 @@ export const EditCardForm = ({ cardId, customerId, onSuccess, onCancel }: EditCa
   };
 
   if (loading) {
-    return <FormSkeleton fieldCount={5} showButtons={true} />;
+    return <FormSkeleton fieldCount={5} showButtons />;
   }
   if (error) {
     return <div className="p-8 text-center text-red-500">{error}</div>;

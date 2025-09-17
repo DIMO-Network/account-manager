@@ -1,9 +1,9 @@
 'use client';
 
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { WalletIcon } from '@/components/Icons';
 import { EditCardForm } from '@/components/payment/EditCardForm';
 import { PageHeader } from '@/components/ui';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 
 export default function EditPaymentMethodPage() {
   const router = useRouter();

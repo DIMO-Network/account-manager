@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import { WalletIcon } from '@/components/Icons';
 import { PaymentMethodsNote } from '@/components/payment/PaymentMethodsNote';
 import { useBackendSubscriptions } from '@/hooks/useBackendSubscriptions';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
+import Link from 'next/link';
 import { PaymentMethodClient } from './PaymentMethodClient';
 
 export function PaymentMethodSection() {

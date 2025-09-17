@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
 import { getOrCreateStripeCustomer } from '@/app/actions/getStripeCustomer';
 import { getSession } from '@/libs/Session';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {

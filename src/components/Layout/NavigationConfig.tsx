@@ -1,9 +1,9 @@
-import type { MenuItemConfig } from '@/types/menu';
 import { SignOutButton } from '@/components/auth/SignOutButton';
 import { HomeIcon, LogoutIcon, WalletIcon } from '@/components/Icons';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { MenuActionButton } from '@/components/Menu/MenuActionButton';
 import { isProductionMode } from '@/utils/FeatureFlags';
+import type { MenuItemConfig } from '@/types/menu';
 
 export type AuthNavigationTranslations = {
   dashboard_link: string;

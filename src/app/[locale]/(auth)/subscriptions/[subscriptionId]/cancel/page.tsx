@@ -1,10 +1,10 @@
-import { cookies } from 'next/headers';
-import { notFound, redirect } from 'next/navigation';
 import { CancellationFlow } from '@/components/subscriptions/cancellation/CancellationFlow';
 import { authorizeSubscriptionAccess } from '@/libs/BackendSubscriptionService';
 import { getSession } from '@/libs/Session';
 import { stripe } from '@/libs/Stripe';
 import { fetchSubscriptionWithSchedule } from '@/libs/StripeSubscriptionService';
+import { cookies } from 'next/headers';
+import { notFound, redirect } from 'next/navigation';
 import { PaymentMethodSection } from '../../PaymentMethodSection';
 
 // Helper function to check if subscription should redirect

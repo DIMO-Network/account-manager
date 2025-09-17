@@ -1,11 +1,11 @@
 'use client';
 
-import type { BackendSubscription } from '@/types/subscription';
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import type { BackendSubscription } from '@/types/subscription';
 
 type ConnectionPlanSelectionProps = {
   subscription: BackendSubscription;

@@ -1,10 +1,10 @@
-import type { NextRequest } from 'next/server';
-import type { DIMOProfile } from '@/types/dimo';
-import { NextResponse } from 'next/server';
 import { logger } from '@/libs/Logger';
 import { createSession } from '@/libs/Session';
 import { getBaseUrl } from '@/utils/Helpers';
 import { verifyDimoJwt } from '@/utils/verifyDimoJwt';
+import { NextResponse } from 'next/server';
+import type { DIMOProfile } from '@/types/dimo';
+import type { NextRequest } from 'next/server';
 
 async function fetchDimoProfile(dimoToken: string): Promise<DIMOProfile> {
   const profilesApiUrl = process.env.DIMO_PROFILES_API_URL || 'https://profiles.dimo.co/v1/account';
