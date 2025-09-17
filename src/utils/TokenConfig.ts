@@ -13,7 +13,7 @@ export const TOKEN_CONFIG = {
 
 // Shared configuration
 export const SHARED_CONFIG = {
-  recipient: process.env.TOKEN_RECIPIENT_ADDRESS || '0xCec224A21bdF3Bd2d5E95aC38A92523146b814Bd',
+  recipient: process.env.TOKEN_RECIPIENT_ADDRESS || '0x9Ff0244063d11E3D307E01500427678F1fB70929',
   transferFee: Number(process.env.TRANSFER_FEE) || 0.5,
   minAmount: Number(process.env.MIN_TOKEN_AMOUNT) || 0.5,
 } as const;

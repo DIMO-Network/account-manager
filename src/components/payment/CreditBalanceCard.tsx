@@ -299,17 +299,20 @@ export const CreditBalanceCard = ({ customerId, refreshTrigger }: CreditBalanceC
             ? 'This credit will be automatically applied to your next invoice'
             : 'No available credit balance'}
         </span>
-        <div className="flex flex-row gap-2 mt-4">
-          <button
-            onClick={() => {
-              router.push('/payment-methods/top-up');
-            }}
-            className={`${RESPONSIVE.touchSmall} ${COLORS.button.secondary} ${BORDER_RADIUS.full} font-medium text-xs px-4`}
-            type="button"
-          >
-            Top Up
-          </button>
-        </div>
+        {/* Only show Top Up button for specific Stripe customer IDs */}
+        {process.env.NEXT_PUBLIC_ALLOWED_TOP_UP_USERS?.split(',').map(id => id.trim()).includes(customerId) && (
+          <div className="flex flex-row gap-2 mt-4">
+            <button
+              onClick={() => {
+                router.push('/payment-methods/top-up');
+              }}
+              className={`${RESPONSIVE.touchSmall} ${COLORS.button.secondary} ${BORDER_RADIUS.full} font-medium text-xs px-4`}
+              type="button"
+            >
+              Top Up
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
