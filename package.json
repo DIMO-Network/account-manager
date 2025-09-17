@@ -36,7 +36,7 @@
     "@sentry/nextjs": "^9.34.0",
     "@stripe/stripe-js": "^7.4.0",
     "@t3-oss/env-nextjs": "^0.13.8",
-    "@types/classnames": "^2.3.0",
+    "@types/classnames": "^2.3.4",
     "autoprefixer": "^10.4.21",
     "classnames": "^2.5.1",
     "graphql": "^16.11.0",
@@ -45,8 +45,8 @@
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
     "posthog-js": "^1.256.0",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
     "react-hook-form": "^7.59.0",
     "react-hot-toast": "^2.5.2",
     "stripe": "^18.3.0",
@@ -110,7 +110,7 @@
     "typescript": "^5.8.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",
-    "vitest-fail-on-console": "^0.7.1"
+    "vitest-fail-on-console": "^0.10.1"
   },
   "config": {
     "commitizen": {
