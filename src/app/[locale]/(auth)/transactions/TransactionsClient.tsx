@@ -1,7 +1,5 @@
 'use client';
 
-import type { TransactionCategory, TransactionHistoryEntry } from '@/types/transaction';
-import { useEffect, useMemo, useState } from 'react';
 import { TransactionIcon } from '@/components/Icons';
 import { Loading } from '@/components/Loading';
 import { TransactionCategoryFilter } from '@/components/transactions/TransactionCategoryFilter';
@@ -9,6 +7,8 @@ import { TransactionHistoryItem } from '@/components/transactions/TransactionHis
 import { TransactionPagination } from '@/components/transactions/TransactionPagination';
 import { PageHeader } from '@/components/ui';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
+import { useEffect, useMemo, useState } from 'react';
+import type { TransactionCategory, TransactionHistoryEntry } from '@/types/transaction';
 
 type TransactionsClientProps = {
   translations: {
@@ -66,9 +66,10 @@ export function TransactionsClient({ translations }: TransactionsClientProps) {
       (accum, curr) => {
         const rewardType = curr.type ? curr.type.toLowerCase() : 'other';
         const categoryKey = rewardType;
+        const existingArray = accum[categoryKey];
 
-        if (accum[categoryKey]) {
-          accum[categoryKey].push(curr);
+        if (existingArray) {
+          existingArray.push(curr);
         } else {
           accum[categoryKey] = [curr];
         }

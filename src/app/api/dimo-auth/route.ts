@@ -1,10 +1,10 @@
-import type { NextRequest } from 'next/server';
-import type { DIMOProfile } from '@/types/dimo';
-import { NextResponse } from 'next/server';
 import { logger } from '@/libs/Logger';
 import { createSession } from '@/libs/Session';
 import { getBaseUrl } from '@/utils/Helpers';
 import { verifyDimoJwt } from '@/utils/verifyDimoJwt';
+import { NextResponse } from 'next/server';
+import type { DIMOProfile } from '@/types/dimo';
+import type { NextRequest } from 'next/server';
 
 async function fetchDimoProfile(dimoToken: string): Promise<DIMOProfile> {
   const profilesApiUrl = process.env.DIMO_PROFILES_API_URL || 'https://profiles.dimo.co/v1/account';
@@ -25,7 +25,7 @@ async function fetchDimoProfile(dimoToken: string): Promise<DIMOProfile> {
 
 async function createUserSession(dimoProfile: DIMOProfile, dimoToken: string) {
   const userEmail = dimoProfile.email?.address;
-  const walletAddress = dimoProfile.wallet?.address;
+  const profileWalletAddress = dimoProfile.wallet?.address;
   const dimoUserId = dimoProfile.id;
 
   if (!userEmail) {
@@ -34,6 +34,21 @@ async function createUserSession(dimoProfile: DIMOProfile, dimoToken: string) {
 
   if (!dimoUserId) {
     throw new Error('No user ID found in DIMO profile');
+  }
+
+  // Get wallet address from JWT as fallback if not in profile
+  let walletAddress = profileWalletAddress;
+  if (!walletAddress) {
+    try {
+      const payload = await verifyDimoJwt(dimoToken);
+      walletAddress = payload.ethereum_address;
+      logger.info('Using wallet address from JWT as fallback', {
+        walletAddress,
+        profileWalletAddress: profileWalletAddress || 'none',
+      });
+    } catch (error) {
+      logger.warn('Could not extract wallet address from JWT', { error });
+    }
   }
 
   // Create session with user data using DIMO's unique ID
@@ -49,6 +64,7 @@ async function createUserSession(dimoProfile: DIMOProfile, dimoToken: string) {
     userId: dimoUserId,
     email: userEmail,
     walletAddress: walletAddress || 'none',
+    profileWalletAddress: profileWalletAddress || 'none',
   });
 
   return { userId: dimoUserId, userEmail, walletAddress };
@@ -87,7 +103,10 @@ export async function GET(request: NextRequest) {
 
     // 2. Get user details from DIMO Profiles API
     const dimoProfile = await fetchDimoProfile(token);
-    logger.info('DIMO profile fetched successfully', { email: dimoProfile.email?.address });
+    logger.info('DIMO profile fetched successfully', {
+      email: dimoProfile.email?.address,
+      walletAddress: dimoProfile.wallet?.address,
+    });
 
     // 3. Create user session with DIMO data
     const userData = await createUserSession(dimoProfile, token);

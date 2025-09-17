@@ -1,10 +1,9 @@
 'use client';
 
-import type { PublicClient } from 'viem';
-import { useEffect, useState } from 'react';
+import { clientLogger } from '@/libs/ClientLogger';
+import { useEffect, useRef, useState } from 'react';
 import { createPublicClient, http } from 'viem';
 import { polygon } from 'viem/chains';
-import { clientLogger } from '@/libs/ClientLogger';
 
 type TransactionStatus = 'pending' | 'confirmed' | 'failed' | 'not-found';
 
@@ -12,7 +11,8 @@ type UseTransactionPollingProps = {
   txHash?: string;
   enabled?: boolean;
   onConfirmed?: (usdValue?: number) => void;
-  onFailed?: () => void;
+  onFailed?: (errorMessage?: string) => void;
+  onAlreadyProcessed?: () => void;
   pollInterval?: number;
 };
 
@@ -23,100 +23,51 @@ type UseTransactionPollingReturn = {
   confirmations: number;
 };
 
-// Extract USD value from DIMO transaction
-async function extractUsdValueFromTransaction(client: PublicClient, txHash: `0x${string}`): Promise<number | undefined> {
-  clientLogger.info('extractUsdValueFromTransaction: Starting extraction for:', txHash);
+// Validate transaction and extract USD value
+async function validateTransactionAndExtractUsdValue(txHash: `0x${string}`): Promise<number | undefined> {
+  clientLogger.info('validateTransactionAndExtractUsdValue: Starting validation for:', txHash);
 
   try {
-    // Get the transaction receipt to access logs
-    const receipt = await client.getTransactionReceipt({ hash: txHash });
-
-    clientLogger.info('extractUsdValueFromTransaction: Got transaction receipt:', {
-      status: receipt?.status,
-      logsCount: receipt?.logs?.length || 0,
+    const response = await fetch('/api/transaction/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ txHash }),
     });
 
-    if (!receipt) {
-      clientLogger.warn('extractUsdValueFromTransaction: No transaction receipt found');
-      return undefined;
-    }
+    if (!response.ok) {
+      const errorData = await response.json();
+      clientLogger.warn('validateTransactionAndExtractUsdValue: Validation failed:', {
+        status: response.status,
+        error: errorData.error,
+        alreadyProcessed: errorData.alreadyProcessed,
+      });
 
-    // DIMO token contract address (from TokenConfig)
-    const DIMO_CONTRACT = '0xE261D618a959aFfFd53168Cd07D12E37B26761db';
-
-    // Find Transfer events from the DIMO contract
-    const transferLogs = receipt.logs.filter(log =>
-      log.address.toLowerCase() === DIMO_CONTRACT.toLowerCase(),
-    );
-
-    clientLogger.info('extractUsdValueFromTransaction: Found DIMO transfer logs:', {
-      totalLogs: receipt.logs.length,
-      dimoLogs: transferLogs.length,
-      dimoContract: DIMO_CONTRACT,
-    });
-
-    if (transferLogs.length === 0) {
-      clientLogger.warn('extractUsdValueFromTransaction: No DIMO Transfer events found');
-      return undefined;
-    }
-
-    // For now, we'll use a simplified approach to extract the value from logs
-    // In a real implementation, you'd decode the ERC-20 Transfer event logs
-    // to get the exact DIMO amount transferred
-
-    // Look for Transfer event logs (topic[0] = Transfer event signature)
-    const TRANSFER_EVENT_SIGNATURE = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-
-    let totalDimoAmount = BigInt(0);
-    for (const log of transferLogs) {
-      if (log.topics[0] === TRANSFER_EVENT_SIGNATURE) {
-        // Extract the value from the log data (topics[3] for Transfer events)
-        // The value is in the data field as a 32-byte hex string
-        const valueHex = log.data.slice(2); // Remove '0x' prefix
-        const value = BigInt(`0x${valueHex}`);
-        totalDimoAmount += value;
-
-        clientLogger.info('extractUsdValueFromTransaction: Found Transfer event:', {
-          value: value.toString(),
-          from: log.topics[1],
-          to: log.topics[2],
-        });
+      // For already processed transactions, throw a specific error
+      if (errorData.alreadyProcessed) {
+        clientLogger.info('validateTransactionAndExtractUsdValue: Throwing ALREADY_PROCESSED error');
+        throw new Error('ALREADY_PROCESSED');
       }
+
+      // Throw an error to stop polling when validation fails
+      throw new Error(errorData.error || 'Transaction validation failed');
     }
 
-    if (totalDimoAmount === BigInt(0)) {
-      clientLogger.warn('extractUsdValueFromTransaction: No DIMO amount found in Transfer events');
-      return undefined;
-    }
+    const validationData = await response.json();
 
-    // Convert from wei to DIMO (18 decimals)
-    const dimoAmount = Number(totalDimoAmount) / 1e18;
-
-    // Get current DIMO price
-    const priceResponse = await fetch('/api/dimo-price');
-    if (!priceResponse.ok) {
-      clientLogger.warn('Failed to fetch DIMO price');
-      return undefined;
-    }
-
-    const priceData = await priceResponse.json();
-    const dimoPrice = Number(priceData.price);
-
-    // Calculate USD value
-    const usdValue = dimoAmount * dimoPrice;
-
-    clientLogger.info('Extracted transaction data (ERC-20):', {
-      dimoAmount,
-      dimoPrice,
-      usdValue,
-      totalDimoAmount: totalDimoAmount.toString(),
-      transferLogsCount: transferLogs.length,
+    clientLogger.info('validateTransactionAndExtractUsdValue: Validation successful:', {
+      dimoAmount: validationData.dimoAmount,
+      usdValue: validationData.usdValue,
+      transactionFrom: validationData.transactionFrom,
+      userWallet: validationData.userWallet,
     });
 
-    return usdValue;
+    return validationData.usdValue;
   } catch (error) {
-    clientLogger.error('Error extracting USD value from transaction:', error);
-    return undefined;
+    clientLogger.error('validateTransactionAndExtractUsdValue: Error validating transaction:', error);
+    // Re-throw the error so it can be handled by the polling function
+    throw error;
   }
 }
 
@@ -125,12 +76,25 @@ export function useTransactionPolling({
   enabled = true,
   onConfirmed,
   onFailed,
+  onAlreadyProcessed,
   pollInterval = 2000, // Poll every 2 seconds
 }: UseTransactionPollingProps): UseTransactionPollingReturn {
   const [status, setStatus] = useState<TransactionStatus>('pending');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmations, setConfirmations] = useState(0);
+
+  // Store callbacks in refs to avoid dependency issues
+  const onConfirmedRef = useRef(onConfirmed);
+  const onFailedRef = useRef(onFailed);
+  const onAlreadyProcessedRef = useRef(onAlreadyProcessed);
+
+  // Update refs when callbacks change
+  useEffect(() => {
+    onConfirmedRef.current = onConfirmed;
+    onFailedRef.current = onFailed;
+    onAlreadyProcessedRef.current = onAlreadyProcessed;
+  }, [onConfirmed, onFailed, onAlreadyProcessed]);
 
   useEffect(() => {
     clientLogger.info('useTransactionPolling: Effect triggered', { enabled, txHash });
@@ -144,9 +108,24 @@ export function useTransactionPolling({
     let pollTimeout: NodeJS.Timeout;
     let continuePollingTimeout: NodeJS.Timeout;
     let isPolling = false; // Prevent multiple concurrent polling loops
+    let isCompleted = false; // Flag to stop polling after success or failure
+    const startTime = Date.now();
+    const MAX_POLLING_DURATION = 60 * 1000; // 1 minute
+
+    // Reset completion flag when starting new polling session
+    isCompleted = false;
 
     const pollTransaction = async () => {
-      if (!isMounted || isPolling) {
+      if (!isMounted || isPolling || isCompleted) {
+        return;
+      }
+
+      // Check if we've been polling too long
+      if (Date.now() - startTime > MAX_POLLING_DURATION) {
+        clientLogger.warn('useTransactionPolling: Polling timeout reached, stopping');
+        setStatus('failed');
+        onFailedRef.current?.('Transaction polling timeout - transaction may not exist');
+        isCompleted = true;
         return;
       }
 
@@ -164,9 +143,21 @@ export function useTransactionPolling({
         });
 
         // Get transaction receipt
-        const receipt = await client.getTransactionReceipt({
-          hash: txHash as `0x${string}`,
-        });
+        let receipt;
+        try {
+          receipt = await client.getTransactionReceipt({
+            hash: txHash as `0x${string}`,
+          });
+        } catch (error) {
+          // Handle transaction not found error
+          if (error instanceof Error && error.message.includes('Transaction receipt with hash') && error.message.includes('could not be found')) {
+            clientLogger.info('useTransactionPolling: Transaction not found yet, continuing to poll');
+            // Transaction not found yet, continue polling
+            return;
+          }
+          // Re-throw other errors
+          throw error;
+        }
 
         if (receipt) {
           // Calculate confirmations by getting current block number
@@ -180,22 +171,42 @@ export function useTransactionPolling({
           }
 
           if (receipt.status === 'success') {
-            setStatus('confirmed');
-
-            // Try to extract USD value from transaction logs
+            // Try to validate transaction and extract USD value
             let usdValue: number | undefined;
+            let validationSuccess = false;
+
             try {
-              usdValue = await extractUsdValueFromTransaction(client, txHash as `0x${string}`);
+              usdValue = await validateTransactionAndExtractUsdValue(txHash as `0x${string}`);
+              validationSuccess = true;
             } catch (error) {
-              console.error('Could not extract USD value from transaction:', error);
+              clientLogger.error('Could not validate transaction and extract USD value:', error);
+
+              // Check if this is an "already processed" error
+              if (error instanceof Error && error.message === 'ALREADY_PROCESSED') {
+                clientLogger.info('useTransactionPolling: Detected ALREADY_PROCESSED error, calling onAlreadyProcessed');
+                // Don't set status here - let the callback handle it
+                onAlreadyProcessedRef.current?.();
+                isCompleted = true; // Stop polling on already processed
+                return;
+              }
+
+              // If validation fails, treat as failed transaction
+              setStatus('failed');
+              const errorMessage = error instanceof Error ? error.message : 'Transaction validation failed';
+              onFailedRef.current?.(errorMessage);
+              isCompleted = true; // Stop polling on validation failure
+              return;
             }
 
-            onConfirmed?.(usdValue);
-            // Stop polling on success
+            if (validationSuccess) {
+              setStatus('confirmed'); // Only set to confirmed after validation succeeds
+              onConfirmedRef.current?.(usdValue);
+              isCompleted = true; // Stop polling on success
+            }
           } else if (receipt.status === 'reverted') {
             setStatus('failed');
-            onFailed?.();
-            // Stop polling on failure
+            onFailedRef.current?.('Transaction was reverted on the blockchain');
+            isCompleted = true; // Stop polling on failure
           }
         } else {
           // Transaction not found yet, continue polling
@@ -212,15 +223,16 @@ export function useTransactionPolling({
           setIsLoading(false);
           isPolling = false; // Reset polling flag
 
-          // Continue polling if transaction is still pending
+          // Continue polling only if transaction is still pending and not completed
           // Check current status from state to avoid closure issues
           continuePollingTimeout = setTimeout(() => {
-            if (isMounted) {
+            if (isMounted && !isCompleted) {
               // Use a callback to get the current status
               setStatus((currentStatus) => {
                 if (currentStatus === 'pending') {
                   pollTimeout = setTimeout(pollTransaction, pollInterval);
                 }
+                // Stop polling for 'confirmed' or 'failed' status
                 return currentStatus;
               });
             }
@@ -234,6 +246,7 @@ export function useTransactionPolling({
 
     return () => {
       isMounted = false;
+      isCompleted = true; // Stop any ongoing polling
       if (pollTimeout) {
         clearTimeout(pollTimeout);
       }
@@ -241,7 +254,7 @@ export function useTransactionPolling({
         clearTimeout(continuePollingTimeout);
       }
     };
-  }, [txHash, enabled, pollInterval, onConfirmed, onFailed]);
+  }, [txHash, enabled, pollInterval]);
 
   return {
     status,

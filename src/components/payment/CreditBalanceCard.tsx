@@ -1,10 +1,10 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 import { CreditCardIcon } from '@/components/Icons';
 import { useTransactionPolling } from '@/hooks/useTransactionPolling';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 type CreditBalanceCardProps = {
   customerId: string;
@@ -23,8 +23,9 @@ export const CreditBalanceCard = ({ customerId, refreshTrigger }: CreditBalanceC
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
-  const [transactionStatus, setTransactionStatus] = useState<'idle' | 'pending' | 'confirmed' | 'failed'>('idle');
+  const [transactionStatus, setTransactionStatus] = useState<'idle' | 'pending' | 'confirmed' | 'failed' | 'already-processed'>('idle');
   const [isProcessingTransaction, setIsProcessingTransaction] = useState(false);
+  const [transactionErrorMessage, setTransactionErrorMessage] = useState<string | null>(null);
 
   // Memoized fetchCreditBalance function
   const fetchCreditBalance = useCallback(async () => {
@@ -93,18 +94,22 @@ export const CreditBalanceCard = ({ customerId, refreshTrigger }: CreditBalanceC
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            amount: Math.round(usdValue * 100), // Convert to cents
+            amount: Math.round(usdValue * 100), // Convert to cents (server will use validated amount)
             currency: 'usd',
             description: 'DIMO token conversion credit',
+            txHash: pendingTxHash, // Pass transaction hash for validation
             metadata: {
-              transactionHash: pendingTxHash,
               source: 'dimo_conversion',
             },
           }),
         });
 
         if (!response.ok) {
-          throw new Error('Failed to add credit balance');
+          const errorData = await response.json();
+          if (errorData.alreadyProcessed) {
+            throw new Error('This transaction has already been processed');
+          }
+          throw new Error(errorData.error || 'Failed to add credit balance');
         }
 
         // Refresh the credit balance display
@@ -131,8 +136,19 @@ export const CreditBalanceCard = ({ customerId, refreshTrigger }: CreditBalanceC
     }
   }, [pendingTxHash, fetchCreditBalance, isProcessingTransaction]);
 
-  const handleTransactionFailed = useCallback(() => {
+  const handleTransactionFailed = useCallback((errorMessage?: string) => {
     setTransactionStatus('failed');
+    setTransactionErrorMessage(errorMessage || null);
+    setIsProcessingTransaction(false);
+    setTimeout(() => {
+      setPendingTxHash(null);
+      setTransactionStatus('idle');
+      setTransactionErrorMessage(null);
+    }, 3000);
+  }, []);
+
+  const handleTransactionAlreadyProcessed = useCallback(() => {
+    setTransactionStatus('already-processed');
     setIsProcessingTransaction(false);
     setTimeout(() => {
       setPendingTxHash(null);
@@ -146,6 +162,7 @@ export const CreditBalanceCard = ({ customerId, refreshTrigger }: CreditBalanceC
     enabled: !!pendingTxHash,
     onConfirmed: handleTransactionConfirmed,
     onFailed: handleTransactionFailed,
+    onAlreadyProcessed: handleTransactionAlreadyProcessed,
   });
 
   useEffect(() => {
@@ -198,7 +215,9 @@ export const CreditBalanceCard = ({ customerId, refreshTrigger }: CreditBalanceC
       case 'confirmed':
         return 'Transaction confirmed! Credit added.';
       case 'failed':
-        return 'Transaction failed';
+        return transactionErrorMessage || 'Transaction failed';
+      case 'already-processed':
+        return 'Transaction already processed.';
       default:
         return null;
     }
@@ -212,6 +231,8 @@ export const CreditBalanceCard = ({ customerId, refreshTrigger }: CreditBalanceC
         return 'text-green-400';
       case 'failed':
         return 'text-red-400';
+      case 'already-processed':
+        return 'text-blue-400';
       default:
         return 'text-gray-400';
     }

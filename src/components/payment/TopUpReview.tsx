@@ -1,10 +1,16 @@
 'use client';
 
-import { ExecuteAdvancedTransactionWithDimo } from '@dimo-network/login-with-dimo';
-import { useEffect, useState } from 'react';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-
 import { getCurrentTokenConfig, SHARED_CONFIG } from '@/utils/TokenConfig';
+import { ExecuteAdvancedTransactionWithDimo } from '@dimo-network/login-with-dimo';
+
+import { useEffect, useState } from 'react';
+
+function toWei(amount: number): string {
+  // Convert to wei (18 decimals)
+  const weiAmount = BigInt(Math.floor(amount * 1e18));
+  return weiAmount.toString();
+}
 
 type TopUpReviewProps = {
   amount: number;
@@ -64,12 +70,6 @@ export const TopUpReview = ({ amount, onBackAction, onSuccessAction }: TopUpRevi
 
   const TOKEN_CONTRACT = getCurrentTokenConfig().contract;
   const RECIPIENT = SHARED_CONFIG.recipient;
-
-  function toWei(amount: number): string {
-    // Convert to wei (18 decimals)
-    const weiAmount = BigInt(Math.floor(amount * 1e18));
-    return weiAmount.toString();
-  }
 
   return (
     <div className="space-y-6">
