@@ -1,13 +1,13 @@
-import { getUser } from '@/libs/DAL';
-import { stripe } from '@/libs/Stripe';
-import { ERC20_EVENTS, TOKEN_CONFIG } from '@/utils/TokenConfig';
-import { verifyDimoJwt } from '@/utils/verifyDimoJwt';
+import type { NextRequest } from 'next/server';
+import type { TransactionValidationError, TransactionValidationResponse } from '@/types/credit-balance';
 import { logger } from '@sentry/nextjs';
 import { NextResponse } from 'next/server';
 import { createPublicClient, http } from 'viem';
 import { polygon } from 'viem/chains';
-import type { TransactionValidationError, TransactionValidationResponse } from '@/types/credit-balance';
-import type { NextRequest } from 'next/server';
+import { getUser } from '@/libs/DAL';
+import { stripe } from '@/libs/Stripe';
+import { ERC20_EVENTS, TOKEN_CONFIG } from '@/utils/TokenConfig';
+import { verifyDimoJwt } from '@/utils/verifyDimoJwt';
 
 async function isTransactionAlreadyProcessed(txHash: string, customerId: string): Promise<boolean> {
   try {

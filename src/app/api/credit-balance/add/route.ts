@@ -1,6 +1,4 @@
-import { getUser } from '@/libs/DAL';
-import { stripe } from '@/libs/Stripe';
-import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import type {
   CreditBalanceError,
   CreditBalanceRequest,
@@ -8,7 +6,9 @@ import type {
   TransactionValidationError,
   TransactionValidationResponse,
 } from '@/types/credit-balance';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { getUser } from '@/libs/DAL';
+import { stripe } from '@/libs/Stripe';
 
 // API endpoint for adding credit balance from DIMO token conversions
 // Requires a transaction hash to validate the blockchain transaction

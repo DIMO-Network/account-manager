@@ -1,9 +1,9 @@
 'use client';
 
-import { clientLogger } from '@/libs/ClientLogger';
 import { useEffect, useRef, useState } from 'react';
 import { createPublicClient, http } from 'viem';
 import { polygon } from 'viem/chains';
+import { clientLogger } from '@/libs/ClientLogger';
 
 type TransactionStatus = 'pending' | 'confirmed' | 'failed' | 'not-found';
 

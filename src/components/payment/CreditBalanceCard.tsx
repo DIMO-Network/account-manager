@@ -1,10 +1,10 @@
 'use client';
 
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { CreditCardIcon } from '@/components/Icons';
 import { useTransactionPolling } from '@/hooks/useTransactionPolling';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 
 type CreditBalanceCardProps = {
   customerId: string;
