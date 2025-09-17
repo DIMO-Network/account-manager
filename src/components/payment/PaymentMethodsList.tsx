@@ -68,7 +68,7 @@ export const PaymentMethodsList = () => {
 
   // Show loading state while getting customer
   if (customerLoading) {
-    return <PaymentMethodSkeleton count={2} showNote={true} />;
+    return <PaymentMethodSkeleton count={2} showNote />;
   }
 
   // Show customer error
@@ -116,7 +116,7 @@ export const PaymentMethodsList = () => {
   }
 
   if (loading) {
-    return <PaymentMethodSkeleton count={2} showNote={true} />;
+    return <PaymentMethodSkeleton count={2} showNote />;
   }
 
   // Only show "No payment methods found" if we're not loading and have confirmed there are no payment methods

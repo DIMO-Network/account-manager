@@ -101,7 +101,7 @@ export const EditCardForm = ({ cardId, customerId, onSuccess, onCancel }: EditCa
   };
 
   if (loading) {
-    return <FormSkeleton fieldCount={5} showButtons={true} />;
+    return <FormSkeleton fieldCount={5} showButtons />;
   }
   if (error) {
     return <div className="p-8 text-center text-red-500">{error}</div>;

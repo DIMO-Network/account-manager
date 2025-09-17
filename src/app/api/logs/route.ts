@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error('Failed to process client log', { error });
+    logger.error({ error }, 'Failed to process client log');
     return NextResponse.json({ error: 'Failed to process log' }, { status: 500 });
   }
 }
