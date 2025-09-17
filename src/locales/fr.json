@@ -26,6 +26,8 @@
   "DashboardLayout": {
     "dashboard_link": "Tableau de bord",
     "subscriptions_link": "Abonnements",
+    "payment_methods_link": "Méthodes de paiement",
+    "transactions_link": "Transactions",
     "user_profile_link": "Gérer votre compte",
     "sign_out": "Se déconnecter"
   },
@@ -42,6 +44,12 @@
       "monthly": "Monthly",
       "annually": "Annually"
     }
+  },
+  "Transactions": {
+    "meta_title": "Transactions",
+    "title": "Transactions",
+    "loading": "Chargement des transactions...",
+    "no_transactions": "Aucune transaction trouvée"
   },
 
   "monthly": "monthly",

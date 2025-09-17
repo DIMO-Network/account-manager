@@ -13,10 +13,10 @@ export default function AddPaymentMethodPage() {
       <PageHeader icon={<WalletIcon />} title="Add a Card" />
 
       <AddCardForm
-        onSuccess={() => {
+        onSuccessAction={() => {
           router.push('/payment-methods');
         }}
-        onCancel={() => {
+        onCancelAction={() => {
           router.push('/payment-methods');
         }}
       />

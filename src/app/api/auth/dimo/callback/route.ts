@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
   const error = searchParams.get('error');
+  const transactionHash = searchParams.get('transactionHash');
 
   if (error) {
     logger.error({ error }, 'DIMO OAuth error');
@@ -93,7 +94,17 @@ export async function GET(request: NextRequest) {
     const userData = await createUserSession(dimoProfile, token);
 
     // 4. Set DIMO JWT as secure cookie for API fallback
-    const response = NextResponse.redirect(new URL('/dashboard', getBaseUrl()));
+    // Determine redirect URL based on whether this is a transaction callback
+    const redirectUrl = transactionHash
+      ? new URL('/payment-methods', getBaseUrl())
+      : new URL('/dashboard', getBaseUrl());
+
+    // Add transaction hash to URL if present
+    if (transactionHash) {
+      redirectUrl.searchParams.set('transactionHash', transactionHash);
+    }
+
+    const response = NextResponse.redirect(redirectUrl);
     response.cookies.set('dimo_jwt', token, {
       httpOnly: process.env.NODE_ENV === 'production',
       secure: process.env.NODE_ENV === 'production',

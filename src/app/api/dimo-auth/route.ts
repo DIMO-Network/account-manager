@@ -25,7 +25,7 @@ async function fetchDimoProfile(dimoToken: string): Promise<DIMOProfile> {
 
 async function createUserSession(dimoProfile: DIMOProfile, dimoToken: string) {
   const userEmail = dimoProfile.email?.address;
-  const walletAddress = dimoProfile.wallet?.address;
+  const profileWalletAddress = dimoProfile.wallet?.address;
   const dimoUserId = dimoProfile.id;
 
   if (!userEmail) {
@@ -34,6 +34,21 @@ async function createUserSession(dimoProfile: DIMOProfile, dimoToken: string) {
 
   if (!dimoUserId) {
     throw new Error('No user ID found in DIMO profile');
+  }
+
+  // Get wallet address from JWT as fallback if not in profile
+  let walletAddress = profileWalletAddress;
+  if (!walletAddress) {
+    try {
+      const payload = await verifyDimoJwt(dimoToken);
+      walletAddress = payload.ethereum_address;
+      logger.info({
+        walletAddress,
+        profileWalletAddress: profileWalletAddress || 'none',
+      }, 'Using wallet address from JWT as fallback');
+    } catch (error) {
+      logger.warn({ error }, 'Could not extract wallet address from JWT');
+    }
   }
 
   // Create session with user data using DIMO's unique ID

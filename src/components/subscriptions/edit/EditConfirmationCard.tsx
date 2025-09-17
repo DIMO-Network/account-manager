@@ -22,7 +22,7 @@ type EditConfirmationCardProps = {
   previewInvoice?: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview;
   previewInvoiceMeta?: PreviewInvoice | ScheduledChangePreview | CanceledTrialPreview | ScheduledSubscriptionPreview;
   nextScheduledDate?: number | null;
-  onBack?: () => void;
+  onBackAction?: () => void;
 };
 
 export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
@@ -34,7 +34,7 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   previewInvoice,
   previewInvoiceMeta,
   nextScheduledDate,
-  onBack,
+  onBackAction,
 }) => {
   const t = useTranslations('Subscriptions.interval');
   const router = useRouter();
@@ -92,8 +92,8 @@ export const EditConfirmationCard: React.FC<EditConfirmationCardProps> = ({
   };
 
   const handleBack = () => {
-    if (onBack) {
-      onBack();
+    if (onBackAction) {
+      onBackAction();
     }
   };
 
