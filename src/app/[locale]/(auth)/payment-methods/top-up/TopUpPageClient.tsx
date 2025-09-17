@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { WalletIcon } from '@/components/Icons';
 import { TopUpForm } from '@/components/payment/TopUpForm';
 import { TopUpReview } from '@/components/payment/TopUpReview';
+import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { getCurrentTokenConfig } from '@/utils/TokenConfig';
 
@@ -12,6 +13,7 @@ type Step = 'form' | 'review';
 
 export function TopUpPageClient() {
   const router = useRouter();
+  const { customerId, loading: customerLoading, error: customerError } = useStripeCustomer();
   const [currentStep, setCurrentStep] = useState<Step>('form');
   const [amount, setAmount] = useState<number>(0);
   const [usdValue, setUsdValue] = useState<number>(0);
@@ -64,6 +66,26 @@ export function TopUpPageClient() {
     }
   };
 
+  // Check authorization on component mount
+  useEffect(() => {
+    if (customerLoading) {
+      return;
+    } // Wait for customer data to load
+
+    if (customerError || !customerId) {
+      // If there's an error or no customer ID, redirect to payment methods
+      router.push('/payment-methods');
+      return;
+    }
+
+    // Check if user is authorized to use top-up feature
+    const allowedUsers = process.env.NEXT_PUBLIC_ALLOWED_TOP_UP_USERS?.split(',').map(id => id.trim()) || [];
+    if (!allowedUsers.includes(customerId)) {
+      // User is not authorized, redirect to payment methods
+      router.push('/payment-methods');
+    }
+  }, [customerId, customerLoading, customerError, router]);
+
   // Fetch token balance and price on component mount
   useEffect(() => {
     fetchData();
@@ -88,6 +110,21 @@ export function TopUpPageClient() {
     // Transaction hash will be extracted from URL params by the payment methods page
     router.push('/payment-methods');
   };
+
+  // Show loading state while checking authorization
+  if (customerLoading) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-row items-center gap-2 border-b border-gray-700 pb-2">
+          <WalletIcon className={`w-4 h-4 ${COLORS.text.secondary}`} />
+          <h1 className={`text-base font-medium leading-6 ${COLORS.text.secondary}`}>Top Up Credits</h1>
+        </div>
+        <div className="flex justify-center items-center py-8">
+          <div className="text-text-secondary">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
