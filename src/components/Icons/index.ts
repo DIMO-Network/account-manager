@@ -12,6 +12,7 @@ export { DIMOLogo } from './DIMOLogo';
 export { EditIcon } from './EditIcon';
 export { HomeIcon } from './HomeIcon';
 export { LogoutIcon } from './LogoutIcon';
+export { RecoveryIcon } from './RecoveryIcon';
 export { SettingsIcon } from './SettingsIcon';
 export { TransactionIcon } from './TransactionIcon';
 export { WalletIcon } from './WalletIcon';

@@ -28,6 +28,7 @@
     "subscriptions_link": "Subscriptions",
     "payment_methods_link": "Payment Methods",
     "transactions_link": "Transactions",
+    "recovery_link": "Recovery",
     "user_profile_link": "Account",
     "sign_out": "Sign out"
   },
@@ -54,7 +55,12 @@
     "loading": "Loading transactions...",
     "no_transactions": "No transactions found"
   },
-
+  "Recovery": {
+    "meta_title": "Recovery",
+    "title": "Recovery",
+    "description": "Recovery",
+    "coming_soon": "Coming soon"
+  },
   "monthly": "monthly",
   "annually": "annually"
 }

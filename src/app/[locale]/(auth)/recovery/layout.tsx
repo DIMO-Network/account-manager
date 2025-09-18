@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { LayoutWrapper } from '@/components/Layout';
+import { RecoveryLayoutClient } from './RecoveryLayoutClient';
 
-export default async function DashboardLayout(props: {
+export default async function RecoveryLayout(props: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
@@ -13,8 +13,7 @@ export default async function DashboardLayout(props: {
   });
 
   return (
-    <LayoutWrapper
-      layoutType="auth"
+    <RecoveryLayoutClient
       translations={{
         dashboard_link: t('dashboard_link'),
         subscriptions_link: t('subscriptions_link'),
@@ -26,6 +25,6 @@ export default async function DashboardLayout(props: {
       }}
     >
       {props.children}
-    </LayoutWrapper>
+    </RecoveryLayoutClient>
   );
 }
