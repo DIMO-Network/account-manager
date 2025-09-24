@@ -16,6 +16,7 @@ export const verifyUserSession = cache(async () => {
     walletAddress: session.walletAddress,
     stripeCustomerId: session.stripeCustomerId,
     dimoToken: session.dimoToken,
+    subOrganizationId: session.subOrganizationId,
   };
 });
 
@@ -29,6 +30,7 @@ export const getUser = cache(async () => {
     walletAddress: session.walletAddress,
     stripeCustomerId: session.stripeCustomerId,
     dimoToken: session.dimoToken,
+    subOrganizationId: session.subOrganizationId,
   };
 });
 
