@@ -1,3 +1,10 @@
+# [2.28.0](https://github.com/DIMO-Network/account-manager/compare/v2.27.0...v2.28.0) (2025-09-24)
+
+
+### Features
+
+* implement asset recovery flow ([#76](https://github.com/DIMO-Network/account-manager/issues/76)) ([d171670](https://github.com/DIMO-Network/account-manager/commit/d1716702bdcad8f5171ae5df809efc8a2d1327c5))
+
 # [2.27.0](https://github.com/DIMO-Network/account-manager/compare/v2.26.1...v2.27.0) (2025-09-17)
 
 
