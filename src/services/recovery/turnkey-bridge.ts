@@ -2,6 +2,7 @@ import { ApiKeyStamper } from '@turnkey/api-key-stamper';
 import { decryptCredentialBundle, getPublicKey } from '@turnkey/crypto';
 import { uint8ArrayFromHexString, uint8ArrayToHexString } from '@turnkey/encoding';
 import { TurnkeyClient } from '@turnkey/http';
+import { Turnkey } from '@turnkey/sdk-browser';
 import { Env } from '@/libs/Env';
 
 export enum SupportedChains {
@@ -12,9 +13,8 @@ export enum SupportedChains {
 
 export type TurnkeyConfig = {
   apiBaseUrl: string;
-  apiPrivateKey: string;
-  apiPublicKey: string;
   defaultOrganizationId: string;
+  rpId: string;
   polygonRpcUrl: string;
   ethereumRpcUrl: string;
   baseRpcUrl: string;
@@ -25,15 +25,22 @@ export type TurnkeyConfig = {
 export const getTurnkeyConfig = (): TurnkeyConfig => {
   return {
     apiBaseUrl: Env.NEXT_PUBLIC_TURNKEY_API_BASE_URL || 'https://api.turnkey.com',
-    apiPrivateKey: Env.TURNKEY_API_PRIVATE_KEY || '',
-    apiPublicKey: Env.TURNKEY_API_PUBLIC_KEY || '',
     defaultOrganizationId: Env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID || '',
-    polygonRpcUrl: 'https://polygon-rpc.com',
-    ethereumRpcUrl: 'https://eth.llamarpc.com',
-    baseRpcUrl: 'https://mainnet.base.org',
-    bundleRpc: Env.NEXT_PUBLIC_ZERODEV_BUNDLER_RPC_URL || 'https://bundler.zerodev.app',
-    paymasterRpc: Env.NEXT_PUBLIC_ZERODEV_PAYMASTER_RPC_URL || 'https://paymaster.zerodev.app',
+    rpId: Env.NEXT_PUBLIC_TURNKEY_RP_ID || 'localhost',
+    polygonRpcUrl: process.env.NEXT_PUBLIC_POLYGON_RPC_URL || '',
+    ethereumRpcUrl: process.env.NEXT_PUBLIC_ETHEREUM_RPC_URL || '',
+    baseRpcUrl: process.env.NEXT_PUBLIC_BASE_RPC_URL || '',
+    bundleRpc: Env.NEXT_PUBLIC_ZERODEV_BUNDLER_RPC_URL || '',
+    paymasterRpc: Env.NEXT_PUBLIC_ZERODEV_PAYMASTER_RPC_URL || '',
   };
+};
+
+export const createTurnkeyClient = () => {
+  const config = getTurnkeyConfig();
+  return new Turnkey({
+    apiBaseUrl: config.apiBaseUrl,
+    defaultOrganizationId: config.defaultOrganizationId,
+  });
 };
 
 export const getTurnkeyClient = ({

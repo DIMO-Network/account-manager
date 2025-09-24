@@ -1,5 +1,6 @@
 import type { SupportedChains } from './turnkey-bridge';
-import { getTurnkeyClient, getTurnkeyWalletAddress } from './turnkey-bridge';
+import { generateP256KeyPair } from '@turnkey/crypto';
+import { createTurnkeyClient, getTurnkeyClient, getTurnkeyConfig, getTurnkeyWalletAddress } from './turnkey-bridge';
 import { getKernelClient } from './zerodev-service';
 
 export type RecoverySession = {
@@ -105,19 +106,42 @@ export const createRecoveryService = async (liwdSession: {
   subOrganizationId: string;
   walletAddress: string;
 }): Promise<RecoveryService> => {
-  // TODO: Extract eKey from LIWD session
-  // For now, we'll need to generate or retrieve this from the session
-  // This is the missing piece that asfiroth mentioned
-  const eKey = ''; // This needs to be extracted from LIWD session
+  // Generate a new P256 key pair for this recovery session
+  const keyPair = generateP256KeyPair();
+  const eKey = keyPair.privateKey;
+  const targetPubHex = keyPair.publicKeyUncompressed;
 
-  if (!eKey) {
-    throw new Error('eKey not found in LIWD session - this needs to be implemented');
-  }
+  // Create Turnkey session to get credential bundle
+  const turnkeyClient = createTurnkeyClient();
 
-  return new RecoveryService({
-    dimoToken: liwdSession.dimoToken,
-    subOrganizationId: liwdSession.subOrganizationId,
-    walletAddress: liwdSession.walletAddress,
-    eKey,
+  const config = getTurnkeyConfig();
+  const passkeyClient = turnkeyClient.passkeyClient({
+    rpId: config.rpId,
   });
+
+  const nowInSeconds = Math.ceil(Date.now() / 1000);
+  const sessionExpiration = nowInSeconds + (60 * 30); // 30 minutes
+
+  try {
+    const { credentialBundle } = await passkeyClient.createReadWriteSession({
+      organizationId: liwdSession.subOrganizationId,
+      targetPublicKey: targetPubHex,
+      expirationSeconds: sessionExpiration.toString(),
+    });
+
+    return new RecoveryService({
+      dimoToken: credentialBundle, // Use credential bundle instead of JWT
+      subOrganizationId: liwdSession.subOrganizationId,
+      walletAddress: liwdSession.walletAddress,
+      eKey,
+    });
+  } catch (error) {
+    console.error('Turnkey session creation failed:', error);
+
+    if (error instanceof Error && error.name === 'NotAllowedError') {
+      throw new Error('Passkey authentication failed. This is expected since we\'re using a placeholder subOrganizationId. You need to register a passkey for the actual DIMO organization.');
+    }
+
+    throw new Error(`Turnkey session creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 };

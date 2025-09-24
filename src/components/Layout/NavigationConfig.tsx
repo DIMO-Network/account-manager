@@ -24,7 +24,11 @@ const hiddenFromProduction = FEATURE_FLAGS.hiddenFromProduction;
 
 export const createAuthNavigation = (
   translations: AuthNavigationTranslations,
-  options?: { hidePaymentMethods?: boolean; disablePaymentMethods?: boolean },
+  options?: {
+    hidePaymentMethods?: boolean;
+    disablePaymentMethods?: boolean;
+    customerId?: string;
+  },
 ): MenuItemConfig[] => {
   const menuItems: MenuItemConfig[] = [
     // Main menu items
@@ -69,14 +73,19 @@ export const createAuthNavigation = (
     section: 'main',
   });
 
-  // Add recovery link
-  menuItems.push({
-    label: translations.recovery_link,
-    icon: RecoveryIcon,
-    iconClassName: 'h-5 w-5 text-text-secondary',
-    link: '/recovery/',
-    section: 'main',
-  });
+  // Add recovery link (only for authorized users) - using same gating as Top Up
+  const allowedRecoveryUsers = process.env.NEXT_PUBLIC_ALLOWED_TOP_UP_USERS?.split(',').map(id => id.trim()) || [];
+  const isRecoveryAuthorized = allowedRecoveryUsers.length === 0 || (options?.customerId && allowedRecoveryUsers.includes(options.customerId));
+
+  if (isRecoveryAuthorized) {
+    menuItems.push({
+      label: translations.recovery_link,
+      icon: RecoveryIcon,
+      iconClassName: 'h-5 w-5 text-text-secondary',
+      link: '/recovery/',
+      section: 'main',
+    });
+  }
 
   // Bottom navigation items
   menuItems.push(
