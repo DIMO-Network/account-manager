@@ -51,6 +51,26 @@ async function createUserSession(dimoProfile: DIMOProfile, dimoToken: string) {
     }
   }
 
+  // Get subOrganizationId from DIMO Global Accounts API
+  let subOrganizationId: string | undefined;
+  try {
+    const globalAccountsResponse = await fetch(`https://accounts.dimo.org/api/account/${userEmail}`, {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (globalAccountsResponse.ok) {
+      const globalAccountData = await globalAccountsResponse.json();
+      subOrganizationId = globalAccountData.subOrganizationId;
+      logger.info({ subOrganizationId }, 'Retrieved subOrganizationId from Global Accounts API');
+    } else {
+      logger.warn({ status: globalAccountsResponse.status }, 'Failed to fetch subOrganizationId from Global Accounts API');
+    }
+  } catch (error) {
+    logger.warn({ error }, 'Error fetching subOrganizationId from Global Accounts API');
+  }
+
   // Create session with user data using DIMO's unique ID
   await createSession({
     userId: dimoUserId,
@@ -58,6 +78,7 @@ async function createUserSession(dimoProfile: DIMOProfile, dimoToken: string) {
     walletAddress: walletAddress || undefined,
     stripeCustomerId: undefined, // Will be set when needed
     dimoToken,
+    subOrganizationId: subOrganizationId || dimoUserId, // Use real subOrganizationId or fallback to userId
   });
 
   logger.info({

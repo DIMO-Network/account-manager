@@ -9,6 +9,7 @@ export type SessionPayload = {
   walletAddress?: string;
   stripeCustomerId?: string;
   dimoToken: string;
+  subOrganizationId?: string;
   expiresAt: number;
 };
 

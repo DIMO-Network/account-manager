@@ -15,6 +15,7 @@ export async function GET() {
       walletAddress: user.walletAddress,
       stripeCustomerId: user.stripeCustomerId,
       dimoToken: user.dimoToken,
+      subOrganizationId: user.subOrganizationId,
     });
   } catch (error) {
     console.error('Auth check failed:', error);
