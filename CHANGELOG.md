@@ -1,3 +1,10 @@
+# [2.29.0](https://github.com/DIMO-Network/account-manager/compare/v2.28.0...v2.29.0) (2025-09-25)
+
+
+### Features
+
+* add testnet support to recovery feature ([#77](https://github.com/DIMO-Network/account-manager/issues/77)) ([e63f31a](https://github.com/DIMO-Network/account-manager/commit/e63f31adf98cf9efbbbe4b164e7d0e2234b89180))
+
 # [2.28.0](https://github.com/DIMO-Network/account-manager/compare/v2.27.0...v2.28.0) (2025-09-24)
 
 
