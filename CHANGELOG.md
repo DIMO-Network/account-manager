@@ -1,3 +1,10 @@
+## [2.29.2](https://github.com/DIMO-Network/account-manager/compare/v2.29.1...v2.29.2) (2025-09-25)
+
+
+### Bug Fixes
+
+* update ZeroDev service to use selected chain ID ([cb2e54f](https://github.com/DIMO-Network/account-manager/commit/cb2e54f9341f7dd675dafa4917a3537dd0ae8444))
+
 ## [2.29.1](https://github.com/DIMO-Network/account-manager/compare/v2.29.0...v2.29.1) (2025-09-25)
 
 
