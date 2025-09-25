@@ -1,3 +1,10 @@
+## [2.29.1](https://github.com/DIMO-Network/account-manager/compare/v2.29.0...v2.29.1) (2025-09-25)
+
+
+### Bug Fixes
+
+* update variable to toggle recovery test mode ([994aa4b](https://github.com/DIMO-Network/account-manager/commit/994aa4b1a17ac37729a4f031896d29790a7c572a))
+
 # [2.29.0](https://github.com/DIMO-Network/account-manager/compare/v2.28.0...v2.29.0) (2025-09-25)
 
 
