@@ -21,6 +21,7 @@ export const Env = createEnv({
     NEXT_PUBLIC_BASE_RPC_URL: z.string().url().optional(),
     NEXT_PUBLIC_ZERODEV_BUNDLER_RPC_URL: z.string().url().optional(),
     NEXT_PUBLIC_ZERODEV_PAYMASTER_RPC_URL: z.string().url().optional(),
+    NEXT_PUBLIC_RECOVERY_FLOW: z.enum(['mainnet', 'testnet']).optional(),
   },
   shared: {
     NODE_ENV: z.enum(['test', 'development', 'production']).optional(),
@@ -43,5 +44,6 @@ export const Env = createEnv({
     NEXT_PUBLIC_BASE_RPC_URL: process.env.NEXT_PUBLIC_BASE_RPC_URL,
     NEXT_PUBLIC_ZERODEV_BUNDLER_RPC_URL: process.env.NEXT_PUBLIC_ZERODEV_BUNDLER_RPC_URL,
     NEXT_PUBLIC_ZERODEV_PAYMASTER_RPC_URL: process.env.NEXT_PUBLIC_ZERODEV_PAYMASTER_RPC_URL,
+    NEXT_PUBLIC_RECOVERY_FLOW: process.env.NEXT_PUBLIC_RECOVERY_FLOW,
   },
 });
