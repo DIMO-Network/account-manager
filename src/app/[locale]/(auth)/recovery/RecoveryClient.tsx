@@ -18,7 +18,7 @@ type RecoveryClientProps = {
 };
 
 // Network configurations - show testnet names and chain IDs in development
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isDevelopment = process.env.NEXT_PUBLIC_RECOVERY_FLOW === 'development';
 const NETWORKS = [
   {
     id: isDevelopment ? 11155111 : 1, // Sepolia: 11155111, Mainnet: 1
