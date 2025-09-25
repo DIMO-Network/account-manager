@@ -17,22 +17,22 @@ type RecoveryClientProps = {
   };
 };
 
-// Network configurations - show testnet names and chain IDs in development
-const isDevelopment = process.env.NEXT_PUBLIC_RECOVERY_FLOW === 'development';
+// Network configurations - show testnet names and chain IDs in testnet mode
+const isTestnet = process.env.NEXT_PUBLIC_RECOVERY_FLOW === 'testnet';
 const NETWORKS = [
   {
-    id: isDevelopment ? 11155111 : 1, // Sepolia: 11155111, Mainnet: 1
-    name: isDevelopment ? 'Ethereum Sepolia (Testnet)' : 'Ethereum',
+    id: isTestnet ? 11155111 : 1, // Sepolia: 11155111, Mainnet: 1
+    name: isTestnet ? 'Ethereum Sepolia (Testnet)' : 'Ethereum',
     symbol: 'ETH',
   },
   {
-    id: isDevelopment ? 80002 : 137, // Amoy: 80002, Polygon: 137
-    name: isDevelopment ? 'Polygon Amoy (Testnet)' : 'Polygon',
+    id: isTestnet ? 80002 : 137, // Amoy: 80002, Polygon: 137
+    name: isTestnet ? 'Polygon Amoy (Testnet)' : 'Polygon',
     symbol: 'MATIC',
   },
   {
-    id: isDevelopment ? 84532 : 8453, // Base Sepolia: 84532, Base: 8453
-    name: isDevelopment ? 'Base Sepolia (Testnet)' : 'Base',
+    id: isTestnet ? 84532 : 8453, // Base Sepolia: 84532, Base: 8453
+    name: isTestnet ? 'Base Sepolia (Testnet)' : 'Base',
     symbol: 'ETH',
   },
 ];
@@ -60,7 +60,7 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
   const [sessionData, setSessionData] = useState<any>(null);
 
   const [form, setForm] = useState({
-    network: isDevelopment ? '80002' : '137', // Default to Amoy (80002) in dev, Polygon (137) in prod
+    network: isTestnet ? '80002' : '137', // Default to Amoy (80002) in testnet, Polygon (137) in mainnet
   });
 
   // Check authorization and fetch session data
@@ -219,7 +219,7 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
               • This tool uses your existing Login With DIMO session + Turnkey + ZeroDev to deploy your account on the "wrong" network
               <br />
               • After deployment, you can access and transfer your stuck tokens
-              {isDevelopment && (
+              {isTestnet && (
                 <>
                   <br />
                   •
@@ -272,7 +272,7 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
             </select>
             <p className="text-xs text-gray-500 mt-1">
               Select the network where you accidentally sent tokens
-              {isDevelopment && ' (Currently testing on testnets)'}
+              {isTestnet && ' (Currently testing on testnets)'}
             </p>
           </div>
 

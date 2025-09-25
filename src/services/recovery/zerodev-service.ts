@@ -35,16 +35,25 @@ const getRpcUrl = (targetChain: SupportedChains): string => {
 };
 
 const getChain = (targetChain: SupportedChains): Chain => {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isTestnet = process.env.NEXT_PUBLIC_RECOVERY_FLOW === 'testnet';
+  console.warn('getChain debug:', { targetChain, isTestnet, envVar: process.env.NEXT_PUBLIC_RECOVERY_FLOW });
+
+  let chain: Chain;
   switch (targetChain) {
     case SupportedChains.ETHEREUM:
-      return isProduction ? mainnet : sepolia;
+      chain = isTestnet ? sepolia : mainnet;
+      break;
     case SupportedChains.BASE:
-      return isProduction ? base : baseSepolia;
+      chain = isTestnet ? baseSepolia : base;
+      break;
     case SupportedChains.POLYGON:
     default:
-      return isProduction ? polygon : polygonAmoy;
+      chain = isTestnet ? polygonAmoy : polygon;
+      break;
   }
+
+  console.warn('getChain result:', { chainId: chain.id, chainName: chain.name });
+  return chain;
 };
 
 export const getPublicClient = (targetChain: SupportedChains) => {
