@@ -7,6 +7,7 @@ import { RecoveryIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { createRecoveryService } from '@/services/recovery/recovery-service';
+import { checkAccountDeployment } from '@/services/recovery/zerodev-service';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 
 type RecoveryClientProps = {
@@ -17,7 +18,6 @@ type RecoveryClientProps = {
   };
 };
 
-// Network configurations - show testnet names and chain IDs in testnet mode
 const isTestnet = process.env.NEXT_PUBLIC_RECOVERY_FLOW === 'testnet';
 const NETWORKS = [
   {
@@ -37,7 +37,6 @@ const NETWORKS = [
   },
 ];
 
-// Supported chains for account deployment (includes both mainnet and testnet chain IDs)
 const SUPPORTED_CHAINS = {
   // Mainnet
   1: 'ETHEREUM',
@@ -55,15 +54,60 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [transactionHash, _setTransactionHash] = useState('');
   const [walletAddress, setWalletAddress] = useState('');
   const [sessionData, setSessionData] = useState<any>(null);
+  const [deploymentStatus, setDeploymentStatus] = useState<Record<string, { isDeployed: boolean }>>({});
+  const [checkingDeployment, setCheckingDeployment] = useState(false);
 
   const [form, setForm] = useState({
     network: isTestnet ? '80002' : '137', // Default to Amoy (80002) in testnet, Polygon (137) in mainnet
   });
 
-  // Check authorization and fetch session data
+  const checkDeploymentStatus = async (walletAddress: string) => {
+    if (!walletAddress) {
+      return;
+    }
+
+    setCheckingDeployment(true);
+    const status: Record<string, { isDeployed: boolean }> = {};
+
+    try {
+      // Only check networks that match the current environment (testnet vs mainnet)
+      const networksToCheck = isTestnet
+        ? Object.entries(SUPPORTED_CHAINS).filter(([chainId]) =>
+            ['11155111', '80002', '84532'].includes(chainId),
+          )
+        : Object.entries(SUPPORTED_CHAINS).filter(([chainId]) =>
+            ['1', '137', '8453'].includes(chainId),
+          );
+
+      for (const [chainId, chainName] of networksToCheck) {
+        const result = await checkAccountDeployment(walletAddress, chainName as SupportedChains);
+        status[chainId] = result;
+      }
+
+      setDeploymentStatus(status);
+    } catch (error) {
+      console.error('Error checking deployment status:', error);
+    } finally {
+      setCheckingDeployment(false);
+    }
+  };
+
+  const getExplorerUrl = (chainId: number, address: string) => {
+    const baseUrls: Record<number, string> = {
+      1: 'https://etherscan.io',
+      11155111: 'https://sepolia.etherscan.io',
+      137: 'https://polygonscan.com',
+      80002: 'https://amoy.polygonscan.com',
+      8453: 'https://basescan.org',
+      84532: 'https://sepolia.basescan.org',
+    };
+
+    const baseUrl = baseUrls[chainId];
+    return baseUrl ? `${baseUrl}/address/${address}` : '#';
+  };
+
   useEffect(() => {
     console.warn('Recovery Authorization Debug:', {
       customerId,
@@ -72,14 +116,12 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
       allowedUsers: process.env.NEXT_PUBLIC_ALLOWED_TOP_UP_USERS?.split(',').map(id => id.trim()) || [],
     });
 
-    // Don't redirect while loading
     if (customerLoading) {
       console.warn('Still loading customer data, waiting...');
       return;
     }
 
     if (customerError || !customerId) {
-      // If there's an error or no customer ID, redirect to dashboard
       console.warn('Redirecting due to customer error or missing customer ID');
       router.push('/');
       return;
@@ -88,13 +130,12 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
     // Check if user is authorized to use recovery feature (same as Top Up)
     const allowedUsers = process.env.NEXT_PUBLIC_ALLOWED_TOP_UP_USERS?.split(',').map(id => id.trim()) || [];
     if (!allowedUsers.includes(customerId)) {
-      // User is not authorized, redirect to dashboard
       console.warn('Redirecting due to unauthorized user:', customerId, 'not in', allowedUsers);
       router.push('/');
       return;
     }
 
-    // Fetch session data for recovery functionality
+    // Fetch Login With DIMO session data for smart account deployment
     const fetchSessionData = async () => {
       try {
         const response = await fetch('/api/auth/me');
@@ -103,6 +144,11 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
           console.warn('Session data:', data); // Debug: see what's in the session
           setSessionData(data);
           setWalletAddress(data.walletAddress || 'Wallet address not found');
+
+          // Check smart account deployment status across all supported networks
+          if (data.walletAddress) {
+            await checkDeploymentStatus(data.walletAddress);
+          }
         } else {
           setWalletAddress('Error loading session data');
         }
@@ -120,6 +166,7 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
     setForm(f => ({ ...f, [name]: value }));
   };
 
+  // Deploy smart account to the selected blockchain network using Login With DIMO session data and Turnkey
   const handleDeployAccount = async () => {
     setLoading(true);
     setError('');
@@ -130,11 +177,9 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
         throw new Error('Missing required session data (walletAddress, dimoToken)');
       }
 
-      // Handle missing subOrganizationId in existing sessions
-      // Use userId as fallback for existing sessions
-      const subOrganizationId = sessionData?.subOrganizationId || sessionData?.id;
+      const subOrganizationId = sessionData?.subOrganizationId;
       if (!subOrganizationId) {
-        setError('⚠️ Missing user ID in session data.');
+        setError('⚠️ Missing subOrganizationId in session data.');
         return;
       }
 
@@ -157,9 +202,7 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
 
       if (result.success) {
         setSuccess(true);
-        _setTransactionHash(result.transactionHash || '');
         setError('');
-        console.warn('Account deployed successfully:', result.transactionHash);
       } else {
         throw new Error(result.error || 'Deployment failed');
       }
@@ -210,15 +253,21 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
             <p className="text-blue-800 text-sm">
               <strong>How this works:</strong>
               <br />
-              • Your DIMO smart account has the same address across all networks
+              • Your DIMO smart account has the same address across all networks (Ethereum, Polygon, Base)
               <br />
-              • It's currently only deployed on Polygon (via ZeroDev)
+              • It's currently only deployed on Polygon (via ZeroDev in the DIMO Mobile app)
               <br />
-              • When you send tokens to the "wrong" network, they're stuck because the account isn't deployed there
+              • If someone sends tokens to your address on Ethereum or Base, they're stuck because your smart account isn't deployed there yet
               <br />
-              • This tool uses your existing Login With DIMO session + Turnkey + ZeroDev to deploy your account on the "wrong" network
+              • This tool deploys your smart account contract to the target network using your existing Login With DIMO session
               <br />
-              • After deployment, you can access and transfer your stuck tokens
+              • After deployment, you can use the transaction builder to recover and transfer your stuck tokens
+              <br />
+              •
+              {' '}
+              <strong>Note:</strong>
+              {' '}
+              This doesn't bridge tokens between networks - it just gives you access to manage them on the target network
               {isTestnet && (
                 <>
                   <br />
@@ -259,21 +308,58 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
               onChange={handleChange}
               className="flex flex-row rounded-md bg-surface-raised px-4 py-2 w-full"
             >
-              {NETWORKS.map(network => (
-                <option key={network.id} value={network.id}>
-                  {network.name}
-                  {' '}
-                  (Chain ID:
-                  {network.id}
-                  )
-                  {(network.id === 137 || network.id === 80002) ? ' - Already deployed' : ''}
-                </option>
-              ))}
+              {NETWORKS.map((network) => {
+                const isDeployed = deploymentStatus[network.id]?.isDeployed || false;
+                return (
+                  <option key={network.id} value={network.id}>
+                    {network.name}
+                    {' '}
+                    (Chain ID:
+                    {network.id}
+                    )
+                    {isDeployed ? ' - Smart account deployed' : ' - Available for deployment'}
+                  </option>
+                );
+              })}
             </select>
             <p className="text-xs text-gray-500 mt-1">
               Select the network where you accidentally sent tokens
               {isTestnet && ' (Currently testing on testnets)'}
             </p>
+
+            {/* Deployment Status Indicator */}
+            {checkingDeployment && (
+              <div className="mt-2 text-xs text-gray-500">
+                Checking deployment status across networks...
+              </div>
+            )}
+
+            {!checkingDeployment && walletAddress && deploymentStatus[form.network]?.isDeployed && (
+              <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-green-800">
+                      Smart account already deployed on this network
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">
+                      <a
+                        href={getExplorerUrl(Number(form.network), walletAddress)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-green-800"
+                      >
+                        View on blockchain explorer →
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Error Message */}
@@ -289,11 +375,16 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
               <p className="text-green-800 text-sm">
                 ✅ Smart account deployed successfully! You can now access your stuck tokens on this network.
               </p>
-              {transactionHash && (
+              {walletAddress && (
                 <p className="text-green-700 text-xs mt-2">
-                  Transaction Hash:
-                  {' '}
-                  <code className="bg-green-100 px-1 rounded">{transactionHash}</code>
+                  <a
+                    href={getExplorerUrl(Number(form.network), walletAddress)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-green-800"
+                  >
+                    View deployed account on blockchain explorer →
+                  </a>
                 </p>
               )}
               <p className="text-green-700 text-xs mt-2">
@@ -304,18 +395,26 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
 
           {/* Deploy Account Button */}
           <div className="flex flex-col pt-4">
-            <button
-              type="button"
-              onClick={handleDeployAccount}
-              disabled={loading || !walletAddress}
-              className={`${BORDER_RADIUS.full} font-medium w-full py-3 px-4 ${
-                loading || !walletAddress
-                  ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {loading ? 'Deploying Account...' : 'Deploy Account on Selected Network'}
-            </button>
+            {deploymentStatus[form.network]?.isDeployed
+              ? (
+                  <div className="text-center py-3 px-4 bg-gray-100 text-gray-600 rounded-full">
+                    Smart account already deployed on this network
+                  </div>
+                )
+              : (
+                  <button
+                    type="button"
+                    onClick={handleDeployAccount}
+                    disabled={loading || !walletAddress || checkingDeployment}
+                    className={`${BORDER_RADIUS.full} font-medium w-full py-3 px-4 ${
+                      loading || !walletAddress || checkingDeployment
+                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    {loading ? 'Deploying Account...' : checkingDeployment ? 'Checking Status...' : 'Deploy Account on Selected Network'}
+                  </button>
+                )}
             {!walletAddress && (
               <p className="text-xs text-gray-500 mt-2 text-center">
                 Loading wallet address...
