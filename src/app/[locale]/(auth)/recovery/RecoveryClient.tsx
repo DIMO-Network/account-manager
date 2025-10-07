@@ -4,6 +4,7 @@ import type { SupportedChains } from '@/services/recovery/turnkey-bridge';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { RecoveryIcon } from '@/components/Icons';
+import { TransactionBuilder } from '@/components/transaction-builder';
 import { PageHeader } from '@/components/ui';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { createRecoveryService } from '@/services/recovery/recovery-service';
@@ -423,6 +424,20 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
           </div>
         </div>
       </div>
+
+      {/* Transaction Builder - Show when smart account is deployed */}
+      {!checkingDeployment && walletAddress && deploymentStatus[form.network]?.isDeployed && (
+        <div className="mt-8">
+          <TransactionBuilder
+            networkId={form.network}
+            walletAddress={walletAddress}
+            onTransactionExecutedAction={(txHash) => {
+              console.warn('Transaction executed:', txHash);
+              // TODO: Handle transaction execution success
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -128,6 +128,18 @@ export const COMMON_ABIS = {
 // Recovery templates for common scenarios
 export const RECOVERY_TEMPLATES: RecoveryTemplate[] = [
   {
+    id: 'erc20-approve',
+    name: 'Approve ERC-20 Token',
+    description: 'Approve spending of ERC-20 tokens (required before transfer)',
+    contractType: 'ERC20',
+    abi: COMMON_ABIS.ERC20,
+    defaultFunction: 'approve',
+    parameterTemplates: [
+      { name: 'spender', type: 'address', value: '', required: true },
+      { name: 'amount', type: 'uint256', value: '0', required: true },
+    ],
+  },
+  {
     id: 'erc20-transfer',
     name: 'Transfer ERC-20 Token',
     description: 'Transfer ERC-20 tokens to another address',
@@ -140,15 +152,15 @@ export const RECOVERY_TEMPLATES: RecoveryTemplate[] = [
     ],
   },
   {
-    id: 'erc20-approve',
-    name: 'Approve ERC-20 Token Spending',
-    description: 'Approve another address to spend your ERC-20 tokens',
-    contractType: 'ERC20',
-    abi: COMMON_ABIS.ERC20,
+    id: 'erc721-approve',
+    name: 'Approve NFT (ERC-721)',
+    description: 'Approve transfer of NFT to another address',
+    contractType: 'ERC721',
+    abi: COMMON_ABIS.ERC721,
     defaultFunction: 'approve',
     parameterTemplates: [
-      { name: 'spender', type: 'address', value: '', required: true },
-      { name: 'amount', type: 'uint256', value: '0', required: true },
+      { name: 'to', type: 'address', value: '', required: true },
+      { name: 'tokenId', type: 'uint256', value: '0', required: true },
     ],
   },
   {
@@ -162,21 +174,6 @@ export const RECOVERY_TEMPLATES: RecoveryTemplate[] = [
       { name: 'from', type: 'address', value: '', required: true },
       { name: 'to', type: 'address', value: '', required: true },
       { name: 'tokenId', type: 'uint256', value: '0', required: true },
-    ],
-  },
-  {
-    id: 'erc1155-transfer',
-    name: 'Transfer Multi-Token (ERC-1155)',
-    description: 'Transfer ERC-1155 tokens to another address',
-    contractType: 'ERC1155',
-    abi: COMMON_ABIS.ERC1155,
-    defaultFunction: 'safeTransferFrom',
-    parameterTemplates: [
-      { name: 'from', type: 'address', value: '', required: true },
-      { name: 'to', type: 'address', value: '', required: true },
-      { name: 'id', type: 'uint256', value: '0', required: true },
-      { name: 'amount', type: 'uint256', value: '0', required: true },
-      { name: 'data', type: 'bytes', value: '0x', required: false },
     ],
   },
 ];
