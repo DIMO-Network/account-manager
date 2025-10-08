@@ -134,7 +134,7 @@ export const TransactionBuilder = ({
         return;
       }
 
-      const preview = await builder.createTransactionPreview(walletAddress as `0x${string}`);
+      const preview = await builder.createTransactionPreview();
       setTransactionPreview(preview);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to preview transaction');

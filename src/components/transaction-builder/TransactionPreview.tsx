@@ -86,28 +86,46 @@ export const TransactionPreviewComponent = ({
             </span>
           </div>
 
-          <div className="flex justify-between">
-            <span className={`text-sm font-medium ${COLORS.text.muted}`}>Gas Limit:</span>
-            <span className={`text-sm ${COLORS.text.primary}`}>
-              {preview.gasLimit.toString()}
-            </span>
-          </div>
+          {preview.estimatedCost.includes('Sponsored')
+            ? (
+                <div>
+                  <div className="flex justify-between items-center">
+                    <span className={`text-sm font-medium ${COLORS.text.muted}`}>Gas:</span>
+                    <span className="text-sm font-semibold text-green-600">
+                      {preview.estimatedCost}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-500 text-right">
+                    You don't need to pay any ETH for gas costs
+                  </div>
+                </div>
+              )
+            : (
+                <>
+                  <div className="flex justify-between">
+                    <span className={`text-sm font-medium ${COLORS.text.muted}`}>Gas Limit:</span>
+                    <span className={`text-sm ${COLORS.text.primary}`}>
+                      {preview.gasLimit.toString()}
+                    </span>
+                  </div>
 
-          <div className="flex justify-between">
-            <span className={`text-sm font-medium ${COLORS.text.muted}`}>Gas Price:</span>
-            <span className={`text-sm ${COLORS.text.primary}`}>
-              {preview.gasPrice.toString()}
-              {' '}
-              wei
-            </span>
-          </div>
+                  <div className="flex justify-between">
+                    <span className={`text-sm font-medium ${COLORS.text.muted}`}>Gas Price:</span>
+                    <span className={`text-sm ${COLORS.text.primary}`}>
+                      {preview.gasPrice.toString()}
+                      {' '}
+                      wei
+                    </span>
+                  </div>
 
-          <div className="flex justify-between">
-            <span className={`text-sm font-medium ${COLORS.text.muted}`}>Estimated Cost:</span>
-            <span className={`text-sm font-semibold ${COLORS.text.primary}`}>
-              {preview.estimatedCost}
-            </span>
-          </div>
+                  <div className="flex justify-between">
+                    <span className={`text-sm font-medium ${COLORS.text.muted}`}>Estimated Cost:</span>
+                    <span className={`text-sm font-semibold ${COLORS.text.primary}`}>
+                      {preview.estimatedCost}
+                    </span>
+                  </div>
+                </>
+              )}
         </div>
 
         {/* Parameters */}

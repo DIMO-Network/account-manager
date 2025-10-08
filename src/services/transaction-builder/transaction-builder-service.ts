@@ -7,7 +7,6 @@ import type {
 
 import { encodeFunctionData } from 'viem';
 import { getFunctionABI, validateABI } from './abi-manager';
-import { estimateGas } from './gas-estimator';
 import { getNetworkConfig } from './network-config';
 
 export class TransactionBuilderService {
@@ -48,7 +47,7 @@ export class TransactionBuilderService {
   /**
    * Create transaction preview with gas estimation
    */
-  async createTransactionPreview(from: `0x${string}`): Promise<TransactionPreview> {
+  async createTransactionPreview(): Promise<TransactionPreview> {
     try {
       const networkConfig = getNetworkConfig(this.config.network);
       if (!networkConfig) {
@@ -57,13 +56,13 @@ export class TransactionBuilderService {
 
       const data = this.buildTransactionData();
 
-      // Estimate gas
-      const gasEstimate = await estimateGas(Number.parseInt(this.config.network), {
-        to: this.config.contractAddress as `0x${string}`,
-        data: data as `0x${string}`,
-        value: this.config.value || BigInt(0),
-        from,
-      });
+      // For Account Abstraction transactions, skip gas estimation and show paymaster info
+      // Standard eth_estimateGas fails for AA because it simulates wrong execution path
+      const gasEstimate = {
+        gasLimit: BigInt(200000), // Typical AA transaction gas limit
+        gasPrice: BigInt(0), // User pays nothing - paymaster covers it
+        estimatedCost: 'Sponsored by ZeroDev Paymaster',
+      };
 
       // Create function parameters for preview
       const functionABI = getFunctionABI(this.config.abi, this.config.functionName);
