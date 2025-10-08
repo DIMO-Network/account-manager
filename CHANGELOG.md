@@ -1,3 +1,10 @@
+# [2.30.0](https://github.com/DIMO-Network/account-manager/compare/v2.29.2...v2.30.0) (2025-10-08)
+
+
+### Features
+
+* create transactions builder ([#79](https://github.com/DIMO-Network/account-manager/issues/79)) ([f041b97](https://github.com/DIMO-Network/account-manager/commit/f041b97246db7225e6a5c32f889f912f49b252ab))
+
 ## [2.29.2](https://github.com/DIMO-Network/account-manager/compare/v2.29.1...v2.29.2) (2025-09-25)
 
 
