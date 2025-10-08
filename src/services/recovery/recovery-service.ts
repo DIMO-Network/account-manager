@@ -95,6 +95,77 @@ export class RecoveryService {
       return false;
     }
   }
+
+  /**
+   * Execute a transaction using the smart account
+   */
+  async executeTransaction({
+    targetChain,
+    contractAddress,
+    abi,
+    functionName,
+    parameters,
+    value = BigInt(0),
+  }: {
+    targetChain: SupportedChains;
+    contractAddress: string;
+    abi: any[];
+    functionName: string;
+    parameters: any[];
+    value?: bigint;
+  }): Promise<DeploymentResult> {
+    try {
+      // Create Turnkey client using LIWD session data
+      const turnkeyClient = getTurnkeyClient({
+        authKey: this.session.dimoToken,
+        eKey: this.session.eKey,
+      });
+
+      // Get wallet address from Turnkey
+      const walletAddress = await getTurnkeyWalletAddress({
+        subOrganizationId: this.session.subOrganizationId,
+        client: turnkeyClient,
+      });
+
+      // Create ZeroDev kernel client for the target chain
+      const kernelClient = await getKernelClient({
+        subOrganizationId: this.session.subOrganizationId,
+        walletAddress,
+        client: turnkeyClient,
+        targetChain,
+      });
+
+      // Encode the function call
+      const { encodeFunctionData } = await import('viem');
+      const callData = encodeFunctionData({
+        abi,
+        functionName,
+        args: parameters,
+      });
+
+      // Send the transaction
+      const transactionHash = await kernelClient.sendUserOperation({
+        callData: await kernelClient.account.encodeCalls([
+          {
+            to: contractAddress as `0x${string}`,
+            value,
+            data: callData,
+          },
+        ]),
+      });
+
+      return {
+        success: true,
+        transactionHash,
+      };
+    } catch (error) {
+      console.error('Transaction execution failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 }
 
 /**
