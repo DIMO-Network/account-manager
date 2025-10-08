@@ -258,27 +258,15 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
               <br />
               • It's currently only deployed on Polygon (via ZeroDev in the DIMO Mobile app)
               <br />
-              • If someone sends tokens to your address on Ethereum or Base, they're stuck because your smart account isn't deployed there yet
+              • If someone sends tokens to your address on a network where your smart account isn't deployed, they're stuck
               <br />
-              • This tool deploys your smart account contract to the target network using your existing Login With DIMO session
+              • First, deploy your smart account to the target network
               <br />
               • After deployment, you can use the transaction builder to recover and transfer your stuck tokens
               <br />
-              •
-              {' '}
               <strong>Note:</strong>
               {' '}
-              This doesn't bridge tokens between networks - it just gives you access to manage them on the target network
-              {isTestnet && (
-                <>
-                  <br />
-                  •
-                  {' '}
-                  <strong>Testing Mode:</strong>
-                  {' '}
-                  Currently testing on testnets (Amoy, Sepolia, Base Sepolia)
-                </>
-              )}
+              This tool does not bridge tokens between networks. It just gives you access to manage them on the target network
             </p>
           </div>
         </div>

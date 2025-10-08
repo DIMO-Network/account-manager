@@ -13,6 +13,10 @@ type State = {
   transactionPreview: TransactionPreview | null;
   loading: boolean;
   error: string | null;
+  successMessage: {
+    transactionHash: string;
+    explorerUrl: string;
+  } | null;
 };
 
 type Action
@@ -20,7 +24,8 @@ type Action
     | { type: 'SET_FUNCTION_PARAMETERS'; payload: FunctionParameter[] }
     | { type: 'SET_TRANSACTION_PREVIEW'; payload: TransactionPreview | null }
     | { type: 'SET_LOADING'; payload: boolean }
-    | { type: 'SET_ERROR'; payload: string | null };
+    | { type: 'SET_ERROR'; payload: string | null }
+    | { type: 'SET_SUCCESS_MESSAGE'; payload: { transactionHash: string; explorerUrl: string } | null };
 
 const initialState: State = {
   templates: [],
@@ -28,6 +33,7 @@ const initialState: State = {
   transactionPreview: null,
   loading: false,
   error: null,
+  successMessage: null,
 };
 
 const reducer = (state: State, action: Action): State => {
@@ -42,6 +48,8 @@ const reducer = (state: State, action: Action): State => {
       return { ...state, loading: action.payload };
     case 'SET_ERROR':
       return { ...state, error: action.payload };
+    case 'SET_SUCCESS_MESSAGE':
+      return { ...state, successMessage: action.payload };
     default:
       return state;
   }
@@ -77,5 +85,7 @@ export const useTransactionBuilder = (config: TransactionBuilderConfig) => {
     setError: (error: string | null) => dispatch({ type: 'SET_ERROR', payload: error }),
     setTransactionPreview: (preview: TransactionPreview | null) =>
       dispatch({ type: 'SET_TRANSACTION_PREVIEW', payload: preview }),
+    setSuccessMessage: (successMessage: { transactionHash: string; explorerUrl: string } | null) =>
+      dispatch({ type: 'SET_SUCCESS_MESSAGE', payload: successMessage }),
   };
 };
