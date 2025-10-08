@@ -1,26 +1,43 @@
 'use client';
 
+import type { SupportedChains } from '@/services/recovery/turnkey-bridge';
 import type {
   RecoveryTemplate,
   TransactionBuilderConfig,
 } from '@/services/transaction-builder';
 import { useState } from 'react';
 import { useTransactionBuilder } from '@/hooks/useTransactionBuilder';
+import { createRecoveryService } from '@/services/recovery/recovery-service';
 import { createTransactionBuilder, getNetworkConfig } from '@/services/transaction-builder';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { ContractSelector } from './ContractSelector';
 import { ParameterInputs } from './ParameterInputs';
 import { TransactionPreviewComponent } from './TransactionPreview';
 
+const SUPPORTED_CHAINS = {
+  1: 'ETHEREUM',
+  137: 'POLYGON',
+  8453: 'BASE',
+  11155111: 'ETHEREUM',
+  80002: 'POLYGON',
+  84532: 'BASE',
+} as const;
+
 type TransactionBuilderProps = {
   networkId: string;
   walletAddress: string;
+  sessionData: {
+    dimoToken: string;
+    subOrganizationId: string;
+    walletAddress: string;
+  } | null;
   onTransactionExecutedAction?: (txHash: string) => void;
 };
 
 export const TransactionBuilder = ({
   networkId,
   walletAddress,
+  sessionData,
   onTransactionExecutedAction,
 }: TransactionBuilderProps) => {
   const [config, setConfig] = useState<TransactionBuilderConfig>({
@@ -127,9 +144,42 @@ export const TransactionBuilder = ({
   };
 
   const handleExecuteTransaction = async () => {
-    // TODO: Implement transaction execution with ZeroDev signing
-    console.warn('Executing transaction:', config);
-    onTransactionExecutedAction?.('0x123...');
+    if (!sessionData) {
+      setError('Session data not available');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const recoveryService = await createRecoveryService(sessionData);
+
+      const chainName = SUPPORTED_CHAINS[Number.parseInt(networkId) as keyof typeof SUPPORTED_CHAINS];
+
+      if (!chainName) {
+        throw new Error('Unsupported network selected');
+      }
+
+      const result = await recoveryService.executeTransaction({
+        targetChain: chainName as SupportedChains,
+        contractAddress: config.contractAddress,
+        abi: config.abi,
+        functionName: config.functionName,
+        parameters: config.parameters,
+        value: BigInt(0),
+      });
+
+      if (result.success && result.transactionHash) {
+        onTransactionExecutedAction?.(result.transactionHash);
+      } else {
+        setError(result.error || 'Transaction execution failed');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Transaction execution failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const networkConfig = getNetworkConfig(Number.parseInt(networkId));

@@ -431,6 +431,7 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
           <TransactionBuilder
             networkId={form.network}
             walletAddress={walletAddress}
+            sessionData={sessionData}
             onTransactionExecutedAction={(txHash) => {
               console.warn('Transaction executed:', txHash);
               // TODO: Handle transaction execution success
