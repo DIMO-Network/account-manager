@@ -36,26 +36,19 @@ const getRpcUrl = (targetChain: SupportedChains): string => {
 
 const getChain = (targetChain: SupportedChains): Chain => {
   const isTestnet = process.env.NEXT_PUBLIC_RECOVERY_FLOW === 'testnet';
-  console.warn('getChain debug:', { targetChain, isTestnet, envVar: process.env.NEXT_PUBLIC_RECOVERY_FLOW });
 
-  let chain: Chain;
   switch (targetChain) {
     case SupportedChains.ETHEREUM:
-      chain = isTestnet ? sepolia : mainnet;
-      break;
+      return isTestnet ? sepolia : mainnet;
     case SupportedChains.BASE:
-      chain = isTestnet ? baseSepolia : base;
-      break;
+      return isTestnet ? baseSepolia : base;
     case SupportedChains.POLYGON:
     default:
-      chain = isTestnet ? polygonAmoy : polygon;
-      break;
+      return isTestnet ? polygonAmoy : polygon;
   }
-
-  console.warn('getChain result:', { chainId: chain.id, chainName: chain.name });
-  return chain;
 };
 
+// Create a Viem public client for reading blockchain data
 export const getPublicClient = (targetChain: SupportedChains) => {
   const chain = getChain(targetChain);
   const rpcUrl = getRpcUrl(targetChain);
@@ -65,6 +58,7 @@ export const getPublicClient = (targetChain: SupportedChains) => {
   });
 };
 
+// Request gas sponsorship for a user operation from ZeroDev paymaster
 const sponsorUserOperation = async ({
   userOperation,
   provider,
@@ -85,6 +79,7 @@ const sponsorUserOperation = async ({
   });
 };
 
+// Create a ZeroDev Kernel smart account with ECDSA validation so that it be deployed across multiple EVM-compatible chains
 export const getKernelAccount = async ({
   subOrganizationId,
   walletAddress,
@@ -99,6 +94,7 @@ export const getKernelAccount = async ({
   const entryPoint = getEntryPoint('0.7');
   const publicClient = getPublicClient(targetChain);
 
+  // Create Turnkey account for signing
   const localAccount = await createAccount({
     client,
     organizationId: subOrganizationId,
@@ -106,12 +102,14 @@ export const getKernelAccount = async ({
     ethereumAddress: walletAddress,
   });
 
+  // Create ECDSA validator for the smart account
   const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
     signer: localAccount,
     entryPoint,
     kernelVersion: KERNEL_V3_1,
   });
 
+  // Create the Kernel smart account
   const zeroDevKernelAccount = await createKernelAccount(publicClient, {
     plugins: {
       sudo: ecdsaValidator,
@@ -123,6 +121,7 @@ export const getKernelAccount = async ({
   return zeroDevKernelAccount;
 };
 
+// If one provider fails, try the next one
 const buildFallbackKernelClients = async ({
   subOrganizationId,
   walletAddress,
@@ -153,6 +152,7 @@ const buildFallbackKernelClients = async ({
 
   const config = getTurnkeyConfig();
 
+  // Create clients for each provider
   for (const provider of fallbackProviders) {
     const kernelClient = createKernelAccountClient({
       account: kernelAccount,
@@ -181,6 +181,7 @@ const buildFallbackKernelClients = async ({
   return createFallbackKernelAccountClient(fallbackKernelClients);
 };
 
+// Get a Kernel client with fallback providers
 export const getKernelClient = async ({
   subOrganizationId,
   walletAddress,
@@ -199,4 +200,23 @@ export const getKernelClient = async ({
     targetChain,
   });
   return kernelClient;
+};
+
+// Check if a smart account is already deployed on a specific chain
+export const checkAccountDeployment = async (walletAddress: string, targetChain: SupportedChains): Promise<{
+  isDeployed: boolean;
+}> => {
+  try {
+    const publicClient = getPublicClient(targetChain);
+    const code = await publicClient.getCode({ address: walletAddress as `0x${string}` });
+
+    // Check if there's actual contract code (not just '0x' for empty accounts)
+    const isDeployed = code !== undefined && code !== '0x' && code.length > 2;
+    console.warn(`Chain ${targetChain}: Code at ${walletAddress} = ${code} (isDeployed: ${isDeployed})`);
+
+    return { isDeployed };
+  } catch (error) {
+    console.warn(`Chain ${targetChain}: Error checking code -`, error);
+    return { isDeployed: false };
+  }
 };
