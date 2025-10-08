@@ -204,7 +204,7 @@ export const TransactionBuilder = ({
               Asset Recovery Actions
             </div>
             <p className={`text-xs ${COLORS.text.muted} mb-3`}>
-              Select the type of asset you want to recover (ERC-20 tokens or ERC-721 NFTs). You may need to approve before transferring.
+              Select the type of asset you want to recover (ERC-20 tokens or ERC-721 NFTs). ERC-20 transfers don't require approval.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {templates.map((template) => {
@@ -236,7 +236,7 @@ export const TransactionBuilder = ({
               <p className="text-blue-800 text-sm mb-3">
                 <strong>Recovery Workflow:</strong>
                 <br />
-                For most tokens, you'll need to approve spending first, then transfer.
+                ERC-20 transfers don't require approval. ERC-721 NFTs require approval before transfer.
                 Select the appropriate action based on your asset type and current approval status.
               </p>
               <ul className="text-xs text-blue-800">

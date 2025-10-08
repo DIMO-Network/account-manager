@@ -128,21 +128,9 @@ export const COMMON_ABIS = {
 // Recovery templates for common scenarios
 export const RECOVERY_TEMPLATES: RecoveryTemplate[] = [
   {
-    id: 'erc20-approve',
-    name: 'Approve ERC-20 Token',
-    description: 'Approve spending of ERC-20 tokens (required before transfer)',
-    contractType: 'ERC20',
-    abi: COMMON_ABIS.ERC20,
-    defaultFunction: 'approve',
-    parameterTemplates: [
-      { name: 'spender', type: 'address', value: '', required: true },
-      { name: 'amount', type: 'uint256', value: '0', required: true },
-    ],
-  },
-  {
     id: 'erc20-transfer',
     name: 'Transfer ERC-20 Token',
-    description: 'Transfer ERC-20 tokens to another address',
+    description: 'Transfer ERC-20 tokens to another address (no approval needed)',
     contractType: 'ERC20',
     abi: COMMON_ABIS.ERC20,
     defaultFunction: 'transfer',
