@@ -6,7 +6,7 @@ export const TRANSACTION_BUILDER_NETWORKS: Record<string, NetworkConfig> = {
   1: {
     chainId: 1,
     name: 'Ethereum',
-    rpcUrl: process.env.NEXT_PUBLIC_ETHEREUM_RPC_URL || 'https://eth.llamarpc.com',
+    rpcUrl: process.env.NEXT_PUBLIC_ETHEREUM_RPC_URL || 'https://eth.drpc.org',
     explorerUrl: 'https://etherscan.io',
     isTestnet: false,
     nativeCurrency: {
@@ -18,7 +18,7 @@ export const TRANSACTION_BUILDER_NETWORKS: Record<string, NetworkConfig> = {
   137: {
     chainId: 137,
     name: 'Polygon',
-    rpcUrl: process.env.NEXT_PUBLIC_POLYGON_RPC_URL || 'https://polygon.llamarpc.com',
+    rpcUrl: process.env.NEXT_PUBLIC_POLYGON_RPC_URL || 'https://polygon-bor-rpc.publicnode.com',
     explorerUrl: 'https://polygonscan.com',
     isTestnet: false,
     nativeCurrency: {
@@ -30,7 +30,7 @@ export const TRANSACTION_BUILDER_NETWORKS: Record<string, NetworkConfig> = {
   8453: {
     chainId: 8453,
     name: 'Base',
-    rpcUrl: process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://base.llamarpc.com',
+    rpcUrl: process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://base.drpc.org',
     explorerUrl: 'https://basescan.org',
     isTestnet: false,
     nativeCurrency: {
@@ -67,7 +67,7 @@ export const TRANSACTION_BUILDER_NETWORKS: Record<string, NetworkConfig> = {
   11155111: {
     chainId: 11155111,
     name: 'Ethereum Sepolia',
-    rpcUrl: process.env.NEXT_PUBLIC_ETHEREUM_SEPOLIA_RPC_URL || 'https://sepolia.llamarpc.com',
+    rpcUrl: process.env.NEXT_PUBLIC_ETHEREUM_SEPOLIA_RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com',
     explorerUrl: 'https://sepolia.etherscan.io',
     isTestnet: true,
     nativeCurrency: {
@@ -79,7 +79,7 @@ export const TRANSACTION_BUILDER_NETWORKS: Record<string, NetworkConfig> = {
   80002: {
     chainId: 80002,
     name: 'Polygon Amoy',
-    rpcUrl: process.env.NEXT_PUBLIC_POLYGON_AMOY_RPC_URL || 'https://amoy.llamarpc.com',
+    rpcUrl: process.env.NEXT_PUBLIC_POLYGON_AMOY_RPC_URL || 'https://polygon-amoy.drpc.org',
     explorerUrl: 'https://amoy.polygonscan.com',
     isTestnet: true,
     nativeCurrency: {
@@ -91,7 +91,7 @@ export const TRANSACTION_BUILDER_NETWORKS: Record<string, NetworkConfig> = {
   84532: {
     chainId: 84532,
     name: 'Base Sepolia',
-    rpcUrl: process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.llamarpc.com',
+    rpcUrl: process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL || 'https://base-sepolia.drpc.org',
     explorerUrl: 'https://sepolia.basescan.org',
     isTestnet: true,
     nativeCurrency: {

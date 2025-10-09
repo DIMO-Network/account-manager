@@ -56,9 +56,11 @@ export const TransactionBuilder = ({
     transactionPreview,
     loading,
     error,
+    successMessage,
     setLoading,
     setError,
     setTransactionPreview,
+    setSuccessMessage,
   } = useTransactionBuilder(config);
 
   const handleTemplateSelect = (template: RecoveryTemplate) => {
@@ -134,7 +136,7 @@ export const TransactionBuilder = ({
         return;
       }
 
-      const preview = await builder.createTransactionPreview(walletAddress as `0x${string}`);
+      const preview = await builder.createTransactionPreview();
       setTransactionPreview(preview);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to preview transaction');
@@ -171,6 +173,20 @@ export const TransactionBuilder = ({
       });
 
       if (result.success && result.transactionHash) {
+        // Get explorer URL for the current network
+        const networkConfig = getNetworkConfig(Number.parseInt(networkId));
+        const explorerUrl = networkConfig?.explorerUrl || 'https://etherscan.io';
+
+        // Set success message with transaction link
+        setSuccessMessage({
+          transactionHash: result.transactionHash,
+          explorerUrl: `${explorerUrl}/tx/${result.transactionHash}`,
+        });
+
+        // Clear any previous errors
+        setError(null);
+
+        // Call the callback for external handling
         onTransactionExecutedAction?.(result.transactionHash);
       } else {
         setError(result.error || 'Transaction execution failed');
@@ -204,7 +220,7 @@ export const TransactionBuilder = ({
               Asset Recovery Actions
             </div>
             <p className={`text-xs ${COLORS.text.muted} mb-3`}>
-              Select the type of asset you want to recover (ERC-20 tokens or ERC-721 NFTs). You may need to approve before transferring.
+              Select the type of asset you want to recover (ERC-20 tokens or ERC-721 NFTs). ERC-20 transfers don't require approval.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {templates.map((template) => {
@@ -236,7 +252,7 @@ export const TransactionBuilder = ({
               <p className="text-blue-800 text-sm mb-3">
                 <strong>Recovery Workflow:</strong>
                 <br />
-                For most tokens, you'll need to approve spending first, then transfer.
+                ERC-20 transfers don't require approval. ERC-721 NFTs require approval before transfer.
                 Select the appropriate action based on your asset type and current approval status.
               </p>
               <ul className="text-xs text-blue-800">
@@ -301,6 +317,46 @@ export const TransactionBuilder = ({
           walletAddress={walletAddress}
           onExecuteAction={handleExecuteTransaction}
         />
+      )}
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-green-800 mb-1">
+                Transaction Successful!
+              </h3>
+              <p className="text-xs text-green-800 mb-3">
+                Your recovery transaction has been submitted and confirmed on the blockchain.
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <a
+                    href={successMessage.explorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-green-600 mt-1 underline hover:text-green-800"
+                  >
+                    View on Blockchain Explorer →
+                  </a>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSuccessMessage(null)}
+              className={`flex-shrink-0 text-gray-400 hover:text-gray-600 ${BORDER_RADIUS.sm} p-1`}
+            >
+              <span className="text-sm">✕</span>
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
