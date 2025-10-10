@@ -1,12 +1,13 @@
 'use client';
 
 import type { FunctionParameter } from '@/services/transaction-builder';
+import { useMemo, useState } from 'react';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 
 type ParameterInputsProps = {
   parameters: FunctionParameter[];
-  values: any[];
-  onParameterChangeAction: (index: number, value: any) => void;
+  values: (string | number | boolean)[];
+  onParameterChangeAction: (index: number, value: string | number | boolean) => void;
 };
 
 export const ParameterInputs = ({
@@ -14,6 +15,33 @@ export const ParameterInputs = ({
   values,
   onParameterChangeAction,
 }: ParameterInputsProps) => {
+  // Local state to store user input values (human-readable)
+  const [inputValues, setInputValues] = useState<string[]>([]);
+
+  // Compute display values from input values or convert wei back to tokens
+  const displayValues = useMemo(() => {
+    return parameters.map((param, index) => {
+      const inputValue = inputValues[index];
+      const weiValue = values[index] || '';
+
+      // If user has typed something, use their input
+      if (inputValue !== undefined) {
+        return inputValue;
+      }
+
+      // Otherwise, convert wei back to human-readable for display
+      if (param.type === 'uint256' && (param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value'))) {
+        if (weiValue && !Number.isNaN(Number(weiValue)) && Number(weiValue) > 0) {
+          // Convert wei back to tokens: divide by 10^18
+          const tokenAmount = (Number(weiValue) / 1e18).toString();
+          return tokenAmount;
+        }
+      }
+
+      return weiValue.toString();
+    });
+  }, [parameters, values, inputValues]);
+
   if (parameters.length === 0) {
     return null;
   }
@@ -54,7 +82,7 @@ export const ParameterInputs = ({
       return 'The address that will receive the tokens/assets';
     }
     if (lowerName.includes('amount') || lowerName.includes('value')) {
-      return 'The amount to transfer (in smallest unit, e.g., wei for ETH)';
+      return 'Amount in DIMO tokens';
     }
     if (lowerName.includes('from') || lowerName.includes('sender')) {
       return 'The address sending the tokens/assets';
@@ -78,65 +106,7 @@ export const ParameterInputs = ({
     return 'Enter the required value for this parameter';
   };
 
-  const add18Zeros = (amount: string): string => {
-    if (!amount || Number.isNaN(Number(amount))) {
-      return '0';
-    }
-
-    // Remove leading zeros and handle fractional numbers
-    const numAmount = Number(amount);
-    if (numAmount === 0) {
-      return '0';
-    }
-
-    // Convert to string to avoid scientific notation for large numbers
-    const amountStr = numAmount.toString();
-
-    // Split by decimal point
-    const [integerPart, decimalPart = ''] = amountStr.split('.');
-
-    // Remove leading zeros from integer part
-    const cleanInteger = integerPart?.replace(/^0+/, '') || '0';
-
-    // Pad decimal part to 18 places or truncate if longer
-    const paddedDecimal = decimalPart.padEnd(18, '0').slice(0, 18);
-
-    // Combine and remove trailing zeros
-    const result = cleanInteger + paddedDecimal;
-    return result.replace(/^0+/, '') || '0';
-  };
-
-  const remove18Zeros = (weiAmount: string): string => {
-    if (!weiAmount || weiAmount.length < 18) {
-      return '0';
-    }
-
-    // Remove leading zeros
-    const cleanWei = weiAmount.replace(/^0+/, '') || '0';
-
-    if (cleanWei.length <= 18) {
-      // If the number is 18 digits or less, it's a decimal
-      const padded = cleanWei.padStart(19, '0'); // Pad to 19 digits
-      const integerPart = padded.slice(0, 1);
-      const decimalPart = padded.slice(1);
-      return `${integerPart}.${decimalPart}`.replace(/\.?0+$/, '');
-    }
-
-    // Split into integer and decimal parts
-    const integerPart = cleanWei.slice(0, -18);
-    const decimalPart = cleanWei.slice(-18);
-
-    // Remove trailing zeros from decimal part
-    const cleanDecimal = decimalPart.replace(/0+$/, '');
-
-    if (cleanDecimal === '') {
-      return integerPart;
-    }
-
-    return `${integerPart}.${cleanDecimal}`;
-  };
-
-  const handleInputChange = (index: number, value: any, type: string) => {
+  const handleInputChange = (index: number, value: any, type: string, paramName: string) => {
     let processedValue = value;
 
     // Convert based on type
@@ -148,6 +118,21 @@ export const ParameterInputs = ({
         processedValue = value.replace(/^0+/, '') || '0';
       }
       processedValue = processedValue.toString();
+    }
+
+    // Update input values for display
+    const newInputValues = [...inputValues];
+    newInputValues[index] = processedValue;
+    setInputValues(newInputValues);
+
+    // For amount/value parameters, convert to wei for the parent
+    if (type === 'uint256' && (paramName.toLowerCase().includes('amount') || paramName.toLowerCase().includes('value'))) {
+      if (processedValue && !Number.isNaN(Number(processedValue)) && Number(processedValue) > 0) {
+        // Convert to wei: multiply by 10^18
+        const weiValue = BigInt(Math.floor(Number(processedValue) * 1e18)).toString();
+        onParameterChangeAction(index, weiValue);
+        return;
+      }
     }
 
     onParameterChangeAction(index, processedValue);
@@ -165,7 +150,7 @@ export const ParameterInputs = ({
         {parameters.map((param, index) => {
           const inputType = getInputType(param.type);
           const placeholder = getPlaceholder(param.type);
-          const value = values[index] || '';
+          const value = displayValues[index] || '';
 
           return (
             <div key={`${param.name}-${param.type}`} className="flex flex-col space-y-1">
@@ -173,7 +158,9 @@ export const ParameterInputs = ({
                 {param.name}
                 {' '}
                 (
-                {param.type}
+                {param.type === 'uint256' && (param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value'))
+                  ? 'tokens'
+                  : param.type}
                 )
                 {param.required && <span className="text-red-500 ml-1">*</span>}
               </label>
@@ -187,7 +174,7 @@ export const ParameterInputs = ({
                       <input
                         type="checkbox"
                         checked={Boolean(value)}
-                        onChange={e => handleInputChange(index, e.target.checked, param.type)}
+                        onChange={e => handleInputChange(index, e.target.checked, param.type, param.name)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                       <span className={`ml-2 text-sm ${COLORS.text.muted}`}>
@@ -199,7 +186,7 @@ export const ParameterInputs = ({
                     <input
                       type={inputType}
                       value={value}
-                      onChange={e => handleInputChange(index, e.target.value, param.type)}
+                      onChange={e => handleInputChange(index, e.target.value, param.type, param.name)}
                       placeholder={placeholder}
                       className={`w-full px-4 py-2 ${BORDER_RADIUS.md} ${COLORS.background.tertiary} ${COLORS.text.primary} border ${COLORS.border.default} focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     />
@@ -213,44 +200,6 @@ export const ParameterInputs = ({
                 <p className="text-xs text-red-600">Must be a valid number</p>
               )}
 
-              {/* Amount Conversion Helper */}
-              {(param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value')) && param.type.includes('uint') && (
-                <div className="mt-2 flex gap-2">
-                  <button
-                    type="button"
-                    className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
-                    onClick={() => {
-                      const currentValue = value || '0';
-                      const weiAmount = add18Zeros(currentValue);
-                      handleInputChange(index, weiAmount, param.type);
-                    }}
-                  >
-                    Add 18 Zeros (Convert to Wei)
-                  </button>
-                  <button
-                    type="button"
-                    className={`px-3 py-1 text-xs rounded ${
-                      (value || '0').length >= 18
-                        ? 'bg-gray-600 text-white hover:bg-gray-700'
-                        : 'bg-red-600 text-white hover:bg-red-700'
-                    }`}
-                    onClick={() => {
-                      const currentValue = value || '0';
-                      if (currentValue.length >= 18) {
-                        const tokenAmount = remove18Zeros(currentValue);
-                        handleInputChange(index, tokenAmount, param.type);
-                      } else {
-                        // Clear the input if not enough digits
-                        handleInputChange(index, '0', param.type);
-                      }
-                    }}
-                  >
-                    {(value || '0').length >= 18
-                      ? 'Remove 18 Zeros (Show as Tokens)'
-                      : 'Clear Input'}
-                  </button>
-                </div>
-              )}
             </div>
           );
         })}
