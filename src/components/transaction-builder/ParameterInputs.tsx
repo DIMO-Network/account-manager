@@ -1,22 +1,29 @@
 'use client';
 
-import type { FunctionParameter } from '@/services/transaction-builder';
+import type { FunctionParameter, NetworkConfig } from '@/services/transaction-builder';
 import { useMemo, useState } from 'react';
+import { createPublicClient, http } from 'viem';
+import { mainnet, sepolia } from 'viem/chains';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 
 type ParameterInputsProps = {
   parameters: FunctionParameter[];
   values: (string | number | boolean)[];
   onParameterChangeAction: (index: number, value: string | number | boolean) => void;
+  networkConfig: NetworkConfig | null;
 };
 
 export const ParameterInputs = ({
   parameters,
   values,
   onParameterChangeAction,
+  networkConfig,
 }: ParameterInputsProps) => {
   // Local state to store user input values (human-readable)
   const [inputValues, setInputValues] = useState<string[]>([]);
+  const [ensResolving, setEnsResolving] = useState<boolean[]>([]);
+  const [ensErrors, setEnsErrors] = useState<string[]>([]);
+  const [resolvedAddresses, setResolvedAddresses] = useState<string[]>([]);
 
   // Compute display values from input values or convert wei back to tokens
   const displayValues = useMemo(() => {
@@ -41,6 +48,94 @@ export const ParameterInputs = ({
       return weiValue.toString();
     });
   }, [parameters, values, inputValues]);
+
+  // Create viem client for ENS resolution (only for Ethereum mainnet and Sepolia)
+  const getViemClient = () => {
+    if (!networkConfig) {
+      return null;
+    }
+
+    // Only support ENS on Ethereum networks
+    if (networkConfig.chainId === 1) {
+      return createPublicClient({
+        chain: mainnet,
+        transport: http(networkConfig.rpcUrl),
+      });
+    } else if (networkConfig.chainId === 11155111) {
+      return createPublicClient({
+        chain: sepolia,
+        transport: http(networkConfig.rpcUrl),
+      });
+    }
+
+    return null;
+  };
+
+  // Resolve ENS name to address
+  const resolveEnsName = async (ensName: string, paramIndex: number) => {
+    const client = getViemClient();
+    if (!client) {
+      setEnsErrors((prev) => {
+        const newErrors = [...prev];
+        newErrors[paramIndex] = 'ENS resolution not supported on this network';
+        return newErrors;
+      });
+      return;
+    }
+
+    setEnsResolving((prev) => {
+      const newResolving = [...prev];
+      newResolving[paramIndex] = true;
+      return newResolving;
+    });
+
+    setEnsErrors((prev) => {
+      const newErrors = [...prev];
+      newErrors[paramIndex] = '';
+      return newErrors;
+    });
+
+    try {
+      const address = await client.getEnsAddress({
+        name: ensName,
+      });
+
+      if (address) {
+        // Store the resolved address for display
+        setResolvedAddresses((prev) => {
+          const newAddresses = [...prev];
+          newAddresses[paramIndex] = address;
+          return newAddresses;
+        });
+
+        // Update the parent component with the resolved address
+        onParameterChangeAction(paramIndex, address);
+      } else {
+        setEnsErrors((prev) => {
+          const newErrors = [...prev];
+          newErrors[paramIndex] = 'ENS name not found';
+          return newErrors;
+        });
+      }
+    } catch (error) {
+      setEnsErrors((prev) => {
+        const newErrors = [...prev];
+        newErrors[paramIndex] = `ENS resolution failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        return newErrors;
+      });
+    } finally {
+      setEnsResolving((prev) => {
+        const newResolving = [...prev];
+        newResolving[paramIndex] = false;
+        return newResolving;
+      });
+    }
+  };
+
+  // Check if input looks like an ENS name
+  const isEnsName = (value: string): boolean => {
+    return value.endsWith('.eth') && value.length > 4 && !value.startsWith('0x');
+  };
 
   if (parameters.length === 0) {
     return null;
@@ -91,7 +186,7 @@ export const ParameterInputs = ({
       return 'The unique identifier of the NFT or token';
     }
     if (type.includes('address')) {
-      return 'A valid Ethereum address (0x...)';
+      return 'A valid Ethereum address (0x...) or ENS name (e.g., jaggedbytes.eth)';
     }
     if (type.includes('uint') || type.includes('int')) {
       return 'A numeric value (whole number)';
@@ -124,6 +219,22 @@ export const ParameterInputs = ({
     const newInputValues = [...inputValues];
     newInputValues[index] = processedValue;
     setInputValues(newInputValues);
+
+    // Clear resolved address when user changes input
+    if (type === 'address') {
+      setResolvedAddresses((prev) => {
+        const newAddresses = [...prev];
+        newAddresses[index] = '';
+        return newAddresses;
+      });
+    }
+
+    // For address parameters, check if it's an ENS name and auto-resolve
+    if (type === 'address' && typeof processedValue === 'string' && isEnsName(processedValue)) {
+      // Auto-resolve ENS names
+      resolveEnsName(processedValue, index);
+      return;
+    }
 
     // For amount/value parameters, convert to wei for the parent
     if (type === 'uint256' && (paramName.toLowerCase().includes('amount') || paramName.toLowerCase().includes('value'))) {
@@ -192,12 +303,72 @@ export const ParameterInputs = ({
                     />
                   )}
 
-              {param.type === 'address' && value && !value.startsWith('0x') && value.length > 0 && (
-                <p className="text-xs text-red-600">Address should start with 0x</p>
+              {/* ENS Resolution UI for address parameters */}
+              {param.type === 'address' && (
+                <div className="space-y-2">
+                  {/* ENS Resolution Status */}
+                  {isEnsName(value) && ensResolving[index] && (
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-xs">Resolving ENS name...</span>
+                    </div>
+                  )}
+
+                  {/* ENS Error Messages */}
+                  {ensErrors[index] && (
+                    <p className="text-xs text-red-600">{ensErrors[index]}</p>
+                  )}
+
+                  {/* Address Validation */}
+                  {value && !value.startsWith('0x') && value.length > 0 && !isEnsName(value) && (
+                    <p className="text-xs text-red-600">Address should start with 0x or be an ENS name (.eth)</p>
+                  )}
+
+                  {value && value.startsWith('0x') && value.length !== 42 && (
+                    <p className="text-xs text-red-600">Address must be 42 characters long</p>
+                  )}
+
+                  {/* Resolved Address Display */}
+                  {resolvedAddresses[index] && (
+                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                      <p className="text-xs text-green-800 font-medium">Resolved Address:</p>
+                      <p className="text-xs text-green-700 font-mono break-all">{resolvedAddresses[index]}</p>
+                    </div>
+                  )}
+                </div>
               )}
 
               {param.type.includes('uint') && value && Number.isNaN(Number(value)) && (
                 <p className="text-xs text-red-600">Must be a valid number</p>
+              )}
+
+              {/* Token amount validation */}
+              {param.type === 'uint256' && (param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value')) && value && !Number.isNaN(Number(value)) && (
+                <>
+                  {Number(value) <= 0 && (
+                    <p className="text-xs text-red-600">Amount must be greater than 0</p>
+                  )}
+                  {Number(value) > 1e9 && (
+                    <p className="text-xs text-red-600">Amount seems too large (max 1 billion tokens)</p>
+                  )}
+                </>
+              )}
+
+              {/* Token ID validation for ERC-721 */}
+              {param.type === 'uint256' && param.name.toLowerCase().includes('tokenid') && value && !Number.isNaN(Number(value)) && (
+                <>
+                  {Number(value) < 0 && (
+                    <p className="text-xs text-red-600">Token ID must be a positive number</p>
+                  )}
+                  {!Number.isInteger(Number(value)) && (
+                    <p className="text-xs text-red-600">Token ID must be a whole number</p>
+                  )}
+                </>
+              )}
+
+              {/* Boolean validation */}
+              {param.type === 'bool' && value && value !== 'true' && value !== 'false' && (
+                <p className="text-xs text-red-600">Must be true or false</p>
               )}
 
             </div>

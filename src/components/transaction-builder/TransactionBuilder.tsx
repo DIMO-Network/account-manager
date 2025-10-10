@@ -89,6 +89,7 @@ export const TransactionBuilder = ({
 
   const handlePreviewTransaction = async () => {
     const missingFields: string[] = [];
+    const validationErrors: string[] = [];
 
     if (!selectedAction) {
       missingFields.push('Recovery Action');
@@ -102,25 +103,64 @@ export const TransactionBuilder = ({
       missingFields.push('Function');
     }
 
-    // Check if parameters are missing
+    // Enhanced parameter validation
     if (functionParameters.length > 0) {
-      const missingParams = functionParameters
-        .map((param, index) => {
-          const value = config.parameters[index];
-          if (!value || value === '' || value === '0') {
-            return param.name;
-          }
-          return null;
-        })
-        .filter(Boolean);
+      functionParameters.forEach((param, index) => {
+        const value = config.parameters[index];
 
-      if (missingParams.length > 0) {
-        missingFields.push(`Parameters: ${missingParams.join(', ')}`);
-      }
+        // Check if required parameter is missing
+        if (param.required && (!value || value === '' || value === '0')) {
+          missingFields.push(param.name);
+          return;
+        }
+
+        // Validate parameter types and values
+        if (value && value !== '') {
+          // Validate addresses
+          if (param.type === 'address') {
+            const addressValue = String(value);
+            if (!addressValue.startsWith('0x') || addressValue.length !== 42) {
+              validationErrors.push(`${param.name} must be a valid Ethereum address (0x...)`);
+            }
+          }
+
+          // Validate token amounts
+          if (param.type === 'uint256' && (param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value'))) {
+            const numValue = Number(value);
+            if (Number.isNaN(numValue) || numValue <= 0) {
+              validationErrors.push(`${param.name} must be a valid positive number`);
+            } else if (numValue > 1e9) {
+              validationErrors.push(`${param.name} amount seems too large (max 1 billion tokens)`);
+            }
+          }
+
+          // Validate token IDs for ERC-721
+          if (param.type === 'uint256' && param.name.toLowerCase().includes('tokenid')) {
+            const numValue = Number(value);
+            if (Number.isNaN(numValue) || numValue < 0 || !Number.isInteger(numValue)) {
+              validationErrors.push(`${param.name} must be a valid token ID (whole number)`);
+            }
+          }
+
+          // Validate boolean values
+          if (param.type === 'bool') {
+            if (value !== 'true' && value !== 'false') {
+              validationErrors.push(`${param.name} must be true or false`);
+            }
+          }
+        }
+      });
     }
 
+    // Show missing fields error
     if (missingFields.length > 0) {
       setError(`Please fill out the following required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    // Show validation errors
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join('. '));
       return;
     }
 
@@ -288,6 +328,7 @@ export const TransactionBuilder = ({
               parameters={functionParameters}
               values={config.parameters}
               onParameterChangeAction={handleParameterChange}
+              networkConfig={networkConfig}
             />
           )}
 
