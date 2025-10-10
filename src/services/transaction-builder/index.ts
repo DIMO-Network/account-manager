@@ -10,12 +10,20 @@ export {
   getRecoveryTemplates,
   validateABI,
 } from './abi-manager';
+export * from './contract-addresses';
+export {
+  getContractAddressByAddress,
+  getContractAddresses,
+  getContractAddressesByNetwork,
+} from './contract-addresses';
 export * from './gas-estimator';
+
 export {
   createNetworkClient,
   estimateGas,
   estimateTransactionCost,
 } from './gas-estimator';
+
 export * from './network-config';
 
 export {

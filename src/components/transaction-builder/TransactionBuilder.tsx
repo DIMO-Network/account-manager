@@ -315,12 +315,16 @@ export const TransactionBuilder = ({
             </div>
           )}
 
-          {/* Contract Address */}
-          <ContractSelector
-            value={config.contractAddress}
-            onChangeAction={handleContractAddressChange}
-            networkConfig={networkConfig}
-          />
+          {/* Contract Address - Only show when action is selected */}
+          {selectedAction && (
+            <ContractSelector
+              value={config.contractAddress}
+              onChangeAction={handleContractAddressChange}
+              networkConfig={networkConfig}
+              selectedAction={selectedAction?.id}
+              networkId={networkId}
+            />
+          )}
 
           {/* Parameter Inputs */}
           {functionParameters.length > 0 && (

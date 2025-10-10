@@ -296,7 +296,7 @@ export const ParameterInputs = ({
                 : (
                     <input
                       type={inputType}
-                      value={value}
+                      value={displayValues[index] || ''}
                       onChange={e => handleInputChange(index, e.target.value, param.type, param.name)}
                       placeholder={placeholder}
                       className={`w-full px-4 py-2 ${BORDER_RADIUS.md} ${COLORS.background.tertiary} ${COLORS.text.primary} border ${COLORS.border.default} focus:outline-none focus:ring-2 focus:ring-blue-500`}
@@ -338,29 +338,29 @@ export const ParameterInputs = ({
                 </div>
               )}
 
-              {param.type.includes('uint') && value && Number.isNaN(Number(value)) && (
+              {param.type.includes('uint') && displayValues[index] && Number.isNaN(Number(displayValues[index])) && (
                 <p className="text-xs text-red-600">Must be a valid number</p>
               )}
 
               {/* Token amount validation */}
-              {param.type === 'uint256' && (param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value')) && value && !Number.isNaN(Number(value)) && (
+              {param.type === 'uint256' && (param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value')) && displayValues[index] && !Number.isNaN(Number(displayValues[index])) && (
                 <>
-                  {Number(value) <= 0 && (
+                  {Number(displayValues[index]) <= 0 && (
                     <p className="text-xs text-red-600">Amount must be greater than 0</p>
                   )}
-                  {Number(value) > 1e9 && (
+                  {Number(displayValues[index]) > 1e9 && (
                     <p className="text-xs text-red-600">Amount seems too large (max 1 billion tokens)</p>
                   )}
                 </>
               )}
 
               {/* Token ID validation for ERC-721 */}
-              {param.type === 'uint256' && param.name.toLowerCase().includes('tokenid') && value && !Number.isNaN(Number(value)) && (
+              {param.type === 'uint256' && param.name.toLowerCase().includes('tokenid') && displayValues[index] && !Number.isNaN(Number(displayValues[index])) && (
                 <>
-                  {Number(value) < 0 && (
+                  {Number(displayValues[index]) < 0 && (
                     <p className="text-xs text-red-600">Token ID must be a positive number</p>
                   )}
-                  {!Number.isInteger(Number(value)) && (
+                  {!Number.isInteger(Number(displayValues[index])) && (
                     <p className="text-xs text-red-600">Token ID must be a whole number</p>
                   )}
                 </>
