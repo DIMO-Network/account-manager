@@ -1,4 +1,5 @@
 import type { SupportedChains } from './turnkey-bridge';
+import type { TurnkeyAccountClient } from './zerodev-service';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { createTurnkeyClient, getTurnkeyClient, getTurnkeyConfig, getTurnkeyWalletAddress } from './turnkey-bridge';
 import { getKernelClient } from './zerodev-service';
@@ -44,7 +45,7 @@ export class RecoveryService {
       const kernelClient = await getKernelClient({
         subOrganizationId: this.session.subOrganizationId,
         walletAddress,
-        client: turnkeyClient,
+        client: turnkeyClient as TurnkeyAccountClient,
         targetChain,
       });
 
@@ -86,7 +87,7 @@ export class RecoveryService {
       await getKernelClient({
         subOrganizationId: this.session.subOrganizationId,
         walletAddress,
-        client: turnkeyClient,
+        client: turnkeyClient as TurnkeyAccountClient,
         targetChain,
       });
 
@@ -131,7 +132,7 @@ export class RecoveryService {
       const kernelClient = await getKernelClient({
         subOrganizationId: this.session.subOrganizationId,
         walletAddress,
-        client: turnkeyClient,
+        client: turnkeyClient as TurnkeyAccountClient,
         targetChain,
       });
 
