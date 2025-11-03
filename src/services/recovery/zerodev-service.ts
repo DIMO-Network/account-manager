@@ -1,4 +1,3 @@
-import type { TurnkeyClient } from '@turnkey/http';
 import type { KernelAccountClient } from '@zerodev/sdk';
 import type { Client, RpcSchema, Transport } from 'viem';
 import type {
@@ -20,6 +19,8 @@ import { getEntryPoint, KERNEL_V3_1 } from '@zerodev/sdk/constants';
 import { createPublicClient, http } from 'viem';
 import { base, baseSepolia, mainnet, polygon, polygonAmoy, sepolia } from 'viem/chains';
 import { getTurnkeyConfig, SupportedChains } from './turnkey-bridge';
+
+export type TurnkeyAccountClient = Parameters<typeof createAccount>[0]['client'];
 
 const getRpcUrl = (targetChain: SupportedChains): string => {
   const config = getTurnkeyConfig();
@@ -88,7 +89,7 @@ export const getKernelAccount = async ({
 }: {
   subOrganizationId: string;
   walletAddress: `0x${string}`;
-  client: TurnkeyClient;
+  client: TurnkeyAccountClient;
   targetChain: SupportedChains;
 }) => {
   const entryPoint = getEntryPoint('0.7');
@@ -130,7 +131,7 @@ const buildFallbackKernelClients = async ({
 }: {
   subOrganizationId: string;
   walletAddress: `0x${string}`;
-  client: TurnkeyClient;
+  client: TurnkeyAccountClient;
   targetChain: SupportedChains;
 }) => {
   const fallbackProviders: string[] = ['ALCHEMY', 'GELATO', 'PIMLICO'];
@@ -190,7 +191,7 @@ export const getKernelClient = async ({
 }: {
   subOrganizationId: string;
   walletAddress: `0x${string}`;
-  client: TurnkeyClient;
+  client: TurnkeyAccountClient;
   targetChain: SupportedChains;
 }) => {
   const kernelClient = await buildFallbackKernelClients({
