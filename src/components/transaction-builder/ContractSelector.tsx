@@ -1,21 +1,48 @@
 'use client';
 
 import type { NetworkConfig } from '@/services/transaction-builder';
+
 import { useState } from 'react';
+import { getContractAddresses } from '@/services/transaction-builder';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 
 type ContractSelectorProps = {
   value: string;
   onChangeAction: (address: string) => void;
   networkConfig: NetworkConfig | null;
+  selectedAction?: string;
+  networkId?: string;
 };
 
-export const ContractSelector = ({ value, onChangeAction, networkConfig }: ContractSelectorProps) => {
+export const ContractSelector = ({ value, onChangeAction, networkConfig, selectedAction, networkId }: ContractSelectorProps) => {
   const [isValid, setIsValid] = useState<boolean | null>(null);
 
   const validateAddress = (address: string): boolean => {
     return /^0x[a-fA-F0-9]{40}$/.test(address);
   };
+
+  // Get default contract addresses for the selected action and network
+  const getDefaultContracts = () => {
+    if (!selectedAction || !networkId) {
+      return [];
+    }
+
+    // Map action IDs to token types
+    const actionToTokenType: Record<string, string> = {
+      'erc20-transfer': 'erc20',
+      'erc721-transfer': 'erc721',
+    };
+
+    const tokenType = actionToTokenType[selectedAction];
+    if (!tokenType) {
+      return [];
+    }
+
+    // Get contract addresses for the specific token type and network
+    return getContractAddresses(tokenType, networkId);
+  };
+
+  const defaultContracts = getDefaultContracts();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const address = e.target.value;
@@ -43,6 +70,51 @@ export const ContractSelector = ({ value, onChangeAction, networkConfig }: Contr
       <p className={`text-xs ${COLORS.text.muted} mb-2`}>
         Enter the contract address of the ERC-20 token or ERC-721 NFT you want to recover
       </p>
+
+      {/* Default contract options for ERC-20 */}
+      {defaultContracts.length > 0 && (
+        <div className="mb-4">
+          <p className={`text-xs ${COLORS.text.muted} mb-2`}>
+            Quick select common tokens:
+          </p>
+          <div className="grid grid-cols-1 gap-2">
+            {defaultContracts.map(contract => (
+              <button
+                key={contract.address}
+                type="button"
+                onClick={() => onChangeAction(contract.address)}
+                className={`p-3 text-left ${BORDER_RADIUS.md} border transition-colors ${
+                  value === contract.address
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : `${COLORS.background.tertiary} ${COLORS.border.default} ${COLORS.text.primary} hover:bg-gray-50`
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium text-sm">{contract.name}</div>
+                    <div className="text-xs text-gray-500 font-mono">{contract.address}</div>
+                  </div>
+                  <a
+                    href={contract.explorer}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 text-xs text-gray-500 text-center">
+            Or enter a custom contract address below
+          </div>
+        </div>
+      )}
+
       <div className="relative">
         <input
           id="contract-address"

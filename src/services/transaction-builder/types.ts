@@ -3,9 +3,9 @@
 export type TransactionBuilderConfig = {
   network: string;
   contractAddress: string;
-  abi: any[];
+  abi: ABIItem[];
   functionName: string;
-  parameters: any[];
+  parameters: (string | number | boolean)[];
   gasLimit?: bigint;
   gasPrice?: bigint;
   value?: bigint;
@@ -43,7 +43,7 @@ export type ABIItem = {
 export type FunctionParameter = {
   name: string;
   type: string;
-  value: any;
+  value: string | number | boolean;
   required: boolean;
 };
 

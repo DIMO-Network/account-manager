@@ -136,7 +136,7 @@ export const RECOVERY_TEMPLATES: RecoveryTemplate[] = [
     defaultFunction: 'transfer',
     parameterTemplates: [
       { name: 'to', type: 'address', value: '', required: true },
-      { name: 'amount', type: 'uint256', value: '0', required: true },
+      { name: 'amount', type: 'uint256', value: '', required: true },
     ],
   },
   {
@@ -148,7 +148,7 @@ export const RECOVERY_TEMPLATES: RecoveryTemplate[] = [
     defaultFunction: 'approve',
     parameterTemplates: [
       { name: 'to', type: 'address', value: '', required: true },
-      { name: 'tokenId', type: 'uint256', value: '0', required: true },
+      { name: 'tokenId', type: 'uint256', value: '', required: true },
     ],
   },
   {
@@ -161,7 +161,7 @@ export const RECOVERY_TEMPLATES: RecoveryTemplate[] = [
     parameterTemplates: [
       { name: 'from', type: 'address', value: '', required: true },
       { name: 'to', type: 'address', value: '', required: true },
-      { name: 'tokenId', type: 'uint256', value: '0', required: true },
+      { name: 'tokenId', type: 'uint256', value: '', required: true },
     ],
   },
 ];
