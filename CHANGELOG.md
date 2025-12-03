@@ -1,3 +1,10 @@
+## [2.30.1](https://github.com/DIMO-Network/account-manager/compare/v2.30.0...v2.30.1) (2025-12-03)
+
+
+### Bug Fixes
+
+* update React and Next.js to patch CVE-10 RCE vulnerability ([8dcf547](https://github.com/DIMO-Network/account-manager/commit/8dcf54700d902e4f62f579a62aac40b7ca54b445))
+
 # [2.30.0](https://github.com/DIMO-Network/account-manager/compare/v2.29.2...v2.30.0) (2025-10-08)
 
 
