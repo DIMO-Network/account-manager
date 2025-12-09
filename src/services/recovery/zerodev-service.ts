@@ -24,15 +24,28 @@ export type TurnkeyAccountClient = Parameters<typeof createAccount>[0]['client']
 
 const getRpcUrl = (targetChain: SupportedChains): string => {
   const config = getTurnkeyConfig();
+  const isTestnet = process.env.NEXT_PUBLIC_RECOVERY_FLOW === 'testnet';
+  let rpcUrl: string;
+
   switch (targetChain) {
     case SupportedChains.ETHEREUM:
-      return config.ethereumRpcUrl;
+      rpcUrl = config.ethereumRpcUrl;
+      break;
     case SupportedChains.BASE:
-      return config.baseRpcUrl;
+      rpcUrl = config.baseRpcUrl;
+      break;
     case SupportedChains.POLYGON:
     default:
-      return config.polygonRpcUrl;
+      rpcUrl = config.polygonRpcUrl;
+      break;
   }
+
+  if (!rpcUrl) {
+    const networkType = isTestnet ? 'testnet' : 'mainnet';
+    throw new Error(`Missing RPC URL for ${targetChain} ${networkType}. Please set the appropriate NEXT_PUBLIC_${targetChain}_RPC_URL environment variable.`);
+  }
+
+  return rpcUrl;
 };
 
 const getChain = (targetChain: SupportedChains): Chain => {
@@ -49,13 +62,77 @@ const getChain = (targetChain: SupportedChains): Chain => {
   }
 };
 
+// Custom fetch that routes through Next.js API to avoid CORS issues
+const createRpcFetch = (rpcUrl: string) => {
+  return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    // For client-side, proxy through Next.js API route
+    if (typeof window !== 'undefined') {
+      // Normalize the input URL
+      const url = typeof input === 'string'
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : input instanceof Request
+            ? input.url
+            : String(input);
+
+      // Check if this is a request to our RPC URL (handle both full URL and path)
+      const isRpcRequest = url.includes(rpcUrl) || url.startsWith(rpcUrl) || url.includes('rpc.dimo.org');
+
+      if (isRpcRequest) {
+        const requestBody = init?.body || '';
+        const bodyString = typeof requestBody === 'string' ? requestBody : JSON.stringify(requestBody);
+
+        try {
+          const proxyResponse = await fetch('/api/rpc', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              url: rpcUrl,
+              requestBody: bodyString,
+            }),
+          });
+
+          if (!proxyResponse.ok) {
+            const errorData = await proxyResponse.json().catch(() => ({}));
+            throw new Error(`RPC proxy failed: ${proxyResponse.statusText} - ${errorData.error || ''}`);
+          }
+
+          const data = await proxyResponse.json();
+
+          // Return a Response-like object that viem expects
+          return new Response(JSON.stringify(data), {
+            status: 200,
+            statusText: 'OK',
+            headers: new Headers({
+              'Content-Type': 'application/json',
+            }),
+          });
+        } catch (error) {
+          console.error('RPC proxy error:', error);
+          throw error;
+        }
+      }
+    }
+
+    // Server-side or non-RPC request: use direct fetch
+    return fetch(input, init);
+  };
+};
+
 // Create a Viem public client for reading blockchain data
 export const getPublicClient = (targetChain: SupportedChains) => {
   const chain = getChain(targetChain);
   const rpcUrl = getRpcUrl(targetChain);
+  const customFetch = createRpcFetch(rpcUrl);
+
   return createPublicClient({
     chain,
-    transport: http(rpcUrl),
+    transport: http(rpcUrl, {
+      fetchFn: customFetch,
+    }),
   });
 };
 
@@ -209,11 +286,43 @@ export const checkAccountDeployment = async (walletAddress: string, targetChain:
 }> => {
   try {
     const publicClient = getPublicClient(targetChain);
+    const chain = getChain(targetChain);
+
+    // Verify we're querying the correct chain by checking chain ID
+    const chainId = await publicClient.getChainId();
+    if (chainId !== chain.id) {
+      const isTestnet = process.env.NEXT_PUBLIC_RECOVERY_FLOW === 'testnet';
+      const networkType = isTestnet ? 'testnet' : 'mainnet';
+      const expectedNetwork = isTestnet
+        ? (targetChain === 'ETHEREUM' ? 'Sepolia' : targetChain === 'BASE' ? 'Base Sepolia' : 'Amoy')
+        : (targetChain === 'ETHEREUM' ? 'Ethereum Mainnet' : targetChain === 'BASE' ? 'Base Mainnet' : 'Polygon Mainnet');
+      const actualNetwork = chainId === 1
+        ? 'Ethereum Mainnet'
+        : chainId === 11155111
+          ? 'Sepolia'
+          : chainId === 137
+            ? 'Polygon Mainnet'
+            : chainId === 80002
+              ? 'Amoy'
+              : chainId === 8453
+                ? 'Base Mainnet'
+                : chainId === 84532
+                  ? 'Base Sepolia'
+                  : `Chain ID ${chainId}`;
+
+      console.error(
+        `Chain ID mismatch for ${targetChain}: Expected ${chain.id} (${expectedNetwork}), but RPC returned ${chainId} (${actualNetwork}).\n`
+        + `Your NEXT_PUBLIC_${targetChain}_RPC_URL is pointing to ${actualNetwork}, but NEXT_PUBLIC_RECOVERY_FLOW is set to '${networkType}'.\n`
+        + `Please update your .env.local to use ${networkType} RPC URLs.`,
+      );
+      return { isDeployed: false };
+    }
+
     const code = await publicClient.getCode({ address: walletAddress as `0x${string}` });
 
     // Check if there's actual contract code (not just '0x' for empty accounts)
     const isDeployed = code !== undefined && code !== '0x' && code.length > 2;
-    console.warn(`Chain ${targetChain}: Code at ${walletAddress} = ${code} (isDeployed: ${isDeployed})`);
+    console.warn(`Chain ${targetChain} (ID: ${chainId}): Code at ${walletAddress} = ${code?.substring(0, 20)}... (isDeployed: ${isDeployed})`);
 
     return { isDeployed };
   } catch (error) {
