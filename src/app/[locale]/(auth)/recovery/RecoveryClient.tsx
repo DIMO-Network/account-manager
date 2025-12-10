@@ -120,28 +120,11 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
   };
 
   useEffect(() => {
-    console.warn('Recovery Authorization Debug:', {
-      customerId,
-      customerLoading,
-      customerError,
-      allowedUsers: process.env.NEXT_PUBLIC_ALLOWED_TOP_UP_USERS?.split(',').map(id => id.trim()) || [],
-    });
-
     if (customerLoading) {
-      console.warn('Still loading customer data, waiting...');
       return;
     }
 
     if (customerError || !customerId) {
-      console.warn('Redirecting due to customer error or missing customer ID');
-      router.push('/');
-      return;
-    }
-
-    // Check if user is authorized to use recovery feature (same as Top Up)
-    const allowedUsers = process.env.NEXT_PUBLIC_ALLOWED_TOP_UP_USERS?.split(',').map(id => id.trim()) || [];
-    if (!allowedUsers.includes(customerId)) {
-      console.warn('Redirecting due to unauthorized user:', customerId, 'not in', allowedUsers);
       router.push('/');
       return;
     }
