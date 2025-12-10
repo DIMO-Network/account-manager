@@ -88,6 +88,7 @@ export const TransactionBuilder = ({
   };
 
   const handlePreviewTransaction = async () => {
+    console.warn('Preview button clicked', { config, selectedAction, functionParameters });
     const missingFields: string[] = [];
     const validationErrors: string[] = [];
 
@@ -125,12 +126,17 @@ export const TransactionBuilder = ({
           }
 
           // Validate token amounts
+          // Note: value is in wei (smallest unit), so we need to convert back to tokens for validation
           if (param.type === 'uint256' && (param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value'))) {
-            const numValue = Number(value);
-            if (Number.isNaN(numValue) || numValue <= 0) {
+            const weiValue = BigInt(String(value));
+            if (weiValue <= BigInt(0)) {
               validationErrors.push(`${param.name} must be a valid positive number`);
-            } else if (numValue > 1e9) {
-              validationErrors.push(`${param.name} amount seems too large (max 1 billion tokens)`);
+            } else {
+              // Convert wei to tokens (divide by 10^18) for validation
+              const tokenValue = Number(weiValue) / 1e18;
+              if (tokenValue > 1e9) {
+                validationErrors.push(`${param.name} amount seems too large (max 1 billion tokens)`);
+              }
             }
           }
 
@@ -154,13 +160,17 @@ export const TransactionBuilder = ({
 
     // Show missing fields error
     if (missingFields.length > 0) {
-      setError(`Please fill out the following required fields: ${missingFields.join(', ')}`);
+      const errorMsg = `Please fill out the following required fields: ${missingFields.join(', ')}`;
+      console.warn('Missing fields:', missingFields);
+      setError(errorMsg);
       return;
     }
 
     // Show validation errors
     if (validationErrors.length > 0) {
-      setError(validationErrors.join('. '));
+      const errorMsg = validationErrors.join('. ');
+      console.warn('Validation errors:', validationErrors);
+      setError(errorMsg);
       return;
     }
 
@@ -168,17 +178,23 @@ export const TransactionBuilder = ({
     setError(null);
 
     try {
+      console.warn('Creating transaction builder with config:', config);
       const builder = createTransactionBuilder(config);
       const validation = builder.validateConfig();
 
       if (!validation.isValid) {
+        console.warn('Config validation failed:', validation.errors);
         setError(validation.errors.join(', '));
+        setLoading(false);
         return;
       }
 
+      console.warn('Creating transaction preview...');
       const preview = await builder.createTransactionPreview();
+      console.warn('Transaction preview created:', preview);
       setTransactionPreview(preview);
     } catch (err) {
+      console.error('Preview transaction error:', err);
       setError(err instanceof Error ? err.message : 'Failed to preview transaction');
     } finally {
       setLoading(false);
@@ -351,6 +367,17 @@ export const TransactionBuilder = ({
               {loading ? 'Building...' : 'Preview Recovery Transaction'}
             </button>
           </div>
+          {/* Debug info - remove in production */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-xs text-gray-500 mt-2">
+              Debug: contractAddress=
+              {config.contractAddress ? 'set' : 'missing'}
+              , functionName=
+              {config.functionName ? 'set' : 'missing'}
+              , selectedAction=
+              {selectedAction ? 'set' : 'missing'}
+            </div>
+          )}
         </div>
       </div>
 
@@ -368,7 +395,7 @@ export const TransactionBuilder = ({
       {successMessage && (
         <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
           <div className="flex items-start">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
@@ -396,7 +423,7 @@ export const TransactionBuilder = ({
             <button
               type="button"
               onClick={() => setSuccessMessage(null)}
-              className={`flex-shrink-0 text-gray-400 hover:text-gray-600 ${BORDER_RADIUS.sm} p-1`}
+              className={`shrink-0 text-gray-400 hover:text-gray-600 ${BORDER_RADIUS.sm} p-1`}
             >
               <span className="text-sm">✕</span>
             </button>
