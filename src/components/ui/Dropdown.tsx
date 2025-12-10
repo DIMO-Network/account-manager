@@ -18,6 +18,8 @@ type DropdownProps = {
   required?: boolean;
   disabled?: boolean;
   className?: string;
+  showSearch?: boolean;
+  backgroundColor?: string;
 };
 
 export function Dropdown({
@@ -29,6 +31,8 @@ export function Dropdown({
   required = false,
   disabled = false,
   className = '',
+  showSearch = true,
+  backgroundColor = 'bg-surface-raised',
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,10 +104,12 @@ export function Dropdown({
       setIsOpen(newIsOpen);
       if (newIsOpen) {
         setSearchQuery('');
-        // Focus search input when opening dropdown
-        setTimeout(() => {
-          searchInputRef.current?.focus();
-        }, 0);
+        // Focus search input when opening dropdown (only if search is enabled)
+        if (showSearch) {
+          setTimeout(() => {
+            searchInputRef.current?.focus();
+          }, 0);
+        }
       }
     }
   };
@@ -122,7 +128,7 @@ export function Dropdown({
           type="button"
           onClick={handleToggle}
           disabled={disabled}
-          className={`w-full flex items-center justify-between px-4 py-2 rounded-md bg-surface-raised text-left ${
+          className={`w-full flex items-center justify-between px-4 py-2 rounded-md ${backgroundColor} text-left ${
             disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
           } ${COLORS.text.primary}`}
         >
@@ -136,17 +142,19 @@ export function Dropdown({
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-surface-raised rounded-md shadow-lg max-h-80 overflow-hidden">
-            <div className="p-2 border-b border-gray-700">
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search..."
-                className="w-full px-3 py-2 bg-surface-input border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-white"
-              />
-            </div>
+          <div className={`absolute z-50 w-full mt-1 ${backgroundColor} rounded-md shadow-lg max-h-80 overflow-hidden`}>
+            {showSearch && (
+              <div className="p-2 border-b border-gray-700">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search..."
+                  className="w-full px-3 py-2 bg-surface-input border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-white"
+                />
+              </div>
+            )}
 
             <div className="max-h-48 overflow-y-auto">
               {filteredOptions.length > 0
