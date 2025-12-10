@@ -5,10 +5,10 @@ import type {
   RecoveryTemplate,
   TransactionBuilderConfig,
 } from '@/services/transaction-builder';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTransactionBuilder } from '@/hooks/useTransactionBuilder';
 import { createRecoveryService } from '@/services/recovery/recovery-service';
-import { createTransactionBuilder, getNetworkConfig } from '@/services/transaction-builder';
+import { createTransactionBuilder, getContractAddresses, getNetworkConfig } from '@/services/transaction-builder';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { ContractSelector } from './ContractSelector';
 import { ParameterInputs } from './ParameterInputs';
@@ -40,6 +40,7 @@ export const TransactionBuilder = ({
   sessionData,
   onTransactionExecutedAction,
 }: TransactionBuilderProps) => {
+  const previewRef = useRef<HTMLDivElement>(null);
   const [config, setConfig] = useState<TransactionBuilderConfig>({
     network: networkId,
     contractAddress: '',
@@ -65,9 +66,19 @@ export const TransactionBuilder = ({
 
   const handleTemplateSelect = (template: RecoveryTemplate) => {
     setSelectedAction(template);
+
+    // Preselect first quick select token for ERC-20 transfers
+    let initialContractAddress = '';
+    if (template.id === 'erc20-transfer') {
+      const defaultContracts = getContractAddresses('erc20', networkId);
+      if (defaultContracts.length > 0 && defaultContracts[0]) {
+        initialContractAddress = defaultContracts[0].address;
+      }
+    }
+
     setConfig({
       network: networkId,
-      contractAddress: '',
+      contractAddress: initialContractAddress,
       abi: template.abi,
       functionName: template.defaultFunction,
       parameters: template.parameterTemplates.map(p => p.value),
@@ -193,6 +204,11 @@ export const TransactionBuilder = ({
       const preview = await builder.createTransactionPreview();
       console.warn('Transaction preview created:', preview);
       setTransactionPreview(preview);
+
+      // Scroll to preview section after a brief delay
+      setTimeout(() => {
+        previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     } catch (err) {
       console.error('Preview transaction error:', err);
       setError(err instanceof Error ? err.message : 'Failed to preview transaction');
@@ -383,12 +399,14 @@ export const TransactionBuilder = ({
 
       {/* Transaction Preview */}
       {transactionPreview && (
-        <TransactionPreviewComponent
-          preview={transactionPreview}
-          networkConfig={networkConfig}
-          walletAddress={walletAddress}
-          onExecuteAction={handleExecuteTransaction}
-        />
+        <div ref={previewRef}>
+          <TransactionPreviewComponent
+            preview={transactionPreview}
+            networkConfig={networkConfig}
+            walletAddress={walletAddress}
+            onExecuteAction={handleExecuteTransaction}
+          />
+        </div>
       )}
 
       {/* Success Message */}

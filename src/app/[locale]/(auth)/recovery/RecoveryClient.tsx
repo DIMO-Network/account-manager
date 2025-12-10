@@ -447,6 +447,7 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
       {!customerLoading && !checkingDeployment && walletAddress && deploymentStatus[form.network]?.isDeployed && (
         <div className="mt-2">
           <TransactionBuilder
+            key={form.network}
             networkId={form.network}
             walletAddress={walletAddress}
             sessionData={sessionData}
