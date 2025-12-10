@@ -2,7 +2,7 @@ import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 
 function SkeletonBox({ className = '' }: { className?: string }) {
   return (
-    <div className={`animate-pulse bg-gray-900 rounded ${className}`} />
+    <div className={`animate-pulse bg-gray-800 rounded ${className}`} />
   );
 }
 

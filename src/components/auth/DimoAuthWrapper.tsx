@@ -27,8 +27,8 @@ export const DimoAuthWrapper = ({ children }: DimoAuthWrapperProps) => {
   if (!isInitialized) {
     return (
       <div className="space-y-8">
-        <div className="animate-pulse bg-gray-200 h-8 rounded mb-4"></div>
-        <div className="animate-pulse bg-gray-200 h-32 rounded"></div>
+        <div className="animate-pulse bg-gray-800 h-8 rounded mb-4"></div>
+        <div className="animate-pulse bg-gray-800 h-32 rounded"></div>
       </div>
     );
   }

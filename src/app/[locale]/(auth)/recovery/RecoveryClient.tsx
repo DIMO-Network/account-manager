@@ -1,11 +1,14 @@
 'use client';
 
+import type { Option } from '@/components/ui/Dropdown';
 import type { SupportedChains } from '@/services/recovery/turnkey-bridge';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { RecoveryIcon } from '@/components/Icons';
+import { Loading } from '@/components/Loading';
 import { TransactionBuilder } from '@/components/transaction-builder';
 import { PageHeader } from '@/components/ui';
+import { Dropdown } from '@/components/ui/Dropdown';
 import { useStripeCustomer } from '@/hooks/useStripeCustomer';
 import { createRecoveryService } from '@/services/recovery/recovery-service';
 import { checkAccountDeployment } from '@/services/recovery/zerodev-service';
@@ -48,6 +51,13 @@ const SUPPORTED_CHAINS = {
   80002: 'POLYGON', // Amoy
   84532: 'BASE', // Base Sepolia
 } as const;
+
+const shortenAddress = (address: string): string => {
+  if (!address || address.length < 10) {
+    return address;
+  }
+  return `${address.slice(0, 4)}...${address.slice(-4)}`;
+};
 
 export function RecoveryClient({ translations }: RecoveryClientProps) {
   const router = useRouter();
@@ -162,10 +172,20 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
     fetchSessionData();
   }, [customerId, customerLoading, customerError, router]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
+  const handleNetworkChange = (value: string) => {
+    setForm(f => ({ ...f, network: value }));
   };
+
+  // Convert NETWORKS to Dropdown options format
+  const networkOptions: Option[] = useMemo(() => {
+    return NETWORKS.map((network) => {
+      const isDeployed = deploymentStatus[network.id]?.isDeployed || false;
+      return {
+        value: String(network.id),
+        label: `${network.name} (Chain ID: ${network.id})${isDeployed ? ' - Already deployed' : ' - Ready for deployment'}`,
+      };
+    });
+  }, [deploymentStatus]);
 
   // Deploy smart account to the selected blockchain network using Login With DIMO session data and Turnkey
   const handleDeployAccount = async () => {
@@ -242,105 +262,134 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
     }
   };
 
-  // Show loading state while checking authorization
-  if (customerLoading) {
-    return (
-      <div className="flex flex-1 flex-col gap-4">
-        <PageHeader icon={<RecoveryIcon />} title={translations.title} className="mb-0" />
+  const renderContent = () => {
+    if (customerLoading) {
+      return (
         <div className={`${BORDER_RADIUS.xl} ${COLORS.background.secondary} p-6`}>
-          <p className="text-text-secondary">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-1 flex-col gap-4">
-      {/* Header */}
-      <PageHeader icon={<RecoveryIcon />} title={translations.title} className="mb-0" />
-
-      {/* Content */}
-      <div className={`${BORDER_RADIUS.xl} ${COLORS.background.secondary} p-6`}>
-        <div className="mb-6">
-          <p className="text-text-secondary mb-4">
-            {translations.description}
-          </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-blue-800 text-sm">
-              <strong>How this works:</strong>
-              <br />
-              • Your DIMO smart account has the same address across all networks (Ethereum, Polygon, Base)
-              <br />
-              • It's currently only deployed on Polygon (via ZeroDev in the DIMO Mobile app)
-              <br />
-              • If someone sends tokens to your address on a network where your smart account isn't deployed, they're stuck
-              <br />
-              • First, deploy your smart account to the target network
-              <br />
-              • After deployment, you can use the transaction builder to recover and transfer your stuck tokens
-              <br />
-              <strong>Note:</strong>
-              {' '}
-              This tool does not bridge tokens between networks. It just gives you access to manage them on the target network
-            </p>
+          <div className="flex items-center justify-center">
+            <Loading className="mx-auto" />
           </div>
         </div>
+      );
+    }
 
-        <div className="space-y-4">
-          {/* Wallet Address Display */}
-          <div>
-            <label htmlFor="wallet-address" className="block text-sm font-medium mb-1">
-              Your Wallet Address
-            </label>
-            <div id="wallet-address" className="flex flex-row rounded-md bg-surface-sunken px-4 py-2 w-full text-gray-400">
-              {walletAddress || 'Loading...'}
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              This address will be deployed on the selected network
-            </p>
-          </div>
-
-          {/* Network Selection */}
-          <div>
-            <label htmlFor="network" className="block text-sm font-medium mb-1">
-              Deploy Account On (Where are your tokens stuck?)
-            </label>
-            <select
-              id="network"
-              name="network"
-              value={form.network}
-              onChange={handleChange}
-              className="flex flex-row rounded-md bg-surface-raised px-4 py-2 w-full"
-            >
-              {NETWORKS.map((network) => {
-                const isDeployed = deploymentStatus[network.id]?.isDeployed || false;
-                return (
-                  <option key={network.id} value={network.id}>
-                    {network.name}
-                    {' '}
-                    (Chain ID:
-                    {network.id}
+    return (
+      <>
+        {/* Content */}
+        <div className={`${BORDER_RADIUS.xl} ${COLORS.background.secondary} p-6`}>
+          <h3 className={`text-lg font-semibold ${COLORS.text.primary} mb-4`}>1. Deploy Smart Account</h3>
+          <div className="space-y-4">
+            {/* Wallet Address Display */}
+            <div>
+              <label htmlFor="wallet-address" className="block text-sm font-medium mb-1">
+                Your Wallet Address
+              </label>
+              <div id="wallet-address" className="flex flex-row rounded-md bg-surface-sunken px-4 py-2 w-full text-gray-400">
+                {walletAddress
+                  ? (
+                      <>
+                        <span className="md:hidden">{shortenAddress(walletAddress)}</span>
+                        <span className="hidden md:inline">{walletAddress}</span>
+                      </>
                     )
-                    {isDeployed ? ' - Smart account deployed' : ' - Available for deployment'}
-                  </option>
-                );
-              })}
-            </select>
-            <p className="text-xs text-gray-500 mt-1">
-              Select the network where you accidentally sent tokens
-              {isTestnet && ' (Currently testing on testnets)'}
-            </p>
+                  : (
+                      'Loading...'
+                    )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                This address will be deployed on the selected network
+              </p>
+            </div>
 
-            {/* Deployment Status Indicator */}
-            {checkingDeployment && (
-              <div className="mt-2 text-xs text-gray-500">
-                Checking deployment status across networks...
+            {/* Network Selection */}
+            <div>
+              <Dropdown
+                backgroundColor="bg-surface-default"
+                options={networkOptions}
+                value={form.network}
+                onChangeAction={handleNetworkChange}
+                placeholder="Select a network"
+                label="Where Are Your Tokens Stuck?"
+                disabled={checkingDeployment}
+                showSearch={false}
+              />
+              {isTestnet && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Currently testing on testnets
+                </p>
+              )}
+
+              {/* Deployment Status Indicator */}
+              {checkingDeployment && (
+                <div className="mt-2 text-xs text-gray-500">
+                  Checking deployment status across networks...
+                </div>
+              )}
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-800 text-sm">{error}</p>
               </div>
             )}
 
+            {/* Success Message */}
+            {success && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-green-800 text-sm">
+                  ✅ Smart account deployed successfully! You can now access your stuck tokens on this network.
+                </p>
+                {walletAddress && (
+                  <p className="text-green-700 text-xs mt-2">
+                    <a
+                      href={getExplorerUrl(Number(form.network), walletAddress)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-green-800"
+                    >
+                      View deployed account on blockchain explorer →
+                    </a>
+                  </p>
+                )}
+                <p className="text-green-700 text-xs mt-2">
+                  Next: Use the transaction builder to transfer your tokens to the correct network.
+                </p>
+              </div>
+            )}
+
+            {/* Deploy Account Button */}
+            <div className="flex flex-col pt-4">
+              {deploymentStatus[form.network]?.isDeployed
+                ? (
+                    <div className="text-center py-3 px-4 bg-gray-100 text-gray-600 rounded-full">
+                      Already deployed
+                    </div>
+                  )
+                : (
+                    <button
+                      type="button"
+                      onClick={handleDeployAccount}
+                      disabled={loading || !walletAddress || checkingDeployment}
+                      className={`${BORDER_RADIUS.full} font-medium w-full py-3 px-4 ${
+                        loading || !walletAddress || checkingDeployment
+                          ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      {loading ? 'Deploying Account...' : checkingDeployment ? 'Checking Status...' : 'Deploy'}
+                    </button>
+                  )}
+              {!walletAddress && (
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  Loading wallet address...
+                </p>
+              )}
+            </div>
+
             {!checkingDeployment && walletAddress && deploymentStatus[form.network]?.isDeployed && (
               <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
-                <div className="flex items-center">
+                <div className="flex items-start">
                   <div className="shrink-0">
                     <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -348,7 +397,7 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-green-800">
-                      Smart account already deployed on this network
+                      Smart account already deployed on this network. Scroll down to use the transaction builder to recover your tokens.
                     </p>
                     <p className="text-xs text-green-600 mt-1">
                       <a
@@ -365,71 +414,37 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
               </div>
             )}
           </div>
+        </div>
+      </>
+    );
+  };
 
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-800 text-sm">{error}</p>
-            </div>
-          )}
-
-          {/* Success Message */}
-          {success && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-green-800 text-sm">
-                ✅ Smart account deployed successfully! You can now access your stuck tokens on this network.
-              </p>
-              {walletAddress && (
-                <p className="text-green-700 text-xs mt-2">
-                  <a
-                    href={getExplorerUrl(Number(form.network), walletAddress)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline hover:text-green-800"
-                  >
-                    View deployed account on blockchain explorer →
-                  </a>
-                </p>
-              )}
-              <p className="text-green-700 text-xs mt-2">
-                Next: Use the transaction builder to transfer your tokens to the correct network.
-              </p>
-            </div>
-          )}
-
-          {/* Deploy Account Button */}
-          <div className="flex flex-col pt-4">
-            {deploymentStatus[form.network]?.isDeployed
-              ? (
-                  <div className="text-center py-3 px-4 bg-gray-100 text-gray-600 rounded-full">
-                    Smart account already deployed on this network
-                  </div>
-                )
-              : (
-                  <button
-                    type="button"
-                    onClick={handleDeployAccount}
-                    disabled={loading || !walletAddress || checkingDeployment}
-                    className={`${BORDER_RADIUS.full} font-medium w-full py-3 px-4 ${
-                      loading || !walletAddress || checkingDeployment
-                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}
-                  >
-                    {loading ? 'Deploying Account...' : checkingDeployment ? 'Checking Status...' : 'Deploy Account on Selected Network'}
-                  </button>
-                )}
-            {!walletAddress && (
-              <p className="text-xs text-gray-500 mt-2 text-center">
-                Loading wallet address...
-              </p>
-            )}
-          </div>
+  return (
+    <div className="flex flex-1 flex-col gap-4">
+      {/* Header */}
+      <PageHeader icon={<RecoveryIcon />} title={translations.title} className="mb-0" />
+      <div className="flex flex-col gap-4 mb-4">
+        <div className="flex flex-col">
+          <h3 className="text-base font-medium leading-6">How This Works</h3>
+          <p className="text-sm text-text-secondary font-light leading-4.5 mt-1">Your DIMO smart account has the same address across all networks (Ethereum, Polygon, Base). It's currently only deployed on Polygon (via ZeroDev in the DIMO Mobile app). If someone sends tokens to your address on a network where your smart account isn't deployed, they're stuck.</p>
+          <ul className="text-sm text-text-secondary font-light leading-4.5 mt-1 list-disc list-outside ml-4">
+            <li className="mt-1">First, deploy your smart account to the target network</li>
+            <li className="mt-1">After deployment, you can use the transaction builder to transfer back your stuck tokens</li>
+          </ul>
+        </div>
+        <div className="flex flex-col">
+          <h3 className="text-base font-medium leading-6">Note</h3>
+          <p className="text-sm text-text-secondary font-light leading-4.5 mt-1">
+            This tool does not bridge tokens between networks. It just gives you access to manage them on the target network.
+          </p>
         </div>
       </div>
 
+      {/* Content */}
+      {renderContent()}
+
       {/* Transaction Builder - Show when smart account is deployed */}
-      {!checkingDeployment && walletAddress && deploymentStatus[form.network]?.isDeployed && (
+      {!customerLoading && !checkingDeployment && walletAddress && deploymentStatus[form.network]?.isDeployed && (
         <div className="mt-8">
           <TransactionBuilder
             networkId={form.network}

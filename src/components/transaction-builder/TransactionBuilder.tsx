@@ -260,7 +260,7 @@ export const TransactionBuilder = ({
     <div className="space-y-6">
       <div className={`${COLORS.background.secondary} ${BORDER_RADIUS.lg} p-6`}>
         <h3 className={`text-lg font-semibold ${COLORS.text.primary} mb-4`}>
-          Build Recovery Transaction
+          2. Build Recovery Transaction
         </h3>
 
         {error && (
