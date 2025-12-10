@@ -271,13 +271,13 @@ export const TransactionBuilder = ({
 
         <div className="space-y-6">
           {/* Recovery Templates */}
-          <div>
-            <div className={`text-sm font-medium ${COLORS.text.secondary} mb-2`}>
-              Asset Recovery Actions
-            </div>
+          <div className="flex flex-col gap-2">
             <p className={`text-xs ${COLORS.text.muted} mb-3`}>
               Select the type of asset you want to recover (ERC-20 tokens or ERC-721 NFTs). ERC-20 transfers don't require approval.
             </p>
+            <div className={`text-sm font-medium ${COLORS.text.secondary} mb-2`}>
+              Asset Recovery Actions
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {templates.map((template) => {
                 const isSelected = selectedAction?.id === template.id;
@@ -286,7 +286,7 @@ export const TransactionBuilder = ({
                     key={template.id}
                     type="button"
                     onClick={() => handleTemplateSelect(template)}
-                    className={`flex flex-col p-3 text-left ${BORDER_RADIUS.lg} border ${COLORS.background.tertiary} transition-colors ${
+                    className={`flex flex-col p-3 text-left ${BORDER_RADIUS.lg} border ${COLORS.background.tertiary} transition-colors cursor-pointer ${
                       isSelected
                         ? 'border-white'
                         : 'border-transparent hover:border-white'
@@ -364,7 +364,7 @@ export const TransactionBuilder = ({
                   : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
             >
-              {loading ? 'Building...' : 'Preview Recovery Transaction'}
+              {loading ? 'Building...' : 'Preview Transaction'}
             </button>
           </div>
           {/* Debug info - remove in production */}

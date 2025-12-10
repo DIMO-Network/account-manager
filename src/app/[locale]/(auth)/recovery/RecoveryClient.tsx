@@ -362,7 +362,7 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
             <div className="flex flex-col pt-4">
               {deploymentStatus[form.network]?.isDeployed
                 ? (
-                    <div className="text-center py-3 px-4 bg-gray-100 text-gray-600 rounded-full">
+                    <div className="text-center py-3 px-4 bg-gray-100 text-gray-600 rounded-full cursor-not-allowed">
                       Already deployed
                     </div>
                   )
@@ -374,7 +374,7 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
                       className={`${BORDER_RADIUS.full} font-medium w-full py-3 px-4 ${
                         loading || !walletAddress || checkingDeployment
                           ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                          : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
                       }`}
                     >
                       {loading ? 'Deploying Account...' : checkingDeployment ? 'Checking Status...' : 'Deploy'}
@@ -445,7 +445,7 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
 
       {/* Transaction Builder - Show when smart account is deployed */}
       {!customerLoading && !checkingDeployment && walletAddress && deploymentStatus[form.network]?.isDeployed && (
-        <div className="mt-8">
+        <div className="mt-2">
           <TransactionBuilder
             networkId={form.network}
             walletAddress={walletAddress}

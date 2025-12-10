@@ -4,7 +4,7 @@ import type { FunctionParameter, NetworkConfig } from '@/services/transaction-bu
 import { useMemo, useState } from 'react';
 import { createPublicClient, http } from 'viem';
 import { mainnet, sepolia } from 'viem/chains';
-import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
+import { COLORS } from '@/utils/designSystem';
 
 type ParameterInputsProps = {
   parameters: FunctionParameter[];
@@ -19,6 +19,16 @@ export const ParameterInputs = ({
   onParameterChangeAction,
   networkConfig,
 }: ParameterInputsProps) => {
+  const validateAddress = (address: string): boolean => {
+    return /^0x[a-fA-F0-9]{40}$/.test(address);
+  };
+
+  const getExplorerUrl = (address: string): string => {
+    if (!networkConfig || !validateAddress(address)) {
+      return '#';
+    }
+    return `${networkConfig.explorerUrl}/address/${address}`;
+  };
   // Local state to store user input values (human-readable)
   const [inputValues, setInputValues] = useState<string[]>([]);
   const [ensResolving, setEnsResolving] = useState<boolean[]>([]);
@@ -299,7 +309,7 @@ export const ParameterInputs = ({
                       value={displayValues[index] || ''}
                       onChange={e => handleInputChange(index, e.target.value, param.type, param.name)}
                       placeholder={placeholder}
-                      className={`w-full px-4 py-2 ${BORDER_RADIUS.md} ${COLORS.background.tertiary} ${COLORS.text.primary} border ${COLORS.border.default} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      className={`flex flex-row rounded-md ${COLORS.background.tertiary} px-4 py-2 w-full placeholder:text-gray-600`}
                     />
                   )}
 
@@ -330,9 +340,32 @@ export const ParameterInputs = ({
 
                   {/* Resolved Address Display */}
                   {resolvedAddresses[index] && (
-                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
-                      <p className="text-xs text-green-800 font-medium">Resolved Address:</p>
-                      <p className="text-xs text-green-700 font-mono break-all">{resolvedAddresses[index]}</p>
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                      <div className="flex items-start">
+                        <div className="shrink-0">
+                          <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm font-medium text-green-800">
+                            Resolved Address
+                          </p>
+                          <p className="text-xs text-green-600 mt-1 font-mono break-all">
+                            {resolvedAddresses[index]}
+                          </p>
+                          <p className="text-xs text-green-600 mt-1">
+                            <a
+                              href={getExplorerUrl(resolvedAddresses[index])}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline hover:text-green-800"
+                            >
+                              View on blockchain explorer →
+                            </a>
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
