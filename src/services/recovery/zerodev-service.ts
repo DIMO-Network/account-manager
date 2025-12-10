@@ -77,7 +77,11 @@ const createRpcFetch = (rpcUrl: string) => {
             : String(input);
 
       // Check if this is a request to our RPC URL (handle both full URL and path)
-      const isRpcRequest = url.includes(rpcUrl) || url.startsWith(rpcUrl) || url.includes('rpc.dimo.org');
+      // Also check for common RPC endpoints that need proxying
+      const isRpcRequest = url.includes(rpcUrl)
+        || url.startsWith(rpcUrl)
+        || url.includes('rpc.dimo.org')
+        || url.includes('rpc.zerodev.app');
 
       if (isRpcRequest) {
         const requestBody = init?.body || '';
@@ -90,7 +94,7 @@ const createRpcFetch = (rpcUrl: string) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              url: rpcUrl,
+              url, // Use the actual request URL, not the base rpcUrl
               requestBody: bodyString,
             }),
           });
@@ -139,7 +143,7 @@ export const getPublicClient = (targetChain: SupportedChains) => {
 // Request gas sponsorship for a user operation from ZeroDev paymaster
 const sponsorUserOperation = async ({
   userOperation,
-  provider,
+  provider: _provider,
   targetChain,
 }: {
   userOperation: GetPaymasterDataParameters;
@@ -148,9 +152,24 @@ const sponsorUserOperation = async ({
 }) => {
   const config = getTurnkeyConfig();
   const chain = getChain(targetChain);
+
+  // For v3, ZeroDev uses the same endpoint for bundler and paymaster
+  // Use the bundler URL with chain ID appended
+  const bundleRpc = config.bundleRpc;
+  if (!bundleRpc) {
+    throw new Error('Bundler RPC URL is not configured. Please set NEXT_PUBLIC_ZERODEV_BUNDLER_RPC_URL');
+  }
+
+  // Paymaster uses the same endpoint as bundler: /api/v3/{projectId}/chain/{chainId}
+  const paymasterUrl = `${bundleRpc}/${chain.id}`;
+  console.warn('Paymaster URL:', paymasterUrl);
+  const customFetch = createRpcFetch(paymasterUrl);
+
   const zerodevPaymaster = createZeroDevPaymasterClient({
     chain,
-    transport: http(`${config.bundleRpc}/${chain.id}?provider=${provider}`),
+    transport: http(paymasterUrl, {
+      fetchFn: customFetch,
+    }),
   });
   return zerodevPaymaster.sponsorUserOperation({
     userOperation,
@@ -174,7 +193,7 @@ export const getKernelAccount = async ({
 
   // Create Turnkey account for signing
   const localAccount = await createAccount({
-    client,
+    client: client as any, // TurnkeyClient from @turnkey/http works but types don't match exactly
     organizationId: subOrganizationId,
     signWith: walletAddress,
     ethereumAddress: walletAddress,
@@ -232,10 +251,15 @@ const buildFallbackKernelClients = async ({
 
   // Create clients for each provider
   for (const provider of fallbackProviders) {
+    const bundlerUrl = `${config.bundleRpc}/${chain.id}?provider=${provider}`;
+    const bundlerFetch = createRpcFetch(bundlerUrl);
+
     const kernelClient = createKernelAccountClient({
       account: kernelAccount,
       chain,
-      bundlerTransport: http(`${config.bundleRpc}/${chain.id}?provider=${provider}`),
+      bundlerTransport: http(bundlerUrl, {
+        fetchFn: bundlerFetch,
+      }),
       client: kernelAccount.client,
       paymaster: {
         getPaymasterData: (userOperation) => {

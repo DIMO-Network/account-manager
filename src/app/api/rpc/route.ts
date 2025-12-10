@@ -14,6 +14,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing request body' }, { status: 400 });
     }
 
+    // Parse the request body to log what we're sending
+    let parsedBody;
+    try {
+      parsedBody = typeof requestBody === 'string' ? JSON.parse(requestBody) : requestBody;
+      console.warn('RPC Proxy Request:', {
+        url,
+        method: parsedBody.method,
+        hasParams: !!parsedBody.params,
+      });
+    } catch (e) {
+      console.warn('Could not parse request body for logging:', e);
+    }
+
+    // requestBody is already a JSON string from viem, send it directly
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -24,8 +38,20 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
+      let errorDetails;
+      try {
+        errorDetails = JSON.parse(errorText);
+      } catch {
+        errorDetails = errorText;
+      }
+      console.error('RPC Proxy Error Response:', {
+        url,
+        status: response.status,
+        statusText: response.statusText,
+        errorDetails,
+      });
       return NextResponse.json(
-        { error: `RPC request failed: ${response.statusText}`, details: errorText },
+        { error: `RPC request failed: ${response.statusText}`, details: errorDetails },
         { status: response.status },
       );
     }
