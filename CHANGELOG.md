@@ -1,3 +1,10 @@
+## [2.31.1](https://github.com/DIMO-Network/account-manager/compare/v2.31.0...v2.31.1) (2025-12-11)
+
+
+### Bug Fixes
+
+* proxy ZeroDev requests to bypass domain allowlist ([1136894](https://github.com/DIMO-Network/account-manager/commit/1136894b89dc5fc6877e0bdba6d932bb7a69fa30))
+
 # [2.31.0](https://github.com/DIMO-Network/account-manager/compare/v2.30.1...v2.31.0) (2025-12-11)
 
 
