@@ -1,3 +1,10 @@
+# [2.31.0](https://github.com/DIMO-Network/account-manager/compare/v2.30.1...v2.31.0) (2025-12-11)
+
+
+### Features
+
+* UX/UI improvements for recovery tool ([#82](https://github.com/DIMO-Network/account-manager/issues/82)) ([f4eebd5](https://github.com/DIMO-Network/account-manager/commit/f4eebd584bc4502471cb1ae11e82087d52311ffb)), closes [#85](https://github.com/DIMO-Network/account-manager/issues/85)
+
 ## [2.30.1](https://github.com/DIMO-Network/account-manager/compare/v2.30.0...v2.30.1) (2025-12-03)
 
 
