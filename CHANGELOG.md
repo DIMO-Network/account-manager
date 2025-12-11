@@ -1,3 +1,10 @@
+## [2.31.3](https://github.com/DIMO-Network/account-manager/compare/v2.31.2...v2.31.3) (2025-12-11)
+
+
+### Bug Fixes
+
+* add provider param to paymaster URL ([3ad2a59](https://github.com/DIMO-Network/account-manager/commit/3ad2a597df65527f0dc2789c64c93711189f9d57))
+
 ## [2.31.2](https://github.com/DIMO-Network/account-manager/compare/v2.31.1...v2.31.2) (2025-12-11)
 
 
