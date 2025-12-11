@@ -140,7 +140,7 @@ export const getPublicClient = (targetChain: SupportedChains) => {
 // Request gas sponsorship for a user operation from ZeroDev paymaster
 const sponsorUserOperation = async ({
   userOperation,
-  provider: _provider,
+  provider,
   targetChain,
 }: {
   userOperation: GetPaymasterDataParameters;
@@ -151,14 +151,14 @@ const sponsorUserOperation = async ({
   const chain = getChain(targetChain);
 
   // For v3, ZeroDev uses the same endpoint for bundler and paymaster
-  // Use the bundler URL with chain ID appended
+  // Use the bundler URL with chain ID appended and provider parameter
   const bundleRpc = config.bundleRpc;
   if (!bundleRpc) {
     throw new Error('Bundler RPC URL is not configured. Please set NEXT_PUBLIC_ZERODEV_BUNDLER_RPC_URL');
   }
 
-  // Paymaster uses the same endpoint as bundler: /api/v3/{projectId}/chain/{chainId}
-  const paymasterUrl = `${bundleRpc}/${chain.id}`;
+  // Paymaster uses the same endpoint as bundler: /api/v3/{projectId}/chain/{chainId}?provider={provider}
+  const paymasterUrl = `${bundleRpc}/${chain.id}?provider=${provider}`;
   console.warn('Paymaster URL:', paymasterUrl);
   const customFetch = createRpcFetch(paymasterUrl);
 
