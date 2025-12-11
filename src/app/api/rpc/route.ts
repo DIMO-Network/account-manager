@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
         status: response.status,
         statusText: response.statusText,
         errorDetails,
+        headers: Object.fromEntries(response.headers.entries()),
       });
       return NextResponse.json(
         { error: `RPC request failed: ${response.statusText}`, details: errorDetails },
