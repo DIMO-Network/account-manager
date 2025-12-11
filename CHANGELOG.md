@@ -1,3 +1,11 @@
+## [2.31.2](https://github.com/DIMO-Network/account-manager/compare/v2.31.1...v2.31.2) (2025-12-11)
+
+
+### Bug Fixes
+
+* bypass proxy for ZeroDev requests ([cdf1f5c](https://github.com/DIMO-Network/account-manager/commit/cdf1f5c59ef666a6423dddf0ca069ba8f77ad437))
+* improve RPC proxy error logging ([b69311e](https://github.com/DIMO-Network/account-manager/commit/b69311e92e0a543b361cb312c32e3e41f8f98130))
+
 ## [2.31.1](https://github.com/DIMO-Network/account-manager/compare/v2.31.0...v2.31.1) (2025-12-11)
 
 
