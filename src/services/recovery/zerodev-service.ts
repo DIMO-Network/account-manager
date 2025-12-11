@@ -63,9 +63,9 @@ const getChain = (targetChain: SupportedChains): Chain => {
 };
 
 // Custom fetch that routes through Next.js API to avoid CORS issues
-const createRpcFetch = (rpcUrl: string) => {
+const createRpcFetch = (_rpcUrl: string) => {
   return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    // For client-side, proxy through Next.js API route
+    // For client-side, proxy through Next.js API route ONLY for rpc.dimo.org
     if (typeof window !== 'undefined') {
       // Normalize the input URL
       const url = typeof input === 'string'
@@ -76,14 +76,10 @@ const createRpcFetch = (rpcUrl: string) => {
             ? input.url
             : String(input);
 
-      // Check if this is a request to our RPC URL (handle both full URL and path)
-      // Also check for common RPC endpoints that need proxying
-      const isRpcRequest = url.includes(rpcUrl)
-        || url.startsWith(rpcUrl)
-        || url.includes('rpc.dimo.org')
-        || url.includes('rpc.zerodev.app');
+      // Proxy both rpc.dimo.org (CORS) and rpc.zerodev.app (domain allowlist) requests
+      const needsProxy = url.includes('rpc.dimo.org') || url.includes('rpc.zerodev.app');
 
-      if (isRpcRequest) {
+      if (needsProxy) {
         const requestBody = init?.body || '';
         const bodyString = typeof requestBody === 'string' ? requestBody : JSON.stringify(requestBody);
 
@@ -121,7 +117,7 @@ const createRpcFetch = (rpcUrl: string) => {
       }
     }
 
-    // Server-side or non-RPC request: use direct fetch
+    // Server-side or non-proxied request: use direct fetch
     return fetch(input, init);
   };
 };
