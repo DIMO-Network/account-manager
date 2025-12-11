@@ -76,8 +76,9 @@ const createRpcFetch = (_rpcUrl: string) => {
             ? input.url
             : String(input);
 
-      // Proxy both rpc.dimo.org (CORS) and rpc.zerodev.app (domain allowlist) requests
-      const needsProxy = url.includes('rpc.dimo.org') || url.includes('rpc.zerodev.app');
+      // Only proxy rpc.dimo.org requests (CORS issues)
+      // ZeroDev requests go directly from browser (requires domain allowlist in ZeroDev)
+      const needsProxy = url.includes('rpc.dimo.org');
 
       if (needsProxy) {
         const requestBody = init?.body || '';
