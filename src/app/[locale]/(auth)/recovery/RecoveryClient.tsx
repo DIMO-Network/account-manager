@@ -64,7 +64,6 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
   const { customerId, loading: customerLoading, error: customerError } = useStripeCustomer();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
   const [sessionData, setSessionData] = useState<any>(null);
   const [deploymentStatus, setDeploymentStatus] = useState<Record<string, { isDeployed: boolean }>>({});
@@ -174,7 +173,6 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
   const handleDeployAccount = async () => {
     setLoading(true);
     setError('');
-    setSuccess(false);
 
     try {
       if (!sessionData?.walletAddress || !sessionData?.dimoToken) {
@@ -205,7 +203,6 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
       const result = await recoveryService.deployAccount(chainName as SupportedChains);
 
       if (result.success) {
-        setSuccess(true);
         setError('');
 
         // Update deployment status immediately so transaction builder shows
@@ -314,30 +311,6 @@ export function RecoveryClient({ translations }: RecoveryClientProps) {
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <p className="text-red-800 text-sm">{error}</p>
-              </div>
-            )}
-
-            {/* Success Message */}
-            {success && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-green-800 text-sm">
-                  ✅ Smart account deployed successfully! You can now access your stuck tokens on this network.
-                </p>
-                {walletAddress && (
-                  <p className="text-green-700 text-xs mt-2">
-                    <a
-                      href={getExplorerUrl(Number(form.network), walletAddress)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline hover:text-green-800"
-                    >
-                      View deployed account on blockchain explorer →
-                    </a>
-                  </p>
-                )}
-                <p className="text-green-700 text-xs mt-2">
-                  Next: Use the transaction builder to transfer your tokens to the correct network.
-                </p>
               </div>
             )}
 
