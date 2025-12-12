@@ -183,6 +183,9 @@ export const ParameterInputs = ({
   const getParameterDescription = (name: string, type: string): string => {
     const lowerName = name.toLowerCase();
 
+    if (lowerName.includes('token') && lowerName.includes('id')) {
+      return 'The unique identifier of the NFT or token';
+    }
     if (lowerName.includes('to') || lowerName.includes('recipient')) {
       return 'The address that will receive the tokens/assets';
     }
@@ -191,9 +194,6 @@ export const ParameterInputs = ({
     }
     if (lowerName.includes('from') || lowerName.includes('sender')) {
       return 'The address sending the tokens/assets';
-    }
-    if (lowerName.includes('token') && lowerName.includes('id')) {
-      return 'The unique identifier of the NFT or token';
     }
     if (type.includes('address')) {
       return 'A valid Ethereum address (0x...) or ENS name (e.g., jaggedbytes.eth)';
