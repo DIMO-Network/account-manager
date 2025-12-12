@@ -1,3 +1,10 @@
+## [2.31.4](https://github.com/DIMO-Network/account-manager/compare/v2.31.3...v2.31.4) (2025-12-12)
+
+
+### Bug Fixes
+
+* correct tokenId label for ERC721 actions ([354730b](https://github.com/DIMO-Network/account-manager/commit/354730b9d9f8be1fe17656ac3d62b528c3291da2))
+
 ## [2.31.3](https://github.com/DIMO-Network/account-manager/compare/v2.31.2...v2.31.3) (2025-12-11)
 
 
