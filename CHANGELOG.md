@@ -1,3 +1,10 @@
+## [2.31.5](https://github.com/DIMO-Network/account-manager/compare/v2.31.4...v2.31.5) (2025-12-15)
+
+
+### Bug Fixes
+
+* remove gating logic for recovery tool ([97ae15c](https://github.com/DIMO-Network/account-manager/commit/97ae15ca8aa130fb5dd931538f7e8fa33f625d81))
+
 ## [2.31.4](https://github.com/DIMO-Network/account-manager/compare/v2.31.3...v2.31.4) (2025-12-12)
 
 
