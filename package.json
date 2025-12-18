@@ -113,7 +113,7 @@
     "rimraf": "^6.1.0",
     "semantic-release": "^24.2.9",
     "start-server-and-test": "^2.1.2",
-    "storybook": "^8.6.12",
+    "storybook": "^8.6.15",
     "tailwindcss": "^4.1.11",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^5.1.4",
