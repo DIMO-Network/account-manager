@@ -29,7 +29,7 @@
     "codegen": "graphql-codegen"
   },
   "dependencies": {
-    "@arcjet/next": "^1.0.0-beta.6",
+    "@arcjet/next": "^1.1.0",
     "@dimo-network/login-with-dimo": "^0.0.27",
     "@hookform/resolvers": "^5.1.1",
     "@logtail/pino": "^0.5.4",
