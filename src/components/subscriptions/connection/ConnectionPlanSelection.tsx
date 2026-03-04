@@ -295,18 +295,18 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
           {subscription.stripe_id && subscription.status === 'canceled'
             ? (
                 <p className="text-sm text-text-secondary mt-1">
-                  Select your plan below. You'll be charged right away when you reactivate. Your data connection should be restored within 24 hours.
+                  You'll be charged right away when you reactivate. Your data connection should be restored within 24 hours.
                 </p>
               )
             : subscription.trial_end && new Date(subscription.trial_end) < new Date()
               ? (
                   <p className="text-sm text-text-secondary mt-2">
-                    Choose your plan below. You'll be charged right away when you subscribe. Your data connection should be restored within 24 hours.
+                    You'll be charged right away when you subscribe. Your data connection should be restored within 24 hours.
                   </p>
                 )
               : (
                   <p className="text-sm text-text-secondary mt-2">
-                    Choose your plan below. You'll receive a
+                    You'll receive a
                     {' '}
                     {devicePricing?.monthly?.trial_period_days}
                     -day trial period.
@@ -317,7 +317,7 @@ export function ConnectionPlanSelection({ subscription, vehicleTokenId }: Connec
         <div className="flex flex-col px-4 gap-3 mb-4">
           {/* Monthly Plan (only option) */}
           <div
-            className="relative p-4 rounded-xl border border-surface-raised bg-surface-raised w-full text-left min-h-20"
+            className="relative p-4 rounded-xl border-2 border-white bg-surface-raised w-full text-left min-h-20"
             role="article"
             aria-label="Monthly plan"
           >
