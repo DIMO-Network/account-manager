@@ -1,3 +1,10 @@
+## [2.31.6](https://github.com/DIMO-Network/account-manager/compare/v2.31.5...v2.31.6) (2026-03-04)
+
+
+### Bug Fixes
+
+* show only monthly option ([212e957](https://github.com/DIMO-Network/account-manager/commit/212e95744bca50895cfe440b44c2bf6f43cf50da))
+
 ## [2.31.5](https://github.com/DIMO-Network/account-manager/compare/v2.31.4...v2.31.5) (2025-12-15)
 
 
