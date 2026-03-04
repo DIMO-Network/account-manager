@@ -1,3 +1,10 @@
+## [2.31.7](https://github.com/DIMO-Network/account-manager/compare/v2.31.6...v2.31.7) (2026-03-04)
+
+
+### Bug Fixes
+
+* update copy and plan styling ([efde28b](https://github.com/DIMO-Network/account-manager/commit/efde28bda121d2f1720beddf4e44567f7825da00))
+
 ## [2.31.6](https://github.com/DIMO-Network/account-manager/compare/v2.31.5...v2.31.6) (2026-03-04)
 
 
