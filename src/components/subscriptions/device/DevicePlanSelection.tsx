@@ -28,7 +28,7 @@ type PricingData = {
 export function DevicePlanSelection({ subscription, deviceTokenId }: DevicePlanSelectionProps) {
   const router = useRouter();
   const [isReactivating, setIsReactivating] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
+  const selectedPlan = 'monthly';
   const [pricing, setPricing] = useState<PricingData | null>(null);
   const [isLoadingPricing, setIsLoadingPricing] = useState(true);
   const [pricingError, setPricingError] = useState<string | null>(null);
@@ -198,11 +198,6 @@ export function DevicePlanSelection({ subscription, deviceTokenId }: DevicePlanS
   const deviceType = getBackendDeviceType(device.manufacturer?.name || '');
   const devicePricing = pricing?.[deviceType];
 
-  // Calculate annual savings if pricing is available
-  const annualSavings = devicePricing
-    ? (devicePricing.monthly.price * 12) - devicePricing.annual.price
-    : 0;
-
   const productName = getManufacturerDisplayName(device.manufacturer?.name || '');
   const vehicleDisplay = device.vehicle?.definition?.year && device.vehicle.definition?.make && device.vehicle.definition?.model
     ? `${device.vehicle.definition.year} ${device.vehicle.definition.make} ${device.vehicle.definition.model}`
@@ -228,14 +223,6 @@ export function DevicePlanSelection({ subscription, deviceTokenId }: DevicePlanS
 
           {/* Skeleton for plan selection */}
           <div className="px-4 space-y-3 mb-4">
-            {/* Annual plan skeleton */}
-            <div className="p-4 rounded-xl min-h-20 bg-surface-raised animate-pulse">
-              <div className="h-4 bg-surface-sunken rounded w-20 mb-2"></div>
-              <div className="h-3 bg-surface-sunken rounded w-24 mb-1"></div>
-              <div className="h-3 bg-surface-sunken rounded w-16"></div>
-            </div>
-
-            {/* Monthly plan skeleton */}
             <div className="p-4 rounded-xl min-h-20 bg-surface-raised animate-pulse">
               <div className="h-4 bg-surface-sunken rounded w-20 mb-2"></div>
               <div className="h-3 bg-surface-sunken rounded w-24 mb-1"></div>
@@ -325,73 +312,18 @@ export function DevicePlanSelection({ subscription, deviceTokenId }: DevicePlanS
                 <p className="text-sm text-text-secondary mt-2">
                   Choose your plan below. You'll receive a
                   {' '}
-                  {devicePricing?.[selectedPlan]?.trial_period_days}
+                  {devicePricing?.monthly?.trial_period_days}
                   -day trial period.
                 </p>
               )}
         </div>
 
         <div className="flex flex-col px-4 gap-3 mb-4">
-          {/* Annual Plan */}
-          <button
-            type="button"
-            className={`relative p-4 rounded-xl border border-surface-raised transition-all duration-200 cursor-pointer w-full text-left min-h-20 bg-surface-raised ${
-              selectedPlan === 'annual'
-                ? 'border-white'
-                : 'border-gray-700'
-            }`}
-            onClick={() => setSelectedPlan('annual')}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setSelectedPlan('annual');
-              }
-            }}
-            aria-pressed={selectedPlan === 'annual'}
-          >
-            <div className="flex flex-col">
-              <div className="font-medium text-base">
-                Annually
-              </div>
-              <div className="text-sm text-text-secondary">
-                $
-                {devicePricing.annual.price.toFixed(2)}
-                {' '}
-                / year
-              </div>
-              {!subscription.trial_end && (
-                <div className="text-xs text-text-tertiary mt-1">
-                  {devicePricing.annual.trial_period_days}
-                  {' '}
-                  day trial
-                </div>
-              )}
-              {annualSavings > 0 && (
-                <div className="text-xs text-green-600 dark:text-green-400 mt-1">
-                  Save $
-                  {annualSavings.toFixed(2)}
-                  /year
-                </div>
-              )}
-            </div>
-          </button>
-
-          {/* Monthly Plan */}
-          <button
-            type="button"
-            className={`relative p-4 rounded-xl border border-surface-raised transition-all duration-200 cursor-pointer w-full text-left min-h-20 bg-surface-raised ${
-              selectedPlan === 'monthly'
-                ? 'border-white'
-                : 'border-gray-700'
-            }`}
-            onClick={() => setSelectedPlan('monthly')}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setSelectedPlan('monthly');
-              }
-            }}
-            aria-pressed={selectedPlan === 'monthly'}
+          {/* Monthly Plan (only option) */}
+          <div
+            className="relative p-4 rounded-xl border border-surface-raised bg-surface-raised w-full text-left min-h-20"
+            role="article"
+            aria-label="Monthly plan"
           >
             <div className="flex flex-col">
               <div className="font-medium text-base">
@@ -411,7 +343,7 @@ export function DevicePlanSelection({ subscription, deviceTokenId }: DevicePlanS
                 </div>
               )}
             </div>
-          </button>
+          </div>
         </div>
 
         <div className="px-4">
