@@ -29,6 +29,26 @@ export type Scalars = {
   Time: { input: any; output: any; }
 };
 
+export type Account = {
+  __typename?: 'Account';
+  /** The account's Ethereum address. */
+  address: Scalars['Address']['output'];
+  /** Lists active account SACDs granted by this account. */
+  sacds: SacdConnection;
+};
+
+
+export type AccountSacdsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type AccountBy = {
+  address?: InputMaybe<Scalars['Address']['input']>;
+};
+
 export type AftermarketDevice = Node & {
   __typename?: 'AftermarketDevice';
   /** The Ethereum address for the device. */
@@ -515,29 +535,34 @@ export type PrivilegesConnection = {
 /** The root query type for the GraphQL schema. */
 export type Query = {
   __typename?: 'Query';
+  /**
+   * Retrieves information about an account. Right now, this is mainly to show
+   * SACDs for user information.
+   */
+  account?: Maybe<Account>;
   /** View a particular aftermarket device. */
-  aftermarketDevice: AftermarketDevice;
+  aftermarketDevice?: Maybe<AftermarketDevice>;
   /**
    * List aftermarket devices.
    * Ordered by token id, descending.
    */
   aftermarketDevices: AftermarketDeviceConnection;
   /** Retrieve a particular connection. */
-  connection: Connection;
+  connection?: Maybe<Connection>;
   /** List connection licenses. Sorts by minting time, descending. */
   connections: ConnectionConnection;
   /** View a particular DIMO Canonical Name. */
-  dcn: Dcn;
+  dcn?: Maybe<Dcn>;
   /** List DIMO Canonical Names. */
   dcns: DcnConnection;
   /** Retrieve a particular developer license. */
-  developerLicense: DeveloperLicense;
+  developerLicense?: Maybe<DeveloperLicense>;
   /** List developer licenses. Sorts by token id, descending. */
   developerLicenses: DeveloperLicenseConnection;
   /** View a particular device definition. */
-  deviceDefinition: DeviceDefinition;
+  deviceDefinition?: Maybe<DeviceDefinition>;
   /** View a particular manufacturer. */
-  manufacturer: Manufacturer;
+  manufacturer?: Maybe<Manufacturer>;
   /**
    * List minted manufacturers.
    *
@@ -549,22 +574,32 @@ export type Query = {
   /** List rewards for a user. */
   rewards?: Maybe<UserRewards>;
   /** List developer licenses. Sorts by token id, descending. */
-  stakes: StakeConnection;
+  stakes?: Maybe<StakeConnection>;
   /** View a particular synthetic device. */
-  syntheticDevice: SyntheticDevice;
+  syntheticDevice?: Maybe<SyntheticDevice>;
   /**
    * List synthetic devices.
    * Ordered by token id, descending.
    */
   syntheticDevices: SyntheticDeviceConnection;
+  /** Retrieve a particular template. */
+  template?: Maybe<Template>;
+  /** List templates. Sorts by minting time, descending. */
+  templates: TemplateConnection;
   /** View a particular vehicle. */
-  vehicle: Vehicle;
+  vehicle?: Maybe<Vehicle>;
   /**
    * List minted vehicles.
    *
    * For now, these are always ordered by token ID in descending order.
    */
   vehicles: VehicleConnection;
+};
+
+
+/** The root query type for the GraphQL schema. */
+export type QueryAccountArgs = {
+  by: AccountBy;
 };
 
 
@@ -682,6 +717,21 @@ export type QuerySyntheticDevicesArgs = {
 
 
 /** The root query type for the GraphQL schema. */
+export type QueryTemplateArgs = {
+  by: TemplateBy;
+};
+
+
+/** The root query type for the GraphQL schema. */
+export type QueryTemplatesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** The root query type for the GraphQL schema. */
 export type QueryVehicleArgs = {
   tokenDID?: InputMaybe<Scalars['String']['input']>;
   tokenId?: InputMaybe<Scalars['Int']['input']>;
@@ -729,6 +779,8 @@ export type Sacd = {
   permissions: Scalars['String']['output'];
   /** Permission source */
   source: Scalars['String']['output'];
+  /** The template used for this permission grant, if any */
+  template?: Maybe<Template>;
 };
 
 /** The Connection type for Sacds. */
@@ -912,6 +964,39 @@ export type SyntheticDevicesFilter = {
   owner?: InputMaybe<Scalars['Address']['input']>;
 };
 
+export type Template = {
+  __typename?: 'Template';
+  asset: Scalars['Address']['output'];
+  cid: Scalars['String']['output'];
+  /** The block timestamp at which this template was created */
+  createdAt: Scalars['Time']['output'];
+  /** Creator of the template */
+  creator: Scalars['Address']['output'];
+  /** Hex string of permissions */
+  permissions: Scalars['String']['output'];
+  /** The token id of the template as an NFT */
+  tokenId: Scalars['BigInt']['output'];
+};
+
+export type TemplateBy = {
+  cid?: InputMaybe<Scalars['String']['input']>;
+  tokenId?: InputMaybe<Scalars['BigInt']['input']>;
+};
+
+export type TemplateConnection = {
+  __typename?: 'TemplateConnection';
+  edges: Array<TemplateEdge>;
+  nodes: Array<Template>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type TemplateEdge = {
+  __typename?: 'TemplateEdge';
+  cursor: Scalars['String']['output'];
+  node: Template;
+};
+
 export type UserRewards = {
   __typename?: 'UserRewards';
   history: EarningsConnection;
@@ -954,6 +1039,8 @@ export type Vehicle = Node & {
   owner: Scalars['Address']['output'];
   /** A Relay-style connection listing any active privilege grants on this vehicle. */
   privileges: PrivilegesConnection;
+  /** The active SACD for this vehicle and the specified grantee, if there is one. */
+  sacd?: Maybe<Sacd>;
   /** A Relay-style connection listing any active SACD permission grants on this vehicle. */
   sacds: SacdConnection;
   stake?: Maybe<Stake>;
@@ -978,6 +1065,11 @@ export type VehiclePrivilegesArgs = {
   filterBy?: InputMaybe<PrivilegeFilterBy>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type VehicleSacdArgs = {
+  grantee: Scalars['Address']['input'];
 };
 
 
@@ -1047,7 +1139,7 @@ export type GetVehicleQueryVariables = Exact<{
 }>;
 
 
-export type GetVehicleQuery = { __typename?: 'Query', vehicle: { __typename?: 'Vehicle', tokenId: number, owner: any, name: string, mintedAt: any, dcn?: { __typename?: 'DCN', id: string, name?: string | null } | null, definition?: { __typename?: 'Definition', make?: string | null, model?: string | null, year?: number | null } | null, aftermarketDevice?: { __typename?: 'AftermarketDevice', tokenId: number, tokenDID: string, serial?: string | null, owner: any, pairedAt?: any | null, manufacturer: { __typename?: 'Manufacturer', name: string } } | null, syntheticDevice?: { __typename?: 'SyntheticDevice', tokenId: number } | null } };
+export type GetVehicleQuery = { __typename?: 'Query', vehicle?: { __typename?: 'Vehicle', tokenId: number, owner: any, name: string, mintedAt: any, dcn?: { __typename?: 'DCN', id: string, name?: string | null } | null, definition?: { __typename?: 'Definition', make?: string | null, model?: string | null, year?: number | null } | null, aftermarketDevice?: { __typename?: 'AftermarketDevice', tokenId: number, tokenDID: string, serial?: string | null, owner: any, pairedAt?: any | null, manufacturer: { __typename?: 'Manufacturer', name: string } } | null, syntheticDevice?: { __typename?: 'SyntheticDevice', tokenId: number } | null } | null };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
