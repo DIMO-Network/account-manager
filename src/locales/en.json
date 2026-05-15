@@ -27,6 +27,7 @@
     "dashboard_link": "Dashboard",
     "subscriptions_link": "Subscriptions",
     "payment_methods_link": "Payment Methods",
+    "parking_link": "Parking",
     "transactions_link": "Transactions",
     "recovery_link": "Recovery",
     "user_profile_link": "Account",
@@ -60,6 +61,16 @@
     "title": "Recovery",
     "description": "Recovery",
     "coming_soon": "Coming soon"
+  },
+  "Parking": {
+    "meta_title": "Parking",
+    "hub_meta_title": "Parking",
+    "hub_title": "Parking assist",
+    "hub_description": "When you park in the Detroit metro area with a Macaron-connected vehicle, DIMO Driver can send you here to pay for parking (ParkDetroit) once that flow is connected.",
+    "session_meta_title": "Parking session",
+    "session_title": "Parking session",
+    "session_description": "Use this page to continue parking payment when the flow is available. Session:",
+    "back_to_parking": "Back to parking"
   },
   "monthly": "monthly",
   "annually": "annually"

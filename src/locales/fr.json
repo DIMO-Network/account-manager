@@ -27,6 +27,7 @@
     "dashboard_link": "Tableau de bord",
     "subscriptions_link": "Abonnements",
     "payment_methods_link": "Méthodes de paiement",
+    "parking_link": "Parking",
     "transactions_link": "Transactions",
     "recovery_link": "Récupération",
     "user_profile_link": "Gérer votre compte",
@@ -51,6 +52,16 @@
     "title": "Transactions",
     "loading": "Chargement des transactions...",
     "no_transactions": "Aucune transaction trouvée"
+  },
+  "Parking": {
+    "meta_title": "Parking",
+    "hub_meta_title": "Parking",
+    "hub_title": "Assistance stationnement",
+    "hub_description": "Lorsque vous vous garez dans la région métropolitaine de Détroit avec un véhicule équipé Macaron, l'application DIMO Driver peut vous envoyer ici pour payer le stationnement (ParkDetroit) une fois le flux connecté.",
+    "session_meta_title": "Session de stationnement",
+    "session_title": "Session de stationnement",
+    "session_description": "Utilisez cette page pour poursuivre le paiement du stationnement lorsque le flux sera disponible. Session :",
+    "back_to_parking": "Retour au parking"
   },
   "Recovery": {
     "meta_title": "Récupération",

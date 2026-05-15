@@ -3,6 +3,7 @@ import type { DIMOProfile } from '@/types/dimo';
 import { NextResponse } from 'next/server';
 import { logger } from '@/libs/Logger';
 import { createSession } from '@/libs/Session';
+import { resolveDimoAuthRedirectPath } from '@/utils/dimoAuthRedirect';
 import { getBaseUrl } from '@/utils/Helpers';
 import { verifyDimoJwt } from '@/utils/verifyDimoJwt';
 
@@ -105,6 +106,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
   const error = searchParams.get('error');
+  const redirectParam = searchParams.get('redirect');
 
   if (error) {
     logger.error({ error }, 'DIMO OAuth error');
@@ -129,7 +131,8 @@ export async function GET(request: NextRequest) {
     const userData = await createUserSession(dimoProfile, token);
 
     // 4. Set DIMO JWT as secure cookie for API fallback
-    const response = NextResponse.redirect(new URL('/dashboard', getBaseUrl()));
+    const postAuthPath = resolveDimoAuthRedirectPath(redirectParam);
+    const response = NextResponse.redirect(new URL(postAuthPath, getBaseUrl()));
     response.cookies.set('dimo_jwt', token, {
       httpOnly: process.env.NODE_ENV === 'production',
       secure: process.env.NODE_ENV === 'production',
@@ -138,7 +141,7 @@ export async function GET(request: NextRequest) {
       path: '/',
     });
 
-    logger.info({ userId: userData.userId }, 'Redirecting to dashboard with authenticated session');
+    logger.info({ userId: userData.userId, postAuthPath }, 'Redirecting after DIMO auth with authenticated session');
     return response;
   } catch (error) {
     logger.error({ error }, 'DIMO auth error');

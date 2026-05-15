@@ -7,6 +7,14 @@ import { isAuthenticated, redirectToSignIn } from '@/libs/MiddlewareAuth';
 import { AppConfig } from '@/utils/AppConfig';
 import { routing } from './libs/i18nRouting';
 
+const localeFromPathname = (pathname: string): string => {
+  const segment = pathname.split('/').filter(Boolean)[0];
+  if (segment && AppConfig.locales.includes(segment as (typeof AppConfig.locales)[number])) {
+    return segment;
+  }
+  return AppConfig.defaultLocale;
+};
+
 const handleI18nRouting = createMiddleware(routing);
 
 // Route matchers
@@ -14,6 +22,8 @@ const isProtectedRoute = (pathname: string) => {
   const protectedPatterns = [
     /^\/dashboard/,
     /^\/[a-z]{2}\/dashboard/,
+    /^\/parking(\/|$)/,
+    /^\/[a-z]{2}\/parking(\/|$)/,
     /^\/subscriptions/,
     /^\/[a-z]{2}\/subscriptions/,
     /^\/payment-methods/,
@@ -87,8 +97,8 @@ export default async function middleware(
   if (isProtectedRoute(pathname)) {
     const authenticated = await isAuthenticated(request);
     if (!authenticated) {
-      const locale = pathname.match(/(\/.*)\/dashboard/)?.at(1) ?? `/${AppConfig.defaultLocale}`;
-      return redirectToSignIn(request, locale.replace('/', ''));
+      const locale = localeFromPathname(pathname);
+      return redirectToSignIn(request, locale);
     }
     return handleI18nRouting(request);
   }
