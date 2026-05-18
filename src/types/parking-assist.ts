@@ -33,12 +33,14 @@ export type ParkingAssistSession = {
 export type ParkingAssistSessionDetail = {
   session: ParkingAssistSession;
   vehicleDisplayName: string | null;
+  vehicleLicensePlate: string | null;
   latestCheckout: ParkingCorporateCheckout | null;
 };
 
 export type ParkingAssistHistoryItem = {
   session: ParkingAssistSession;
   vehicleDisplayName: string | null;
+  vehicleLicensePlate: string | null;
   latestCheckout: ParkingCorporateCheckout | null;
 };
 

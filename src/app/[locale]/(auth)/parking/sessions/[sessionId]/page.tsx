@@ -57,6 +57,10 @@ export default async function ParkingSessionPage(props: {
 
   const translations = {
     vehicle_label: t('vehicle_label'),
+    license_plate_label: t('license_plate_label'),
+    license_plate_not_set: t('license_plate_not_set'),
+    license_plate_missing_hint: t('license_plate_missing_hint'),
+    license_plate_required_error: t('license_plate_required_error'),
     triggered_at_label: t('triggered_at_label'),
     checkout_status_label: t('checkout_status_label'),
     pay_with_dimo: t('pay_with_dimo'),

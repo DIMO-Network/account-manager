@@ -14,6 +14,10 @@ type ParkingSessionClientProps = {
   initialDetail: ParkingAssistSessionDetail;
   translations: {
     vehicle_label: string;
+    license_plate_label: string;
+    license_plate_not_set: string;
+    license_plate_missing_hint: string;
+    license_plate_required_error: string;
     triggered_at_label: string;
     checkout_status_label: string;
     pay_with_dimo: string;
@@ -39,6 +43,19 @@ const MAX_POLL_ATTEMPTS = 12;
 
 function isInProgress(status: ParkingCorporateCheckoutStatus | undefined): boolean {
   return status === 'pending' || status === 'running';
+}
+
+function resolveApiErrorMessage(
+  body: { error?: string; message?: string | string[] },
+  fallback: string,
+  licensePlateRequiredMessage: string,
+): string {
+  const raw = body.error ?? body.message;
+  const message = Array.isArray(raw) ? raw.join(' ') : raw;
+  if (message?.includes('license_plate_required')) {
+    return licensePlateRequiredMessage;
+  }
+  return message ?? fallback;
 }
 
 export function ParkingSessionClient({
@@ -74,6 +91,10 @@ export function ParkingSessionClient({
 
   const checkoutStatus = detail.latestCheckout?.status;
 
+  const vehicleLicensePlate
+    = detail.vehicleLicensePlate ?? detail.latestCheckout?.licensePlate ?? null;
+  const hasLicensePlate = Boolean(vehicleLicensePlate?.trim());
+
   useEffect(() => {
     if (!isInProgress(checkoutStatus)) {
       setPollingExhausted(false);
@@ -97,9 +118,12 @@ export function ParkingSessionClient({
     return () => window.clearInterval(id);
   }, [checkoutStatus, pollingExhausted, refreshSession]);
 
-  const canPay
-    = !paying
-      && (!checkoutStatus || checkoutStatus === 'failed' || checkoutStatus === 'cancelled');
+  const checkoutAllowsPay
+    = !checkoutStatus || checkoutStatus === 'failed' || checkoutStatus === 'cancelled';
+
+  const canPay = !paying && hasLicensePlate && checkoutAllowsPay;
+
+  const showMissingPlateHint = !hasLicensePlate && checkoutAllowsPay;
 
   const handlePay = async () => {
     setPaying(true);
@@ -115,8 +139,13 @@ export function ParkingSessionClient({
       );
 
       if (!response.ok) {
-        const body = (await response.json().catch(() => ({}))) as { error?: string; message?: string };
-        throw new Error(body.error ?? body.message ?? t.pay_error);
+        const body = (await response.json().catch(() => ({}))) as {
+          error?: string;
+          message?: string | string[];
+        };
+        throw new Error(
+          resolveApiErrorMessage(body, t.pay_error, t.license_plate_required_error),
+        );
       }
 
       await response.json() as StartCorporateCheckoutResponse;
@@ -147,6 +176,16 @@ export function ParkingSessionClient({
         <div>
           <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary} mb-1`}>{t.vehicle_label}</p>
           <p className={`${RESPONSIVE.text.body} font-medium ${COLORS.text.primary}`}>{vehicleLabel}</p>
+        </div>
+        <div>
+          <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary} mb-1`}>{t.license_plate_label}</p>
+          <p
+            className={`${RESPONSIVE.text.body} font-medium ${
+              hasLicensePlate ? COLORS.text.primary : COLORS.text.secondary
+            }`}
+          >
+            {hasLicensePlate ? vehicleLicensePlate : t.license_plate_not_set}
+          </p>
         </div>
         <div>
           <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary} mb-1`}>{t.triggered_at_label}</p>
@@ -181,6 +220,10 @@ export function ParkingSessionClient({
           </p>
         )}
       </div>
+
+      {showMissingPlateHint && (
+        <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>{t.license_plate_missing_hint}</p>
+      )}
 
       {error && (
         <p className={`${RESPONSIVE.text.body} ${COLORS.feedback.error}`}>{error}</p>
