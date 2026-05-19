@@ -7,6 +7,7 @@ import type {
 } from '@/types/parking-assist';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
+import { hasZoneCode, normalizeZoneCode } from '@/utils/zone-code';
 import { ParkingCheckoutStatusBadge } from './ParkingCheckoutStatusBadge';
 
 type ParkingSessionClientProps = {
@@ -18,6 +19,11 @@ type ParkingSessionClientProps = {
     license_plate_not_set: string;
     license_plate_missing_hint: string;
     license_plate_required_error: string;
+    zone_code_label: string;
+    zone_code_placeholder: string;
+    zone_sign_hint: string;
+    zone_code_missing_hint: string;
+    zone_code_required_error: string;
     triggered_at_label: string;
     checkout_status_label: string;
     pay_with_dimo: string;
@@ -45,17 +51,33 @@ function isInProgress(status: ParkingCorporateCheckoutStatus | undefined): boole
   return status === 'pending' || status === 'running';
 }
 
+type PayErrorMessages = {
+  fallback: string;
+  licensePlateRequired: string;
+  zoneCodeRequired: string;
+};
+
 function resolveApiErrorMessage(
   body: { error?: string; message?: string | string[] },
-  fallback: string,
-  licensePlateRequiredMessage: string,
+  messages: PayErrorMessages,
 ): string {
   const raw = body.error ?? body.message;
   const message = Array.isArray(raw) ? raw.join(' ') : raw;
   if (message?.includes('license_plate_required')) {
-    return licensePlateRequiredMessage;
+    return messages.licensePlateRequired;
   }
-  return message ?? fallback;
+  if (message?.includes('zone_code_required')) {
+    return messages.zoneCodeRequired;
+  }
+  return message ?? messages.fallback;
+}
+
+function initialZoneCodeInput(detail: ParkingAssistSessionDetail): string {
+  const checkout = detail.latestCheckout;
+  if (!checkout) {
+    return '';
+  }
+  return checkout.zoneLabel ?? checkout.zoneId ?? '';
 }
 
 export function ParkingSessionClient({
@@ -65,6 +87,7 @@ export function ParkingSessionClient({
   locale,
 }: ParkingSessionClientProps) {
   const [detail, setDetail] = useState(initialDetail);
+  const [zoneCodeInput, setZoneCodeInput] = useState(() => initialZoneCodeInput(initialDetail));
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pollingExhausted, setPollingExhausted] = useState(false);
@@ -94,6 +117,7 @@ export function ParkingSessionClient({
   const vehicleLicensePlate
     = detail.vehicleLicensePlate ?? detail.latestCheckout?.licensePlate ?? null;
   const hasLicensePlate = Boolean(vehicleLicensePlate?.trim());
+  const hasValidZoneCode = hasZoneCode(zoneCodeInput);
 
   useEffect(() => {
     if (!isInProgress(checkoutStatus)) {
@@ -121,20 +145,30 @@ export function ParkingSessionClient({
   const checkoutAllowsPay
     = !checkoutStatus || checkoutStatus === 'failed' || checkoutStatus === 'cancelled';
 
-  const canPay = !paying && hasLicensePlate && checkoutAllowsPay;
+  const canPay = !paying && hasLicensePlate && hasValidZoneCode && checkoutAllowsPay;
 
   const showMissingPlateHint = !hasLicensePlate && checkoutAllowsPay;
+  const showMissingZoneHint = hasLicensePlate && !hasValidZoneCode && checkoutAllowsPay;
 
   const handlePay = async () => {
     setPaying(true);
     setError(null);
     try {
       const idempotencyKey = crypto.randomUUID();
+      const zoneCode = normalizeZoneCode(zoneCodeInput);
+      if (!zoneCode) {
+        throw new Error(t.zone_code_required_error);
+      }
+
       const response = await fetch(
         `/api/parking-assist/sessions/${sessionId}/corporate-checkout`,
         {
           method: 'POST',
-          headers: { 'Idempotency-Key': idempotencyKey },
+          headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': idempotencyKey,
+          },
+          body: JSON.stringify({ zoneCode }),
         },
       );
 
@@ -144,7 +178,11 @@ export function ParkingSessionClient({
           message?: string | string[];
         };
         throw new Error(
-          resolveApiErrorMessage(body, t.pay_error, t.license_plate_required_error),
+          resolveApiErrorMessage(body, {
+            fallback: t.pay_error,
+            licensePlateRequired: t.license_plate_required_error,
+            zoneCodeRequired: t.zone_code_required_error,
+          }),
         );
       }
 
@@ -219,10 +257,35 @@ export function ParkingSessionClient({
             {t.pending_queued_message}
           </p>
         )}
+        {checkoutAllowsPay && (
+          <div className="flex flex-col gap-2">
+            <label htmlFor="parking-zone-code" className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>
+              {t.zone_code_label}
+            </label>
+            <input
+              id="parking-zone-code"
+              name="zoneCode"
+              type="text"
+              inputMode="text"
+              autoComplete="off"
+              spellCheck={false}
+              value={zoneCodeInput}
+              onChange={event => setZoneCodeInput(event.target.value)}
+              placeholder={t.zone_code_placeholder}
+              maxLength={32}
+              className={`rounded-md bg-surface-raised px-4 py-2 w-full ${RESPONSIVE.text.body} ${COLORS.text.primary} placeholder:text-text-secondary`}
+            />
+            <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>{t.zone_sign_hint}</p>
+          </div>
+        )}
       </div>
 
       {showMissingPlateHint && (
         <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>{t.license_plate_missing_hint}</p>
+      )}
+
+      {showMissingZoneHint && (
+        <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>{t.zone_code_missing_hint}</p>
       )}
 
       {error && (

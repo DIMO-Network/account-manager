@@ -19,6 +19,19 @@ export async function POST(
     }
 
     const { sessionId } = await params;
+
+    let zoneCode: string | undefined;
+    try {
+      const body = (await request.json()) as { zoneCode?: string };
+      zoneCode = body.zoneCode?.trim();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+
+    if (!zoneCode) {
+      return NextResponse.json({ error: 'zone_code_required' }, { status: 400 });
+    }
+
     const backendUrl
       = `${getParkingAssistBackendBaseUrl()}/account/parking-assist/sessions/${sessionId}/corporate-checkout`;
 
@@ -27,7 +40,9 @@ export async function POST(
       headers: {
         'Authorization': `Bearer ${session.dimoToken}`,
         'Idempotency-Key': idempotencyKey,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ zoneCode }),
     });
 
     const body = await response.text();
