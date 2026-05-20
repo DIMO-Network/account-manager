@@ -76,9 +76,11 @@ export default async function ParkingSessionPage(props: {
     status_running: t('status_running'),
     status_paid: t('status_paid'),
     status_failed: t('status_failed'),
+    status_no_payment_required: t('status_no_payment_required'),
     status_cancelled: t('status_cancelled'),
     paid_message: t('paid_message'),
     failed_message: t('failed_message'),
+    no_payment_required_message: t('no_payment_required_message'),
     no_checkout: t('no_checkout'),
     pending_queued_message: t('pending_queued_message'),
   };

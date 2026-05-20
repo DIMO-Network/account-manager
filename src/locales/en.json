@@ -95,9 +95,11 @@
     "status_running": "Processing",
     "status_paid": "Paid",
     "status_failed": "Failed",
+    "status_no_payment_required": "No payment needed",
     "status_cancelled": "Cancelled",
     "paid_message": "Parking was paid successfully.",
     "failed_message": "Payment could not be completed.",
+    "no_payment_required_message": "No metered payment is required right now for this zone. Posted sign restrictions still apply. You can try again during metered hours if payment becomes necessary.",
     "no_checkout": "Not started",
     "pending_queued_message": "Your payment request is queued. Checkout automation is not connected yet, so the status may stay Pending—use Refresh to check again later."
   },

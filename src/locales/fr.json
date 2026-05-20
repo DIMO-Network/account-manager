@@ -86,9 +86,11 @@
     "status_running": "En cours",
     "status_paid": "Payé",
     "status_failed": "Échec",
+    "status_no_payment_required": "Aucun paiement requis",
     "status_cancelled": "Annulé",
     "paid_message": "Le stationnement a été payé avec succès.",
     "failed_message": "Le paiement n'a pas pu être effectué.",
+    "no_payment_required_message": "Aucun paiement horaire n'est requis pour cette zone en ce moment. Les restrictions affichées sur les panneaux s'appliquent toujours. Réessayez pendant les heures payantes si un paiement devient nécessaire.",
     "no_checkout": "Non démarré",
     "pending_queued_message": "Votre demande de paiement est en file d'attente. L'automatisation n'est pas encore connectée; le statut peut rester En attente—utilisez Actualiser plus tard."
   },

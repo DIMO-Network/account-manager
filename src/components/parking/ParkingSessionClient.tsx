@@ -7,6 +7,7 @@ import type {
 } from '@/types/parking-assist';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
+import { isNoPaymentRequiredCheckout } from '@/utils/parking-checkout';
 import { hasZoneCode, normalizeZoneCode } from '@/utils/zone-code';
 import { ParkingCheckoutStatusBadge } from './ParkingCheckoutStatusBadge';
 
@@ -34,9 +35,11 @@ type ParkingSessionClientProps = {
     status_running: string;
     status_paid: string;
     status_failed: string;
+    status_no_payment_required: string;
     status_cancelled: string;
     paid_message: string;
     failed_message: string;
+    no_payment_required_message: string;
     no_checkout: string;
     pending_queued_message: string;
   };
@@ -113,6 +116,7 @@ export function ParkingSessionClient({
   }, [sessionId]);
 
   const checkoutStatus = detail.latestCheckout?.status;
+  const noPaymentRequired = isNoPaymentRequiredCheckout(detail.latestCheckout);
 
   const vehicleLicensePlate
     = detail.vehicleLicensePlate ?? detail.latestCheckout?.licensePlate ?? null;
@@ -237,7 +241,12 @@ export function ParkingSessionClient({
             ? (
                 <ParkingCheckoutStatusBadge
                   status={detail.latestCheckout.status}
-                  label={statusLabels[detail.latestCheckout.status]}
+                  label={
+                    noPaymentRequired
+                      ? t.status_no_payment_required
+                      : statusLabels[detail.latestCheckout.status]
+                  }
+                  variant={noPaymentRequired ? 'info' : 'default'}
                 />
               )
             : (
@@ -247,7 +256,12 @@ export function ParkingSessionClient({
         {checkoutStatus === 'paid' && (
           <p className={`${RESPONSIVE.text.body} ${COLORS.feedback.success}`}>{t.paid_message}</p>
         )}
-        {checkoutStatus === 'failed' && (
+        {checkoutStatus === 'failed' && noPaymentRequired && (
+          <p className={`${RESPONSIVE.text.body} text-amber-300`}>
+            {t.no_payment_required_message}
+          </p>
+        )}
+        {checkoutStatus === 'failed' && !noPaymentRequired && (
           <p className={`${RESPONSIVE.text.body} ${COLORS.feedback.error}`}>
             {detail.latestCheckout?.failureMessage ?? t.failed_message}
           </p>
