@@ -5,6 +5,8 @@ export type ParkingCorporateCheckoutStatus
     | 'failed'
     | 'cancelled';
 
+export type ParkingService = 'parkdetroit';
+
 export type ParkingCorporateCheckout = {
   id: string;
   status: ParkingCorporateCheckoutStatus;
@@ -16,7 +18,8 @@ export type ParkingCorporateCheckout = {
   zoneId: string | null;
   zoneLabel: string | null;
   licensePlate: string | null;
-  maxDurationMinutes: number | null;
+  parkingService: ParkingService;
+  durationMinutes: number | null;
   paidAt: string | null;
   automationRunId: string | null;
   createdAt: string;
@@ -27,6 +30,8 @@ export type ParkingAssistSession = {
   id: string;
   vehicleTokenId: number;
   triggeredAt: string;
+  triggerLatitude: number | null;
+  triggerLongitude: number | null;
   createdAt: string;
 };
 
@@ -55,4 +60,27 @@ export type StartCorporateCheckoutResponse = {
   checkoutId: string;
   status: string;
   idempotencyKey: string;
+};
+
+export type ParkingServiceDurationOption = {
+  minutes: number;
+  label: string;
+};
+
+export type ParkingServiceCatalogEntry = {
+  id: ParkingService;
+  label: string;
+  zoneCodeHint: string;
+  defaultDurationMinutes: number;
+  durationOptions: ParkingServiceDurationOption[];
+};
+
+export type ParkingServicesCatalog = {
+  services: ParkingServiceCatalogEntry[];
+};
+
+export type StartCorporateCheckoutRequest = {
+  zoneCode: string;
+  durationMinutes: number;
+  parkingService?: ParkingService;
 };

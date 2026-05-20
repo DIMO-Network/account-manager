@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import type { ParkingAssistSessionDetail } from '@/types/parking-assist';
+import type { ParkingAssistSessionDetail, ParkingServicesCatalog } from '@/types/parking-assist';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -37,9 +37,12 @@ export default async function ParkingSessionPage(props: {
     namespace: 'Parking',
   });
 
-  const sessionResult = await fetchParkingAssistBackend<ParkingAssistSessionDetail>(
-    `/account/parking-assist/sessions/${sessionId}`,
-  );
+  const [sessionResult, catalogResult] = await Promise.all([
+    fetchParkingAssistBackend<ParkingAssistSessionDetail>(
+      `/account/parking-assist/sessions/${sessionId}`,
+    ),
+    fetchParkingAssistBackend<ParkingServicesCatalog>('/account/parking-assist/parking-services'),
+  ]);
 
   if ('error' in sessionResult) {
     if (sessionResult.status === 404) {
@@ -55,12 +58,34 @@ export default async function ParkingSessionPage(props: {
     );
   }
 
+  if ('error' in catalogResult || catalogResult.data.services.length === 0) {
+    return (
+      <div className="flex flex-col gap-6 max-w-2xl">
+        <Link href="/parking/" className="text-sm text-text-secondary hover:text-text-primary underline">
+          {t('back_to_parking')}
+        </Link>
+        <p className={`${RESPONSIVE.text.body} ${COLORS.feedback.error}`}>{t('catalog_load_error')}</p>
+      </div>
+    );
+  }
+
   const translations = {
     vehicle_label: t('vehicle_label'),
     license_plate_label: t('license_plate_label'),
     license_plate_not_set: t('license_plate_not_set'),
     license_plate_missing_hint: t('license_plate_missing_hint'),
     license_plate_required_error: t('license_plate_required_error'),
+    parking_service_label: t('parking_service_label'),
+    duration_label: t('duration_label'),
+    duration_option_60: t('duration_option_60'),
+    duration_option_75: t('duration_option_75'),
+    duration_option_90: t('duration_option_90'),
+    duration_option_105: t('duration_option_105'),
+    duration_option_120: t('duration_option_120'),
+    duration_missing_hint: t('duration_missing_hint'),
+    duration_minutes_required_error: t('duration_minutes_required_error'),
+    duration_minutes_invalid_error: t('duration_minutes_invalid_error'),
+    parking_service_invalid_error: t('parking_service_invalid_error'),
     zone_code_label: t('zone_code_label'),
     zone_code_placeholder: t('zone_code_placeholder'),
     zone_sign_hint: t('zone_sign_hint'),
@@ -101,6 +126,7 @@ export default async function ParkingSessionPage(props: {
       <ParkingSessionClient
         sessionId={sessionId}
         initialDetail={sessionResult.data}
+        parkingServicesCatalog={catalogResult.data}
         translations={translations}
         locale={locale}
       />

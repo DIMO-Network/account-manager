@@ -3,23 +3,43 @@
 import type {
   ParkingAssistSessionDetail,
   ParkingCorporateCheckoutStatus,
+  ParkingService,
+  ParkingServicesCatalog,
   StartCorporateCheckoutResponse,
 } from '@/types/parking-assist';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { isNoPaymentRequiredCheckout } from '@/utils/parking-checkout';
+import {
+  findCatalogService,
+  initialParkingCheckoutSelections,
+  isDurationAllowedForCatalogService,
+  parkingDurationTranslationKey,
+} from '@/utils/parking-services';
 import { hasZoneCode, normalizeZoneCode } from '@/utils/zone-code';
 import { ParkingCheckoutStatusBadge } from './ParkingCheckoutStatusBadge';
 
 type ParkingSessionClientProps = {
   sessionId: string;
   initialDetail: ParkingAssistSessionDetail;
+  parkingServicesCatalog: ParkingServicesCatalog;
   translations: {
     vehicle_label: string;
     license_plate_label: string;
     license_plate_not_set: string;
     license_plate_missing_hint: string;
     license_plate_required_error: string;
+    parking_service_label: string;
+    duration_label: string;
+    duration_option_60: string;
+    duration_option_75: string;
+    duration_option_90: string;
+    duration_option_105: string;
+    duration_option_120: string;
+    duration_missing_hint: string;
+    duration_minutes_required_error: string;
+    duration_minutes_invalid_error: string;
+    parking_service_invalid_error: string;
     zone_code_label: string;
     zone_code_placeholder: string;
     zone_sign_hint: string;
@@ -50,6 +70,8 @@ type ParkingSessionClientProps = {
 const POLL_INTERVAL_MS = 5000;
 const MAX_POLL_ATTEMPTS = 12;
 
+const selectClassName = `rounded-md bg-surface-raised px-4 py-2 w-full ${RESPONSIVE.text.body} ${COLORS.text.primary}`;
+
 function isInProgress(status: ParkingCorporateCheckoutStatus | undefined): boolean {
   return status === 'pending' || status === 'running';
 }
@@ -58,6 +80,9 @@ type PayErrorMessages = {
   fallback: string;
   licensePlateRequired: string;
   zoneCodeRequired: string;
+  durationRequired: string;
+  durationInvalid: string;
+  parkingServiceInvalid: string;
 };
 
 function resolveApiErrorMessage(
@@ -72,6 +97,15 @@ function resolveApiErrorMessage(
   if (message?.includes('zone_code_required')) {
     return messages.zoneCodeRequired;
   }
+  if (message?.includes('duration_minutes_required')) {
+    return messages.durationRequired;
+  }
+  if (message?.includes('duration_minutes_invalid')) {
+    return messages.durationInvalid;
+  }
+  if (message?.includes('parking_service_invalid')) {
+    return messages.parkingServiceInvalid;
+  }
   return message ?? messages.fallback;
 }
 
@@ -83,14 +117,35 @@ function initialZoneCodeInput(detail: ParkingAssistSessionDetail): string {
   return checkout.zoneLabel ?? checkout.zoneId ?? '';
 }
 
+function durationLabelFromTranslations(
+  minutes: number,
+  translations: ParkingSessionClientProps['translations'],
+): string {
+  const key = parkingDurationTranslationKey(minutes) as keyof ParkingSessionClientProps['translations'];
+  const label = translations[key];
+  return typeof label === 'string' ? label : String(minutes);
+}
+
 export function ParkingSessionClient({
   sessionId,
   initialDetail,
+  parkingServicesCatalog,
   translations: t,
   locale,
 }: ParkingSessionClientProps) {
+  const initialSelections = useMemo(
+    () => initialParkingCheckoutSelections(parkingServicesCatalog, initialDetail.latestCheckout),
+    [parkingServicesCatalog, initialDetail.latestCheckout],
+  );
+
   const [detail, setDetail] = useState(initialDetail);
   const [zoneCodeInput, setZoneCodeInput] = useState(() => initialZoneCodeInput(initialDetail));
+  const [parkingServiceId, setParkingServiceId] = useState<ParkingService | ''>(
+    () => initialSelections?.parkingServiceId ?? '',
+  );
+  const [durationMinutes, setDurationMinutes] = useState<number | null>(
+    () => initialSelections?.durationMinutes ?? null,
+  );
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pollingExhausted, setPollingExhausted] = useState(false);
@@ -123,12 +178,19 @@ export function ParkingSessionClient({
   const hasLicensePlate = Boolean(vehicleLicensePlate?.trim());
   const hasValidZoneCode = hasZoneCode(zoneCodeInput);
 
+  const selectedCatalogEntry = useMemo(
+    () => findCatalogService(parkingServicesCatalog, parkingServiceId || undefined),
+    [parkingServicesCatalog, parkingServiceId],
+  );
+
+  const hasValidParkingService = Boolean(selectedCatalogEntry);
+  const hasValidDuration = isDurationAllowedForCatalogService(selectedCatalogEntry, durationMinutes);
+
+  const checkoutInProgress = isInProgress(checkoutStatus);
+  const showPendingQueuedMessage = checkoutStatus === 'pending' && pollingExhausted;
+
   useEffect(() => {
-    if (!isInProgress(checkoutStatus)) {
-      setPollingExhausted(false);
-      return;
-    }
-    if (pollingExhausted) {
+    if (!checkoutInProgress || pollingExhausted) {
       return;
     }
 
@@ -144,15 +206,38 @@ export function ParkingSessionClient({
     }, POLL_INTERVAL_MS);
 
     return () => window.clearInterval(id);
-  }, [checkoutStatus, pollingExhausted, refreshSession]);
+  }, [checkoutInProgress, pollingExhausted, refreshSession]);
 
   const checkoutAllowsPay
     = !checkoutStatus || checkoutStatus === 'failed' || checkoutStatus === 'cancelled';
 
-  const canPay = !paying && hasLicensePlate && hasValidZoneCode && checkoutAllowsPay;
+  const canPay
+    = !paying
+      && hasLicensePlate
+      && hasValidParkingService
+      && hasValidDuration
+      && hasValidZoneCode
+      && checkoutAllowsPay;
 
   const showMissingPlateHint = !hasLicensePlate && checkoutAllowsPay;
-  const showMissingZoneHint = hasLicensePlate && !hasValidZoneCode && checkoutAllowsPay;
+  const showMissingDurationHint
+    = hasLicensePlate && hasValidParkingService && !hasValidDuration && checkoutAllowsPay;
+  const showMissingZoneHint
+    = hasLicensePlate
+      && hasValidParkingService
+      && hasValidDuration
+      && !hasValidZoneCode
+      && checkoutAllowsPay;
+
+  const zoneHint = selectedCatalogEntry?.zoneCodeHint ?? t.zone_sign_hint;
+
+  const handleParkingServiceChange = (nextServiceId: string) => {
+    setParkingServiceId(nextServiceId as ParkingService);
+    const entry = findCatalogService(parkingServicesCatalog, nextServiceId as ParkingService);
+    if (entry && !isDurationAllowedForCatalogService(entry, durationMinutes)) {
+      setDurationMinutes(entry.defaultDurationMinutes);
+    }
+  };
 
   const handlePay = async () => {
     setPaying(true);
@@ -163,6 +248,12 @@ export function ParkingSessionClient({
       if (!zoneCode) {
         throw new Error(t.zone_code_required_error);
       }
+      if (!hasValidDuration || durationMinutes == null) {
+        throw new Error(t.duration_minutes_required_error);
+      }
+      if (!parkingServiceId) {
+        throw new Error(t.parking_service_invalid_error);
+      }
 
       const response = await fetch(
         `/api/parking-assist/sessions/${sessionId}/corporate-checkout`,
@@ -172,7 +263,11 @@ export function ParkingSessionClient({
             'Content-Type': 'application/json',
             'Idempotency-Key': idempotencyKey,
           },
-          body: JSON.stringify({ zoneCode }),
+          body: JSON.stringify({
+            zoneCode,
+            durationMinutes,
+            parkingService: parkingServiceId,
+          }),
         },
       );
 
@@ -186,6 +281,9 @@ export function ParkingSessionClient({
             fallback: t.pay_error,
             licensePlateRequired: t.license_plate_required_error,
             zoneCodeRequired: t.zone_code_required_error,
+            durationRequired: t.duration_minutes_required_error,
+            durationInvalid: t.duration_minutes_invalid_error,
+            parkingServiceInvalid: t.parking_service_invalid_error,
           }),
         );
       }
@@ -266,36 +364,79 @@ export function ParkingSessionClient({
             {detail.latestCheckout?.failureMessage ?? t.failed_message}
           </p>
         )}
-        {checkoutStatus === 'pending' && pollingExhausted && (
+        {showPendingQueuedMessage && (
           <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>
             {t.pending_queued_message}
           </p>
         )}
-        {checkoutAllowsPay && (
-          <div className="flex flex-col gap-2">
-            <label htmlFor="parking-zone-code" className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>
-              {t.zone_code_label}
-            </label>
-            <input
-              id="parking-zone-code"
-              name="zoneCode"
-              type="text"
-              inputMode="text"
-              autoComplete="off"
-              spellCheck={false}
-              value={zoneCodeInput}
-              onChange={event => setZoneCodeInput(event.target.value)}
-              placeholder={t.zone_code_placeholder}
-              maxLength={32}
-              className={`rounded-md bg-surface-raised px-4 py-2 w-full ${RESPONSIVE.text.body} ${COLORS.text.primary} placeholder:text-text-secondary`}
-            />
-            <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>{t.zone_sign_hint}</p>
-          </div>
+        {checkoutAllowsPay && parkingServicesCatalog.services.length > 0 && (
+          <>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="parking-service" className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>
+                {t.parking_service_label}
+              </label>
+              <select
+                id="parking-service"
+                name="parkingService"
+                value={parkingServiceId}
+                onChange={event => handleParkingServiceChange(event.target.value)}
+                className={selectClassName}
+              >
+                {parkingServicesCatalog.services.map(service => (
+                  <option key={service.id} value={service.id}>
+                    {service.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="parking-duration" className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>
+                {t.duration_label}
+              </label>
+              <select
+                id="parking-duration"
+                name="durationMinutes"
+                value={durationMinutes == null ? '' : String(durationMinutes)}
+                onChange={event => setDurationMinutes(Number.parseInt(event.target.value, 10))}
+                className={selectClassName}
+                disabled={!selectedCatalogEntry}
+              >
+                {(selectedCatalogEntry?.durationOptions ?? []).map(option => (
+                  <option key={option.minutes} value={option.minutes}>
+                    {durationLabelFromTranslations(option.minutes, t)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="parking-zone-code" className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>
+                {t.zone_code_label}
+              </label>
+              <input
+                id="parking-zone-code"
+                name="zoneCode"
+                type="text"
+                inputMode="text"
+                autoComplete="off"
+                spellCheck={false}
+                value={zoneCodeInput}
+                onChange={event => setZoneCodeInput(event.target.value)}
+                placeholder={t.zone_code_placeholder}
+                maxLength={32}
+                className={`${selectClassName} placeholder:text-text-secondary`}
+              />
+              <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>{zoneHint}</p>
+            </div>
+          </>
         )}
       </div>
 
       {showMissingPlateHint && (
         <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>{t.license_plate_missing_hint}</p>
+      )}
+
+      {showMissingDurationHint && (
+        <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>{t.duration_missing_hint}</p>
       )}
 
       {showMissingZoneHint && (

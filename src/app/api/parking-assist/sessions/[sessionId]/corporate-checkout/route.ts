@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import type { StartCorporateCheckoutRequest } from '@/types/parking-assist';
 import { NextResponse } from 'next/server';
 import { getParkingAssistBackendBaseUrl } from '@/libs/ParkingAssistBackend';
 import { getSession } from '@/libs/Session';
@@ -20,16 +21,20 @@ export async function POST(
 
     const { sessionId } = await params;
 
-    let zoneCode: string | undefined;
+    let body: StartCorporateCheckoutRequest;
     try {
-      const body = (await request.json()) as { zoneCode?: string };
-      zoneCode = body.zoneCode?.trim();
+      body = (await request.json()) as StartCorporateCheckoutRequest;
     } catch {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
 
+    const zoneCode = body.zoneCode?.trim();
     if (!zoneCode) {
       return NextResponse.json({ error: 'zone_code_required' }, { status: 400 });
+    }
+
+    if (body.durationMinutes == null || !Number.isInteger(body.durationMinutes)) {
+      return NextResponse.json({ error: 'duration_minutes_required' }, { status: 400 });
     }
 
     const backendUrl
@@ -42,11 +47,15 @@ export async function POST(
         'Idempotency-Key': idempotencyKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ zoneCode }),
+      body: JSON.stringify({
+        zoneCode,
+        durationMinutes: body.durationMinutes,
+        ...(body.parkingService ? { parkingService: body.parkingService } : {}),
+      }),
     });
 
-    const body = await response.text();
-    return new NextResponse(body, {
+    const responseBody = await response.text();
+    return new NextResponse(responseBody, {
       status: response.status,
       headers: { 'Content-Type': 'application/json' },
     });
