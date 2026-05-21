@@ -104,7 +104,8 @@
     "failed_message": "Le paiement n'a pas pu être effectué.",
     "no_payment_required_message": "Aucun paiement horaire n'est requis pour cette zone en ce moment. Les restrictions affichées sur les panneaux s'appliquent toujours. Réessayez pendant les heures payantes si un paiement devient nécessaire.",
     "no_checkout": "Non démarré",
-    "pending_queued_message": "Votre paiement est traité automatiquement sur ParkDetroit. Cela prend généralement jusqu'à 3 minutes. Appuyez sur Actualiser si le statut ne s'est pas mis à jour."
+    "pending_queued_message": "Le paiement est toujours en cours. Appuyez sur Actualiser pour voir le statut.",
+    "pay_submitted_message": "Votre paiement a été envoyé. Vous pouvez fermer cette page—nous vous enverrons une notification lorsque le paiement ParkDetroit sera terminé (en quelques minutes en général). Appuyez sur Actualiser si vous restez sur la page."
   },
   "Recovery": {
     "meta_title": "Récupération",

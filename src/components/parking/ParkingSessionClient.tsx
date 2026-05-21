@@ -62,13 +62,16 @@ type ParkingSessionClientProps = {
     no_payment_required_message: string;
     no_checkout: string;
     pending_queued_message: string;
+    pay_submitted_message: string;
   };
   locale: string;
 };
 
-/** Poll while checkout is in progress (pending/running). Nova Act automation often needs ~3 min. */
 const POLL_INTERVAL_MS = 5000;
-const MAX_POLL_ATTEMPTS = 36;
+/** After Pay: brief poll if user stays on page; terminal status also arrives via push notification. */
+const PAY_SUBMITTED_MAX_POLL_ATTEMPTS = 6;
+/** Fallback when checkout is in progress before Pay (e.g. opened an old pending session). */
+const MAX_POLL_ATTEMPTS_WITHOUT_PAY = 12;
 
 const selectClassName = `rounded-md bg-surface-raised px-4 py-2 w-full ${RESPONSIVE.text.body} ${COLORS.text.primary}`;
 
@@ -149,6 +152,7 @@ export function ParkingSessionClient({
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pollingExhausted, setPollingExhausted] = useState(false);
+  const [paySubmitted, setPaySubmitted] = useState(false);
 
   const statusLabels = useMemo<Record<ParkingCorporateCheckoutStatus, string>>(
     () => ({
@@ -168,6 +172,11 @@ export function ParkingSessionClient({
     }
     const data = (await response.json()) as ParkingAssistSessionDetail;
     setDetail(data);
+    const status = data.latestCheckout?.status;
+    if (!isInProgress(status)) {
+      setPaySubmitted(false);
+      setPollingExhausted(false);
+    }
   }, [sessionId]);
 
   const checkoutStatus = detail.latestCheckout?.status;
@@ -187,19 +196,24 @@ export function ParkingSessionClient({
   const hasValidDuration = isDurationAllowedForCatalogService(selectedCatalogEntry, durationMinutes);
 
   const checkoutInProgress = isInProgress(checkoutStatus);
+  const showPaySubmittedMessage = paySubmitted && checkoutInProgress;
   const showStillProcessingMessage
-    = (checkoutStatus === 'pending' || checkoutStatus === 'running') && pollingExhausted;
+    = !paySubmitted
+      && (checkoutStatus === 'pending' || checkoutStatus === 'running')
+      && pollingExhausted;
 
   useEffect(() => {
     if (!checkoutInProgress || pollingExhausted) {
       return;
     }
 
+    const maxAttempts = paySubmitted ? PAY_SUBMITTED_MAX_POLL_ATTEMPTS : MAX_POLL_ATTEMPTS_WITHOUT_PAY;
+
     void refreshSession();
     let attempts = 0;
     const id = window.setInterval(() => {
       attempts += 1;
-      if (attempts >= MAX_POLL_ATTEMPTS) {
+      if (attempts >= maxAttempts) {
         window.clearInterval(id);
         setPollingExhausted(true);
         return;
@@ -208,7 +222,7 @@ export function ParkingSessionClient({
     }, POLL_INTERVAL_MS);
 
     return () => window.clearInterval(id);
-  }, [checkoutInProgress, pollingExhausted, refreshSession]);
+  }, [checkoutInProgress, pollingExhausted, paySubmitted, refreshSession]);
 
   const checkoutAllowsPay
     = !checkoutStatus || checkoutStatus === 'failed' || checkoutStatus === 'cancelled';
@@ -291,6 +305,7 @@ export function ParkingSessionClient({
       }
 
       await response.json() as StartCorporateCheckoutResponse;
+      setPaySubmitted(true);
       setPollingExhausted(false);
       await refreshSession();
     } catch (err) {
@@ -364,6 +379,11 @@ export function ParkingSessionClient({
         {checkoutStatus === 'failed' && !noPaymentRequired && (
           <p className={`${RESPONSIVE.text.body} ${COLORS.feedback.error}`}>
             {detail.latestCheckout?.failureMessage ?? t.failed_message}
+          </p>
+        )}
+        {showPaySubmittedMessage && (
+          <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>
+            {t.pay_submitted_message}
           </p>
         )}
         {showStillProcessingMessage && (

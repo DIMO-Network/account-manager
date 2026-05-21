@@ -113,7 +113,8 @@
     "failed_message": "Payment could not be completed.",
     "no_payment_required_message": "No metered payment is required right now for this zone. Posted sign restrictions still apply. You can try again during metered hours if payment becomes necessary.",
     "no_checkout": "Not started",
-    "pending_queued_message": "Your payment is being processed automatically. This usually takes up to 3 minutes. Tap Refresh if the status has not updated."
+    "pending_queued_message": "Payment is still processing. Tap Refresh to check the latest status.",
+    "pay_submitted_message": "Your payment was submitted. You can close this page—we'll send a notification when ParkDetroit checkout finishes (usually within a few minutes). Tap Refresh if you're still here."
   },
   "monthly": "monthly",
   "annually": "annually"
