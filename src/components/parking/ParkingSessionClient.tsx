@@ -66,9 +66,9 @@ type ParkingSessionClientProps = {
   locale: string;
 };
 
-/** Poll while checkout is in progress; cap requests until automation updates status. */
+/** Poll while checkout is in progress (pending/running). Nova Act automation often needs ~3 min. */
 const POLL_INTERVAL_MS = 5000;
-const MAX_POLL_ATTEMPTS = 12;
+const MAX_POLL_ATTEMPTS = 36;
 
 const selectClassName = `rounded-md bg-surface-raised px-4 py-2 w-full ${RESPONSIVE.text.body} ${COLORS.text.primary}`;
 
@@ -187,13 +187,15 @@ export function ParkingSessionClient({
   const hasValidDuration = isDurationAllowedForCatalogService(selectedCatalogEntry, durationMinutes);
 
   const checkoutInProgress = isInProgress(checkoutStatus);
-  const showPendingQueuedMessage = checkoutStatus === 'pending' && pollingExhausted;
+  const showStillProcessingMessage
+    = (checkoutStatus === 'pending' || checkoutStatus === 'running') && pollingExhausted;
 
   useEffect(() => {
     if (!checkoutInProgress || pollingExhausted) {
       return;
     }
 
+    void refreshSession();
     let attempts = 0;
     const id = window.setInterval(() => {
       attempts += 1;
@@ -364,7 +366,7 @@ export function ParkingSessionClient({
             {detail.latestCheckout?.failureMessage ?? t.failed_message}
           </p>
         )}
-        {showPendingQueuedMessage && (
+        {showStillProcessingMessage && (
           <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>
             {t.pending_queued_message}
           </p>
