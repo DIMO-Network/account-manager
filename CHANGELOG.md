@@ -1,3 +1,10 @@
+# [2.32.0](https://github.com/DIMO-Network/account-manager/compare/v2.31.7...v2.32.0) (2026-05-26)
+
+
+### Features
+
+* parking session ([#128](https://github.com/DIMO-Network/account-manager/issues/128)) ([d9c517f](https://github.com/DIMO-Network/account-manager/commit/d9c517ff61118507bc3a41c76c740a2f0c6eb0bb))
+
 ## [2.31.7](https://github.com/DIMO-Network/account-manager/compare/v2.31.6...v2.31.7) (2026-03-04)
 
 
