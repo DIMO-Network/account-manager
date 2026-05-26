@@ -127,7 +127,7 @@ The application uses a hybrid approach with both direct Stripe API calls and bac
 
 ### Authentication Routes
 - `/api/auth/dimo/callback` - DIMO authentication callback
-- `/api/dimo-auth` - DIMO authentication endpoint
+- `/api/dimo-auth` - DIMO authentication endpoint. Query params: `token` (required), optional `redirect` must be a relative path on the allowlist (currently `/parking/sessions/<uuid>`); otherwise redirects to `/dashboard` after session creation.
 - `/api/auth/logout` - Logout endpoint
 - `/api/auth/me` - User session information
 

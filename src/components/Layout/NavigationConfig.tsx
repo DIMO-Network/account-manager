@@ -1,6 +1,6 @@
 import type { MenuItemConfig } from '@/types/menu';
 import { SignOutButton } from '@/components/auth/SignOutButton';
-import { HomeIcon, LogoutIcon, RecoveryIcon, TransactionIcon, WalletIcon } from '@/components/Icons';
+import { CarIcon, HomeIcon, LogoutIcon, RecoveryIcon, TransactionIcon, WalletIcon } from '@/components/Icons';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { MenuActionButton } from '@/components/Menu/MenuActionButton';
 import { FEATURE_FLAGS } from '@/utils/FeatureFlags';
@@ -8,6 +8,7 @@ import { FEATURE_FLAGS } from '@/utils/FeatureFlags';
 export type AuthNavigationTranslations = {
   dashboard_link: string;
   payment_methods_link: string;
+  parking_link: string;
   recovery_link: string;
   transactions_link: string;
   user_profile_link: string;
@@ -70,6 +71,14 @@ export const createAuthNavigation = (
     icon: TransactionIcon,
     iconClassName: 'h-5 w-5 text-text-secondary',
     link: '/transactions/',
+    section: 'main',
+  });
+
+  menuItems.push({
+    label: translations.parking_link,
+    icon: CarIcon,
+    iconClassName: 'h-5 w-5 text-text-secondary',
+    link: '/parking/',
     section: 'main',
   });
 

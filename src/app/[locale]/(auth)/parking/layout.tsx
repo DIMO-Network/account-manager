@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { PaymentMethodsLayoutClient } from './PaymentMethodsLayoutClient';
+import { LayoutWrapper } from '@/components/Layout';
 
-export default async function PaymentMethodsLayout(props: {
+export default async function ParkingLayout(props: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
@@ -13,7 +13,8 @@ export default async function PaymentMethodsLayout(props: {
   });
 
   return (
-    <PaymentMethodsLayoutClient
+    <LayoutWrapper
+      layoutType="auth"
       translations={{
         dashboard_link: t('dashboard_link'),
         subscriptions_link: t('subscriptions_link'),
@@ -26,6 +27,6 @@ export default async function PaymentMethodsLayout(props: {
       }}
     >
       {props.children}
-    </PaymentMethodsLayoutClient>
+    </LayoutWrapper>
   );
 }
