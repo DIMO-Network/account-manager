@@ -114,7 +114,8 @@
     "no_payment_required_message": "No metered payment is required right now for this zone. Posted sign restrictions still apply. You can try again during metered hours if payment becomes necessary.",
     "no_checkout": "Not started",
     "pending_queued_message": "Payment is still processing. Tap Refresh to check the latest status.",
-    "pay_submitted_message": "Your payment was submitted. You can close this page—we'll send a notification when checkout finishes (usually within a few minutes). Tap Refresh if you're still here."
+    "pay_submitted_message": "Your payment was submitted. You can close this page. We'll send a notification when checkout finishes (usually within a few minutes). Tap Refresh if you're still here.",
+    "suggested_service_hint": "Suggested service for this location: {service}"
   },
   "monthly": "monthly",
   "annually": "annually"

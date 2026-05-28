@@ -63,6 +63,7 @@ type ParkingSessionClientProps = {
     no_checkout: string;
     pending_queued_message: string;
     pay_submitted_message: string;
+    suggested_service_hint: string;
   };
   locale: string;
 };
@@ -137,8 +138,13 @@ export function ParkingSessionClient({
   locale,
 }: ParkingSessionClientProps) {
   const initialSelections = useMemo(
-    () => initialParkingCheckoutSelections(parkingServicesCatalog, initialDetail.latestCheckout),
-    [parkingServicesCatalog, initialDetail.latestCheckout],
+    () =>
+      initialParkingCheckoutSelections(
+        parkingServicesCatalog,
+        initialDetail.latestCheckout,
+        initialDetail.suggestedParkingServiceId,
+      ),
+    [parkingServicesCatalog, initialDetail.latestCheckout, initialDetail.suggestedParkingServiceId],
   );
 
   const [detail, setDetail] = useState(initialDetail);
@@ -246,6 +252,13 @@ export function ParkingSessionClient({
       && checkoutAllowsPay;
 
   const zoneHint = selectedCatalogEntry?.zoneCodeHint ?? t.zone_sign_hint;
+  const suggestedServiceLabel = useMemo(() => {
+    if (detail.latestCheckout || !detail.suggestedParkingServiceId) {
+      return null;
+    }
+    const suggested = findCatalogService(parkingServicesCatalog, detail.suggestedParkingServiceId);
+    return suggested?.label ?? null;
+  }, [detail.latestCheckout, detail.suggestedParkingServiceId, parkingServicesCatalog]);
 
   const handleParkingServiceChange = (nextServiceId: string) => {
     setParkingServiceId(nextServiceId as ParkingService);
@@ -397,6 +410,11 @@ export function ParkingSessionClient({
               <label htmlFor="parking-service" className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>
                 {t.parking_service_label}
               </label>
+              {suggestedServiceLabel && (
+                <p className={`${RESPONSIVE.text.body} ${COLORS.text.secondary}`}>
+                  {t.suggested_service_hint.replace('{service}', suggestedServiceLabel)}
+                </p>
+              )}
               <select
                 id="parking-service"
                 name="parkingService"

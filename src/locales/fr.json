@@ -105,7 +105,8 @@
     "no_payment_required_message": "Aucun paiement horaire n'est requis pour cette zone en ce moment. Les restrictions affichées sur les panneaux s'appliquent toujours. Réessayez pendant les heures payantes si un paiement devient nécessaire.",
     "no_checkout": "Non démarré",
     "pending_queued_message": "Le paiement est toujours en cours. Appuyez sur Actualiser pour voir le statut.",
-    "pay_submitted_message": "Votre paiement a été envoyé. Vous pouvez fermer cette page—nous vous enverrons une notification lorsque le paiement sera terminé (en quelques minutes en général). Appuyez sur Actualiser si vous restez sur la page."
+    "pay_submitted_message": "Votre paiement a été envoyé. Vous pouvez fermer cette page. Nous vous enverrons une notification lorsque le paiement sera terminé (en quelques minutes en général). Appuyez sur Actualiser si vous restez sur la page.",
+    "suggested_service_hint": "Service suggéré pour cet emplacement : {service}"
   },
   "Recovery": {
     "meta_title": "Récupération",
