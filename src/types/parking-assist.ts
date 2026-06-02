@@ -5,7 +5,7 @@ export type ParkingCorporateCheckoutStatus
     | 'failed'
     | 'cancelled';
 
-export type ParkingService = 'parkdetroit';
+export type ParkingService = 'parkdetroit' | 'parkmobile';
 
 export type ParkingCorporateCheckout = {
   id: string;
@@ -40,6 +40,8 @@ export type ParkingAssistSessionDetail = {
   vehicleDisplayName: string | null;
   vehicleLicensePlate: string | null;
   latestCheckout: ParkingCorporateCheckout | null;
+  suggestedParkingServiceId: ParkingService | null;
+  suggestedCoverageLabel: string | null;
 };
 
 export type ParkingAssistHistoryItem = {

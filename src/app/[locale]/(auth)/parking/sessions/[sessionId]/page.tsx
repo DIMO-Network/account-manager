@@ -109,6 +109,7 @@ export default async function ParkingSessionPage(props: {
     no_checkout: t('no_checkout'),
     pending_queued_message: t('pending_queued_message'),
     pay_submitted_message: t('pay_submitted_message'),
+    suggested_service_hint: t('suggested_service_hint'),
   };
 
   return (

@@ -36,8 +36,10 @@ export function isDurationAllowedForCatalogService(
 export function initialParkingCheckoutSelections(
   catalog: ParkingServicesCatalog,
   checkout: ParkingCorporateCheckout | null,
+  suggestedParkingServiceId?: ParkingService | null,
 ): { parkingServiceId: ParkingService; durationMinutes: number } | null {
-  const entry = findCatalogService(catalog, checkout?.parkingService);
+  const preferredService = checkout?.parkingService ?? suggestedParkingServiceId ?? undefined;
+  const entry = findCatalogService(catalog, preferredService);
   if (!entry) {
     return null;
   }

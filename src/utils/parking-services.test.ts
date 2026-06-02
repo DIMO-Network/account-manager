@@ -18,6 +18,17 @@ const catalog: ParkingServicesCatalog = {
         { minutes: 90, label: '1 hour 30 min' },
       ],
     },
+    {
+      id: 'parkmobile',
+      label: 'ParkMobile',
+      zoneCodeHint: 'Zone code',
+      defaultDurationMinutes: 60,
+      durationOptions: [
+        { minutes: 30, label: '30 min' },
+        { minutes: 60, label: '1 hour' },
+        { minutes: 100, label: '1 hour 40 min' },
+      ],
+    },
   ],
 };
 
@@ -86,5 +97,42 @@ describe('parking-services', () => {
 
     expect(isDurationAllowedForCatalogService(entry, 90)).toBe(true);
     expect(isDurationAllowedForCatalogService(entry, 45)).toBe(false);
+  });
+
+  it('uses suggested parking service when no checkout exists', () => {
+    expect(initialParkingCheckoutSelections(catalog, null, 'parkmobile')).toEqual({
+      parkingServiceId: 'parkmobile',
+      durationMinutes: 60,
+    });
+  });
+
+  it('prefers checkout parking service over suggestion', () => {
+    expect(
+      initialParkingCheckoutSelections(
+        catalog,
+        {
+          id: 'c2',
+          status: 'pending',
+          failureCode: null,
+          failureMessage: null,
+          flowbirdReference: null,
+          amountCents: null,
+          currency: null,
+          zoneId: null,
+          zoneLabel: null,
+          licensePlate: null,
+          parkingService: 'parkdetroit',
+          durationMinutes: 60,
+          paidAt: null,
+          automationRunId: null,
+          createdAt: '',
+          updatedAt: '',
+        },
+        'parkmobile',
+      ),
+    ).toEqual({
+      parkingServiceId: 'parkdetroit',
+      durationMinutes: 60,
+    });
   });
 });
