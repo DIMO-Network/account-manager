@@ -1,3 +1,10 @@
+# [2.33.0](https://github.com/DIMO-Network/account-manager/compare/v2.32.0...v2.33.0) (2026-06-02)
+
+
+### Features
+
+* parking service selection and copy ([#130](https://github.com/DIMO-Network/account-manager/issues/130)) ([4588c7e](https://github.com/DIMO-Network/account-manager/commit/4588c7edc29a6449968412a15be0bd851c3e9ab9))
+
 # [2.32.0](https://github.com/DIMO-Network/account-manager/compare/v2.31.7...v2.32.0) (2026-05-26)
 
 
