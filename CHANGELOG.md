@@ -1,3 +1,10 @@
+# [2.34.0](https://github.com/DIMO-Network/account-manager/compare/v2.33.0...v2.34.0) (2026-06-03)
+
+
+### Features
+
+* enhance parking assist session pages ([#132](https://github.com/DIMO-Network/account-manager/issues/132)) ([2e9b068](https://github.com/DIMO-Network/account-manager/commit/2e9b0682ea57e9d0822f92c5460624613df9a862))
+
 # [2.33.0](https://github.com/DIMO-Network/account-manager/compare/v2.32.0...v2.33.0) (2026-06-02)
 
 
