@@ -7,6 +7,7 @@ export const Env = createEnv({
     LOGTAIL_SOURCE_TOKEN: z.string().optional(),
     TURNKEY_API_PRIVATE_KEY: z.string().optional(),
     TURNKEY_API_PUBLIC_KEY: z.string().optional(),
+    MAPBOX_ACCESS_TOKEN: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().optional(),
@@ -31,6 +32,7 @@ export const Env = createEnv({
     LOGTAIL_SOURCE_TOKEN: process.env.LOGTAIL_SOURCE_TOKEN,
     TURNKEY_API_PRIVATE_KEY: process.env.TURNKEY_API_PRIVATE_KEY,
     TURNKEY_API_PUBLIC_KEY: process.env.TURNKEY_API_PUBLIC_KEY,
+    MAPBOX_ACCESS_TOKEN: process.env.MAPBOX_ACCESS_TOKEN,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,

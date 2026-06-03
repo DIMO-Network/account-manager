@@ -39,6 +39,8 @@ export type ParkingAssistSessionDetail = {
   session: ParkingAssistSession;
   vehicleDisplayName: string | null;
   vehicleLicensePlate: string | null;
+  vehicleCountry: string | null;
+  vehicleState: string | null;
   latestCheckout: ParkingCorporateCheckout | null;
   suggestedParkingServiceId: ParkingService | null;
   suggestedCoverageLabel: string | null;
@@ -48,6 +50,8 @@ export type ParkingAssistHistoryItem = {
   session: ParkingAssistSession;
   vehicleDisplayName: string | null;
   vehicleLicensePlate: string | null;
+  vehicleCountry: string | null;
+  vehicleState: string | null;
   latestCheckout: ParkingCorporateCheckout | null;
 };
 

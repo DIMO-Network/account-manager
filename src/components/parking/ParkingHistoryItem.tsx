@@ -1,0 +1,65 @@
+import type { VehicleDefinitionSummary } from './parkingDisplayHelpers';
+import type { ParkingAssistHistoryItem, ParkingCorporateCheckoutStatus } from '@/types/parking-assist';
+import Link from 'next/link';
+import { ChevronIcon } from '@/components/Icons';
+import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
+import { ParkingCheckoutStatusIndicator } from './ParkingCheckoutStatusIndicator';
+import { formatSessionDateTime } from './parkingDisplayHelpers';
+import { ParkingHistoryDetails } from './ParkingHistoryDetails';
+
+type ParkingHistoryItemProps = {
+  item: ParkingAssistHistoryItem;
+  locale: string;
+  statusLabels: Record<ParkingCorporateCheckoutStatus, string>;
+  noCheckoutLabel: string;
+  vehicleDefinition?: VehicleDefinitionSummary;
+  triggerLocation?: string;
+  detailLabels: {
+    locationPrefix: string;
+    locationUnknown: string;
+    licensePlatePrefix: string;
+    licensePlateNotSet: string;
+  };
+};
+
+export function ParkingHistoryItem({
+  item,
+  locale,
+  statusLabels,
+  noCheckoutLabel,
+  vehicleDefinition,
+  triggerLocation,
+  detailLabels,
+}: ParkingHistoryItemProps) {
+  const href = `/parking/sessions/${item.session.id}`;
+
+  return (
+    <li className={`gap-2 ${BORDER_RADIUS.xl} bg-surface-raised`}>
+      <Link href={href} className="block">
+        <div className="border-b border-gray-600 pb-2">
+          <div className="flex flex-row items-center justify-between gap-2 px-4 pt-3 w-full">
+            <div className="flex flex-row items-center gap-2 min-w-0">
+              <ParkingCheckoutStatusIndicator
+                status={item.latestCheckout?.status}
+                statusLabels={statusLabels}
+                noCheckoutLabel={noCheckoutLabel}
+              />
+              <h3 className="text-base font-medium leading-6 truncate">
+                {formatSessionDateTime(item.session.triggeredAt, locale)}
+              </h3>
+            </div>
+            <ChevronIcon orientation="right" className={`w-2 h-3 shrink-0 ${COLORS.text.secondary}`} />
+          </div>
+        </div>
+        <ParkingHistoryDetails
+          item={item}
+          statusLabels={statusLabels}
+          noCheckoutLabel={noCheckoutLabel}
+          vehicleDefinition={vehicleDefinition}
+          triggerLocation={triggerLocation}
+          detailLabels={detailLabels}
+        />
+      </Link>
+    </li>
+  );
+}
