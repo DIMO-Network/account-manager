@@ -1,14 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
-/** False on server and the first client render; true after hydration completes. */
+const subscribe = () => () => {};
+
+/** False on server and during hydration; true after the client has mounted. */
 export function useHydrated(): boolean {
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
-
-  return hydrated;
+  return useSyncExternalStore(subscribe, () => true, () => false);
 }
