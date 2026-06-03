@@ -65,8 +65,8 @@
   "Parking": {
     "meta_title": "Parking",
     "hub_meta_title": "Parking",
-    "hub_title": "Parking assist",
-    "hub_description": "When you park in supported Metro Detroit areas with an eligible connected vehicle, DIMO Driver can send you here to pay for parking. DIMO completes checkout using your corporate account.",
+    "hub_title": "Parking Assist",
+    "hub_description": "Manage your parking sessions here. You'll see new sessions when parking assist alerts you in the DIMO app.",
     "history_title": "Recent sessions",
     "history_empty": "No parking sessions yet. You will see sessions here after parking assist notifies you.",
     "history_load_error": "Could not load parking history.",

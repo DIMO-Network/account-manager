@@ -57,7 +57,7 @@
     "meta_title": "Parking",
     "hub_meta_title": "Parking",
     "hub_title": "Assistance stationnement",
-    "hub_description": "Lorsque vous vous garez dans les zones prises en charge du Grand Détroit avec un véhicule admissible, DIMO Driver peut vous envoyer ici pour payer le stationnement. DIMO effectue le paiement via votre compte corporatif.",
+    "hub_description": "Gérez vos sessions de stationnement ici. De nouvelles sessions apparaîtront lorsque l'assistance stationnement vous alerte dans l'application DIMO.",
     "history_title": "Sessions récentes",
     "history_empty": "Aucune session de stationnement pour le moment. Les sessions apparaîtront ici après une notification d'assistance stationnement.",
     "history_load_error": "Impossible de charger l'historique de stationnement.",
