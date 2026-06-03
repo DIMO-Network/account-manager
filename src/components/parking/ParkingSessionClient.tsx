@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '@/components/ui';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { useHydrated } from '@/hooks/useHydrated';
 import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { isNoPaymentRequiredCheckout } from '@/utils/parking-checkout';
 import {
@@ -28,6 +29,7 @@ import {
   formatSessionVehicleLine,
   getParkingCheckoutStatusDisplay,
 } from './parkingDisplayHelpers';
+import { ParkingSessionClientSkeleton } from './ParkingSessionClientSkeleton';
 
 type ParkingSessionClientProps = {
   sessionId: string;
@@ -184,6 +186,7 @@ export function ParkingSessionClient({
   locale,
 }: ParkingSessionClientProps) {
   const router = useRouter();
+  const hydrated = useHydrated();
 
   const initialSelections = useMemo(
     () =>
@@ -424,6 +427,14 @@ export function ParkingSessionClient({
   );
 
   const locationDisplay = triggerLocation ?? t.location_unknown;
+
+  if (!hydrated) {
+    return (
+      <div className="flex flex-col gap-4 max-w-2xl">
+        <ParkingSessionClientSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
