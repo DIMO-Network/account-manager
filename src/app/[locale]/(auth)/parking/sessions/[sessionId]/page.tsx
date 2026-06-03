@@ -110,6 +110,8 @@ export default async function ParkingSessionPage(props: {
     license_plate_required_error: t('license_plate_required_error'),
     parking_service_label: t('parking_service_label'),
     duration_label: t('duration_label'),
+    duration_range_parkdetroit: t('duration_range_parkdetroit'),
+    duration_range_parkmobile: t('duration_range_parkmobile'),
     durationLabels: Object.fromEntries(
       PARKING_DURATION_I18N_KEYS.map(minutes => [
         parkingDurationTranslationKey(minutes),

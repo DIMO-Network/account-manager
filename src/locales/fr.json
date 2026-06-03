@@ -77,6 +77,8 @@
     "catalog_load_error": "Impossible de charger les options de stationnement. Actualisez la page ou réessayez plus tard.",
     "parking_service_label": "Service de stationnement",
     "duration_label": "Durée",
+    "duration_range_parkdetroit": "Durée minimale : 1 heure. Durée maximale : 2 heures.",
+    "duration_range_parkmobile": "Durée minimale : 30 minutes. Durée maximale : 3 heures.",
     "duration_option_30": "30 minutes",
     "duration_option_40": "40 minutes",
     "duration_option_50": "50 minutes",

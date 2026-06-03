@@ -67,6 +67,21 @@ export function isDurationAllowedForCatalogService(
   return entry.durationOptions.some(option => option.minutes === durationMinutes);
 }
 
+export function getMinimumDurationMinutes(entry: ParkingServiceCatalogEntry): number {
+  return Math.min(...entry.durationOptions.map(option => option.minutes));
+}
+
+export function getMaximumDurationMinutes(entry: ParkingServiceCatalogEntry): number {
+  return Math.max(...entry.durationOptions.map(option => option.minutes));
+}
+
+function shouldReuseCheckoutDuration(checkout: ParkingCorporateCheckout | null): boolean {
+  if (!checkout) {
+    return false;
+  }
+  return checkout.status === 'pending' || checkout.status === 'running' || checkout.status === 'paid';
+}
+
 export function initialParkingCheckoutSelections(
   catalog: ParkingServicesCatalog,
   checkout: ParkingCorporateCheckout | null,
@@ -80,9 +95,11 @@ export function initialParkingCheckoutSelections(
 
   const fromCheckout = checkout?.durationMinutes;
   const durationMinutes
-    = fromCheckout != null && isDurationAllowedForCatalogService(entry, fromCheckout)
+    = shouldReuseCheckoutDuration(checkout)
+      && fromCheckout != null
+      && isDurationAllowedForCatalogService(entry, fromCheckout)
       ? fromCheckout
-      : entry.defaultDurationMinutes;
+      : getMinimumDurationMinutes(entry);
 
   return {
     parkingServiceId: entry.id,

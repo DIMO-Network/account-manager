@@ -64,7 +64,33 @@ describe('parking-services', () => {
       }),
     ).toEqual({
       parkingServiceId: 'parkdetroit',
-      durationMinutes: 90,
+      durationMinutes: 60,
+    });
+  });
+
+  it('reuses checkout duration for active checkouts', () => {
+    expect(
+      initialParkingCheckoutSelections(catalog, {
+        id: 'c1',
+        status: 'pending',
+        failureCode: null,
+        failureMessage: null,
+        flowbirdReference: null,
+        amountCents: null,
+        currency: null,
+        zoneId: 'Z1',
+        zoneLabel: 'Z1',
+        licensePlate: 'ABC',
+        parkingService: 'parkmobile',
+        durationMinutes: 100,
+        paidAt: null,
+        automationRunId: null,
+        createdAt: '',
+        updatedAt: '',
+      }),
+    ).toEqual({
+      parkingServiceId: 'parkmobile',
+      durationMinutes: 100,
     });
   });
 
@@ -104,6 +130,13 @@ describe('parking-services', () => {
   it('uses suggested parking service when no checkout exists', () => {
     expect(initialParkingCheckoutSelections(catalog, null, 'parkmobile')).toEqual({
       parkingServiceId: 'parkmobile',
+      durationMinutes: 30,
+    });
+  });
+
+  it('defaults duration to the minimum allowed for the selected service', () => {
+    expect(initialParkingCheckoutSelections(catalog, null, 'parkdetroit')).toEqual({
+      parkingServiceId: 'parkdetroit',
       durationMinutes: 60,
     });
   });
@@ -150,6 +183,32 @@ describe('parking-services', () => {
     ).toEqual({
       parkingServiceId: 'parkdetroit',
       durationMinutes: 60,
+    });
+  });
+
+  it('defaults ParkMobile to 30 minutes after a failed checkout', () => {
+    expect(
+      initialParkingCheckoutSelections(catalog, {
+        id: 'c3',
+        status: 'failed',
+        failureCode: null,
+        failureMessage: null,
+        flowbirdReference: null,
+        amountCents: null,
+        currency: null,
+        zoneId: 'Z1',
+        zoneLabel: 'Z1',
+        licensePlate: 'ABC',
+        parkingService: 'parkmobile',
+        durationMinutes: 60,
+        paidAt: null,
+        automationRunId: null,
+        createdAt: '',
+        updatedAt: '',
+      }),
+    ).toEqual({
+      parkingServiceId: 'parkmobile',
+      durationMinutes: 30,
     });
   });
 });

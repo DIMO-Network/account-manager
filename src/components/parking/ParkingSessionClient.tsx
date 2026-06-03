@@ -18,6 +18,7 @@ import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { isNoPaymentRequiredCheckout } from '@/utils/parking-checkout';
 import {
   findCatalogService,
+  getMinimumDurationMinutes,
   getParkingDurationLabel,
   initialParkingCheckoutSelections,
   isDurationAllowedForCatalogService,
@@ -46,6 +47,8 @@ type ParkingSessionClientProps = {
     license_plate_required_error: string;
     parking_service_label: string;
     duration_label: string;
+    duration_range_parkdetroit: string;
+    duration_range_parkmobile: string;
     durationLabels: Record<string, string>;
     note_label: string;
     duration_missing_hint: string;
@@ -133,6 +136,23 @@ function initialZoneCodeInput(detail: ParkingAssistSessionDetail): string {
     return '';
   }
   return checkout.zoneLabel ?? checkout.zoneId ?? '';
+}
+
+function isCheckoutSummaryStatus(status: ParkingCorporateCheckoutStatus | undefined): boolean {
+  return status === 'pending' || status === 'running' || status === 'paid';
+}
+
+function durationRangeHintForService(
+  serviceId: ParkingService | '',
+  translations: Pick<ParkingSessionClientProps['translations'], 'duration_range_parkdetroit' | 'duration_range_parkmobile'>,
+): string | null {
+  if (serviceId === 'parkdetroit') {
+    return translations.duration_range_parkdetroit;
+  }
+  if (serviceId === 'parkmobile') {
+    return translations.duration_range_parkmobile;
+  }
+  return null;
 }
 
 function FieldRow({
@@ -320,6 +340,28 @@ export function ParkingSessionClient({
     [selectedCatalogEntry, t.durationLabels],
   );
 
+  const durationRangeHint = durationRangeHintForService(parkingServiceId, t);
+
+  const showCheckoutSummary = isCheckoutSummaryStatus(checkoutStatus);
+  const checkout = detail.latestCheckout;
+
+  const checkoutSummary = useMemo(() => {
+    if (!showCheckoutSummary || !checkout) {
+      return null;
+    }
+    const serviceEntry = findCatalogService(parkingServicesCatalog, checkout.parkingService);
+    const zoneDisplay = checkout.zoneLabel ?? checkout.zoneId;
+    const durationDisplay = checkout.durationMinutes == null
+      ? null
+      : getParkingDurationLabel(checkout.durationMinutes, t.durationLabels);
+
+    return {
+      parkingServiceLabel: serviceEntry?.label ?? checkout.parkingService,
+      durationLabel: durationDisplay,
+      zoneDisplay,
+    };
+  }, [showCheckoutSummary, checkout, parkingServicesCatalog, t.durationLabels]);
+
   const checkoutStatusDisplay = useMemo(() => {
     if (!detail.latestCheckout) {
       return getParkingCheckoutStatusDisplay(null, statusLabels, t.no_checkout);
@@ -333,8 +375,8 @@ export function ParkingSessionClient({
   const handleParkingServiceChange = (nextServiceId: string) => {
     setParkingServiceId(nextServiceId as ParkingService);
     const entry = findCatalogService(parkingServicesCatalog, nextServiceId as ParkingService);
-    if (entry && !isDurationAllowedForCatalogService(entry, durationMinutes)) {
-      setDurationMinutes(entry.defaultDurationMinutes);
+    if (entry) {
+      setDurationMinutes(getMinimumDurationMinutes(entry));
     }
   };
 
@@ -484,6 +526,24 @@ export function ParkingSessionClient({
             {checkoutStatusDisplay.text}
           </FieldRow>
 
+          {checkoutSummary && (
+            <>
+              <FieldRow label={t.parking_service_label}>
+                {checkoutSummary.parkingServiceLabel}
+              </FieldRow>
+              {checkoutSummary.durationLabel && (
+                <FieldRow label={t.duration_label}>
+                  {checkoutSummary.durationLabel}
+                </FieldRow>
+              )}
+              {checkoutSummary.zoneDisplay && (
+                <FieldRow label={t.zone_code_label}>
+                  {checkoutSummary.zoneDisplay}
+                </FieldRow>
+              )}
+            </>
+          )}
+
           {showPayForm && (
             <>
               <div>
@@ -500,6 +560,9 @@ export function ParkingSessionClient({
 
               <div>
                 <div className={LABEL_STYLE}>{t.duration_label}</div>
+                {durationRangeHint && (
+                  <p className={`px-4 pb-2 ${SECONDARY_VALUE_STYLE}`}>{durationRangeHint}</p>
+                )}
                 <div className={FORM_FIELD_VALUE_STYLE}>
                   <Dropdown
                     options={durationOptions}
