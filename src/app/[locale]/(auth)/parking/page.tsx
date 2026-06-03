@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import type { ParkingAssistHistory, ParkingCorporateCheckoutStatus } from '@/types/parking-assist';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { CarIcon } from '@/components/Icons';
 import { ParkingHistoryList } from '@/components/parking/ParkingHistoryList';
+import { PageHeader } from '@/components/ui';
 import { fetchParkingAssistBackend } from '@/libs/ParkingAssistBackend';
 import { COLORS, RESPONSIVE } from '@/utils/designSystem';
 
@@ -42,13 +44,11 @@ export default async function ParkingHubPage(props: {
   );
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary">{t('hub_title')}</h1>
-        <p className={`${COLORS.text.secondary} leading-relaxed mt-2 ${RESPONSIVE.text.body}`}>
-          {t('hub_description')}
-        </p>
-      </div>
+    <div className="flex flex-1 flex-col gap-4 max-w-2xl">
+      <PageHeader icon={<CarIcon />} title={t('hub_title')} className="mb-0" />
+      <p className={`${COLORS.text.secondary} leading-relaxed ${RESPONSIVE.text.body}`}>
+        {t('hub_description')}
+      </p>
 
       <section>
         <h2 className={`text-lg font-semibold ${COLORS.text.primary} mb-3`}>{t('history_title')}</h2>
