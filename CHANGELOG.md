@@ -1,3 +1,15 @@
+# [2.35.0](https://github.com/DIMO-Network/account-manager/compare/v2.34.0...v2.35.0) (2026-06-03)
+
+
+### Bug Fixes
+
+* replace with store ([e895700](https://github.com/DIMO-Network/account-manager/commit/e895700090348a77487f5aa8dc037423ac6900ba))
+
+
+### Features
+
+* set default duration and show checkout summary ([a4ae44c](https://github.com/DIMO-Network/account-manager/commit/a4ae44ca9149c752d976ac3ebf9e1c60751eefff))
+
 # [2.34.0](https://github.com/DIMO-Network/account-manager/compare/v2.33.0...v2.34.0) (2026-06-03)
 
 
