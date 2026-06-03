@@ -33,7 +33,11 @@ export default async function ParkingHubPage(props: {
 
   return (
     <div className="flex flex-1 flex-col gap-4 max-w-2xl">
-      <PageHeader icon={<CarIcon />} title={t('hub_title')} className="mb-0" />
+      <PageHeader
+        icon={<CarIcon className={`h-4 w-4 ${COLORS.text.secondary}`} />}
+        title={t('hub_title')}
+        className="mb-0"
+      />
       <p className={`${COLORS.text.secondary} leading-relaxed ${RESPONSIVE.text.body}`}>
         {t('hub_description')}
       </p>
