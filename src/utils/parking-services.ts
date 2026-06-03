@@ -5,12 +5,46 @@ import type {
   ParkingServicesCatalog,
 } from '@/types/parking-assist';
 
-export const PARKING_DURATION_I18N_KEYS = [60, 75, 90, 105, 120] as const;
+export const PARKDETROIT_DURATION_MINUTES_OPTIONS = [60, 75, 90, 105, 120] as const;
+
+export const PARKMOBILE_DURATION_MINUTES_OPTIONS = [
+  30,
+  40,
+  50,
+  60,
+  70,
+  80,
+  90,
+  100,
+  110,
+  120,
+  130,
+  140,
+  150,
+  160,
+  170,
+  180,
+] as const;
+
+/** All duration minutes that have locale keys under Parking.duration_option_ */
+export const PARKING_DURATION_I18N_KEYS = [
+  ...new Set([
+    ...PARKDETROIT_DURATION_MINUTES_OPTIONS,
+    ...PARKMOBILE_DURATION_MINUTES_OPTIONS,
+  ]),
+].sort((a, b) => a - b) as readonly number[];
 
 export type ParkingDurationMinutes = (typeof PARKING_DURATION_I18N_KEYS)[number];
 
 export function parkingDurationTranslationKey(minutes: number): string {
   return `duration_option_${minutes}`;
+}
+
+export function getParkingDurationLabel(
+  minutes: number,
+  durationLabels: Record<string, string | undefined>,
+): string {
+  return durationLabels[parkingDurationTranslationKey(minutes)] ?? String(minutes);
 }
 
 export function findCatalogService(

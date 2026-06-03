@@ -35,10 +35,19 @@ export type ParkingAssistSession = {
   createdAt: string;
 };
 
+export type ParkingVehicleDefinition = {
+  year: number | null;
+  make: string | null;
+  model: string | null;
+};
+
 export type ParkingAssistSessionDetail = {
   session: ParkingAssistSession;
   vehicleDisplayName: string | null;
+  vehicleDefinition?: ParkingVehicleDefinition | null;
   vehicleLicensePlate: string | null;
+  vehicleCountry: string | null;
+  vehicleState: string | null;
   latestCheckout: ParkingCorporateCheckout | null;
   suggestedParkingServiceId: ParkingService | null;
   suggestedCoverageLabel: string | null;
@@ -48,6 +57,8 @@ export type ParkingAssistHistoryItem = {
   session: ParkingAssistSession;
   vehicleDisplayName: string | null;
   vehicleLicensePlate: string | null;
+  vehicleCountry: string | null;
+  vehicleState: string | null;
   latestCheckout: ParkingCorporateCheckout | null;
 };
 

@@ -2,8 +2,10 @@ import type { ParkingServicesCatalog } from '@/types/parking-assist';
 import { describe, expect, it } from 'vitest';
 import {
   findCatalogService,
+  getParkingDurationLabel,
   initialParkingCheckoutSelections,
   isDurationAllowedForCatalogService,
+  parkingDurationTranslationKey,
 } from './parking-services';
 
 const catalog: ParkingServicesCatalog = {
@@ -104,6 +106,21 @@ describe('parking-services', () => {
       parkingServiceId: 'parkmobile',
       durationMinutes: 60,
     });
+  });
+
+  it('resolves ParkMobile duration labels from locale map', () => {
+    const durationLabels = {
+      [parkingDurationTranslationKey(30)]: '30 minutes',
+      [parkingDurationTranslationKey(50)]: '50 minutes',
+      [parkingDurationTranslationKey(70)]: '1 hour 10 minutes',
+      [parkingDurationTranslationKey(100)]: '1 hour 40 minutes',
+      [parkingDurationTranslationKey(180)]: '3 hours',
+    };
+
+    expect(getParkingDurationLabel(30, durationLabels)).toBe('30 minutes');
+    expect(getParkingDurationLabel(70, durationLabels)).toBe('1 hour 10 minutes');
+    expect(getParkingDurationLabel(100, durationLabels)).toBe('1 hour 40 minutes');
+    expect(getParkingDurationLabel(180, durationLabels)).toBe('3 hours');
   });
 
   it('prefers checkout parking service over suggestion', () => {
