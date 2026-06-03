@@ -162,10 +162,20 @@ export type Connection = {
   name: Scalars['String']['output'];
   /** The owner of the connection. Connections are transferable, so this may change over time. */
   owner: Scalars['Address']['output'];
+  /** A Relay-style connection listing any active permission grants on this connection. */
+  sacds: SacdConnection;
   /** The DID for this connection's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
   tokenDID: Scalars['String']['output'];
   /** The token id of the connection as an NFT. This tends to be very large. */
   tokenId: Scalars['BigInt']['output'];
+};
+
+
+export type ConnectionSacdsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type ConnectionBy = {
