@@ -1,6 +1,6 @@
 import type { ParkingAssistHistory, ParkingCorporateCheckoutStatus } from '@/types/parking-assist';
 import { getTranslations } from 'next-intl/server';
-import { ParkingHistoryList } from '@/components/parking/ParkingHistoryList';
+import { ParkingHistoryListClient } from '@/components/parking/ParkingHistoryListClient';
 import { fetchParkingAssistBackend } from '@/libs/ParkingAssistBackend';
 import { resolveTriggerLocationsBySessionId } from '@/libs/parkingTriggerLocations';
 import { resolveVehicleDefinitionsByTokenId } from '@/libs/parkingVehicleDefinitions';
@@ -59,13 +59,13 @@ export async function ParkingHistorySection({ locale }: ParkingHistorySectionPro
   };
 
   return (
-    <ParkingHistoryList
-      history={historyResult.data}
+    <ParkingHistoryListClient
+      items={historyResult.data.items}
       statusLabels={statusLabels}
       noCheckoutLabel={t('no_checkout')}
       locale={locale}
-      vehicleDefinitionsByTokenId={vehicleDefinitionsByTokenId}
-      triggerLocationBySessionId={triggerLocationBySessionId}
+      vehicleDefinitionsByTokenId={Object.fromEntries(vehicleDefinitionsByTokenId)}
+      triggerLocationBySessionId={Object.fromEntries(triggerLocationBySessionId)}
       detailLabels={detailLabels}
     />
   );
