@@ -7,6 +7,7 @@ import type {
   ParkingServicesCatalog,
 } from '@/types/parking-assist';
 import { ListPagination } from '@/components/ui/ListPagination';
+import { isExpiredPaidSession } from '@/utils/parkingSessionExpiry';
 import { ParkingHistoryItem } from './ParkingHistoryItem';
 
 const PARKING_HISTORY_PAGE_LENGTH = 5;
@@ -24,6 +25,9 @@ type ParkingHistoryListClientProps = {
   };
   parkingServicesCatalog: ParkingServicesCatalog;
   durationLabels: Record<string, string>;
+  showActiveCountdown?: boolean;
+  showExpiredBadge?: boolean;
+  expiredLabel: string;
 };
 
 export function ParkingHistoryListClient({
@@ -36,6 +40,9 @@ export function ParkingHistoryListClient({
   detailLabels,
   parkingServicesCatalog,
   durationLabels,
+  showActiveCountdown = false,
+  showExpiredBadge = false,
+  expiredLabel,
 }: ParkingHistoryListClientProps) {
   return (
     <ListPagination
@@ -56,6 +63,9 @@ export function ParkingHistoryListClient({
               detailLabels={detailLabels}
               parkingServicesCatalog={parkingServicesCatalog}
               durationLabels={durationLabels}
+              showActiveCountdown={showActiveCountdown}
+              showExpiredBadge={showExpiredBadge && isExpiredPaidSession(item)}
+              expiredLabel={expiredLabel}
             />
           ))}
         </ul>

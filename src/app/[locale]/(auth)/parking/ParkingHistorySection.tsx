@@ -9,6 +9,7 @@ import {
   PARKING_DURATION_I18N_KEYS,
   parkingDurationTranslationKey,
 } from '@/utils/parking-services';
+import { partitionParkingHistoryItems } from '@/utils/parkingSessionExpiry';
 
 type ParkingHistorySectionProps = {
   locale: string;
@@ -66,6 +67,8 @@ export async function ParkingHistorySection({ locale }: ParkingHistorySectionPro
     resolveTriggerLocationsBySessionId(historyResult.data.items),
   ]);
 
+  const { activeItems, recentItems } = partitionParkingHistoryItems(historyResult.data.items);
+
   const detailLabels = {
     locationUnknown: t('history_location_unknown'),
     licensePlateNotSet: t('license_plate_not_set'),
@@ -78,17 +81,43 @@ export async function ParkingHistorySection({ locale }: ParkingHistorySectionPro
     ]),
   ) as Record<string, string>;
 
+  const listProps = {
+    statusLabels,
+    noCheckoutLabel: t('no_checkout'),
+    locale,
+    vehicleDefinitionsByTokenId: Object.fromEntries(vehicleDefinitionsByTokenId),
+    triggerLocationBySessionId: Object.fromEntries(triggerLocationBySessionId),
+    detailLabels,
+    parkingServicesCatalog: catalogResult.data,
+    durationLabels,
+    expiredLabel: t('parking_session_expired'),
+  };
+
+  const sectionHeadingClass = `text-lg font-semibold ${COLORS.text.primary} mb-3`;
+
   return (
-    <ParkingHistoryListClient
-      items={historyResult.data.items}
-      statusLabels={statusLabels}
-      noCheckoutLabel={t('no_checkout')}
-      locale={locale}
-      vehicleDefinitionsByTokenId={Object.fromEntries(vehicleDefinitionsByTokenId)}
-      triggerLocationBySessionId={Object.fromEntries(triggerLocationBySessionId)}
-      detailLabels={detailLabels}
-      parkingServicesCatalog={catalogResult.data}
-      durationLabels={durationLabels}
-    />
+    <>
+      {activeItems.length > 0 && (
+        <section className="mb-6">
+          <h2 className={sectionHeadingClass}>{t('active_sessions_title')}</h2>
+          <ParkingHistoryListClient
+            {...listProps}
+            items={activeItems}
+            showActiveCountdown
+          />
+        </section>
+      )}
+
+      {recentItems.length > 0 && (
+        <section>
+          <h2 className={sectionHeadingClass}>{t('history_title')}</h2>
+          <ParkingHistoryListClient
+            {...listProps}
+            items={recentItems}
+            showExpiredBadge
+          />
+        </section>
+      )}
+    </>
   );
 }

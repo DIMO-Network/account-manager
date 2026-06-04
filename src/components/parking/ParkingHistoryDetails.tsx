@@ -4,6 +4,7 @@ import type {
   ParkingCorporateCheckoutStatus,
   ParkingServicesCatalog,
 } from '@/types/parking-assist';
+import { getPaidSessionExpiresAtMs } from '@/utils/parkingSessionExpiry';
 import {
   formatCheckoutSummaryLine,
   formatHistoryLicensePlate,
@@ -13,6 +14,7 @@ import {
   isCheckoutSummaryStatus,
   resolveCheckoutSummary,
 } from './parkingDisplayHelpers';
+import { ParkingSessionCountdown } from './ParkingSessionCountdown';
 
 type ParkingHistoryDetailsProps = {
   item: ParkingAssistHistoryItem;
@@ -26,6 +28,9 @@ type ParkingHistoryDetailsProps = {
   };
   parkingServicesCatalog: ParkingServicesCatalog;
   durationLabels: Record<string, string>;
+  showActiveCountdown?: boolean;
+  showExpiredBadge?: boolean;
+  expiredLabel: string;
 };
 
 export function ParkingHistoryDetails({
@@ -37,8 +42,12 @@ export function ParkingHistoryDetails({
   detailLabels,
   parkingServicesCatalog,
   durationLabels,
+  showActiveCountdown = false,
+  showExpiredBadge = false,
+  expiredLabel,
 }: ParkingHistoryDetailsProps) {
   const checkout = item.latestCheckout;
+  const expiresAtMs = checkout ? getPaidSessionExpiresAtMs(checkout) : null;
   const checkoutSummary = checkout && isCheckoutSummaryStatus(checkout.status)
     ? resolveCheckoutSummary(checkout, parkingServicesCatalog, durationLabels)
     : null;
@@ -53,11 +62,23 @@ export function ParkingHistoryDetails({
     <div className="px-4 py-3">
       <div className={`text-xs font-light leading-5 ${statusDisplay.color}`}>
         {statusDisplay.text}
+        {showExpiredBadge && (
+          <span className="text-text-secondary font-normal">
+            {' '}
+            ·
+            {' '}
+            {expiredLabel}
+          </span>
+        )}
       </div>
 
       <div className="text-base font-medium leading-5">
         {formatVehicleLine(vehicleDefinition, item)}
       </div>
+
+      {showActiveCountdown && expiresAtMs != null && (
+        <ParkingSessionCountdown expiresAtMs={expiresAtMs} />
+      )}
 
       <div className="text-xs text-text-secondary mt-1">
         {formatHistoryLicensePlate(item, detailLabels.licensePlateNotSet)}

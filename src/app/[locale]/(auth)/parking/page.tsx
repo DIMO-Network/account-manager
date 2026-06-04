@@ -42,12 +42,9 @@ export default async function ParkingHubPage(props: {
         {t('hub_description')}
       </p>
 
-      <section>
-        <h2 className={`text-lg font-semibold ${COLORS.text.primary} mb-3`}>{t('history_title')}</h2>
-        <Suspense fallback={<ParkingHistoryListSkeleton count={3} />}>
-          <ParkingHistorySection locale={locale} />
-        </Suspense>
-      </section>
+      <Suspense fallback={<ParkingHistoryListSkeleton count={3} />}>
+        <ParkingHistorySection locale={locale} />
+      </Suspense>
     </div>
   );
 }

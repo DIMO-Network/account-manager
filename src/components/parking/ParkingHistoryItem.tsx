@@ -24,6 +24,9 @@ type ParkingHistoryItemProps = {
   };
   parkingServicesCatalog: ParkingServicesCatalog;
   durationLabels: Record<string, string>;
+  showActiveCountdown?: boolean;
+  showExpiredBadge?: boolean;
+  expiredLabel: string;
 };
 
 export function ParkingHistoryItem({
@@ -36,6 +39,9 @@ export function ParkingHistoryItem({
   detailLabels,
   parkingServicesCatalog,
   durationLabels,
+  showActiveCountdown = false,
+  showExpiredBadge = false,
+  expiredLabel,
 }: ParkingHistoryItemProps) {
   const href = `/parking/sessions/${item.session.id}`;
 
@@ -66,6 +72,9 @@ export function ParkingHistoryItem({
           detailLabels={detailLabels}
           parkingServicesCatalog={parkingServicesCatalog}
           durationLabels={durationLabels}
+          showActiveCountdown={showActiveCountdown}
+          showExpiredBadge={showExpiredBadge}
+          expiredLabel={expiredLabel}
         />
       </Link>
     </li>
