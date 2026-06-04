@@ -1,3 +1,18 @@
+# [2.36.0](https://github.com/DIMO-Network/account-manager/compare/v2.35.0...v2.36.0) (2026-06-04)
+
+
+### Bug Fixes
+
+* use local time ([0e02a7c](https://github.com/DIMO-Network/account-manager/commit/0e02a7ca9774203aec0e5c010a728064181613c4))
+
+
+### Features
+
+* add active sessions and countdown timer ([7b6ae2d](https://github.com/DIMO-Network/account-manager/commit/7b6ae2d0d5f9a1728a89c22755a7252c98a9917a))
+* display summary on parking page ([33096cc](https://github.com/DIMO-Network/account-manager/commit/33096ccade743b8d644e13fa13c502eabc24effa))
+* implement pagination for sessions ([4d0944d](https://github.com/DIMO-Network/account-manager/commit/4d0944d018bbdea704e181e700400fbc879bdf6d))
+* show countdown timer in session page ([4e2d86b](https://github.com/DIMO-Network/account-manager/commit/4e2d86b7b9aa3de4549b345267345f3a9b3ba0a2))
+
 # [2.35.0](https://github.com/DIMO-Network/account-manager/compare/v2.34.0...v2.35.0) (2026-06-03)
 
 
