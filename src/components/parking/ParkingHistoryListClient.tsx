@@ -28,6 +28,7 @@ type ParkingHistoryListClientProps = {
   showActiveCountdown?: boolean;
   showExpiredBadge?: boolean;
   expiredLabel: string;
+  paidAtLabel: string;
 };
 
 export function ParkingHistoryListClient({
@@ -43,6 +44,7 @@ export function ParkingHistoryListClient({
   showActiveCountdown = false,
   showExpiredBadge = false,
   expiredLabel,
+  paidAtLabel,
 }: ParkingHistoryListClientProps) {
   return (
     <ListPagination
@@ -66,6 +68,7 @@ export function ParkingHistoryListClient({
               showActiveCountdown={showActiveCountdown}
               showExpiredBadge={showExpiredBadge && isExpiredPaidSession(item)}
               expiredLabel={expiredLabel}
+              paidAtLabel={paidAtLabel}
             />
           ))}
         </ul>

@@ -14,6 +14,7 @@ import {
   isCheckoutSummaryStatus,
   resolveCheckoutSummary,
 } from './parkingDisplayHelpers';
+import { ParkingLocalDateTime } from './ParkingLocalDateTime';
 import { ParkingSessionCountdown } from './ParkingSessionCountdown';
 
 type ParkingHistoryDetailsProps = {
@@ -31,6 +32,8 @@ type ParkingHistoryDetailsProps = {
   showActiveCountdown?: boolean;
   showExpiredBadge?: boolean;
   expiredLabel: string;
+  locale: string;
+  paidAtLabel: string;
 };
 
 export function ParkingHistoryDetails({
@@ -45,6 +48,8 @@ export function ParkingHistoryDetails({
   showActiveCountdown = false,
   showExpiredBadge = false,
   expiredLabel,
+  locale,
+  paidAtLabel,
 }: ParkingHistoryDetailsProps) {
   const checkout = item.latestCheckout;
   const expiresAtMs = checkout ? getPaidSessionExpiresAtMs(checkout) : null;
@@ -89,9 +94,18 @@ export function ParkingHistoryDetails({
       </div>
 
       {checkoutSummary && (
-        <div className="text-xs text-text-secondary">
-          {formatCheckoutSummaryLine(checkoutSummary)}
-        </div>
+        <>
+          <div className="text-xs text-text-secondary">
+            {formatCheckoutSummaryLine(checkoutSummary)}
+          </div>
+          {checkout?.paidAt && (
+            <div className="text-xs text-text-secondary">
+              {paidAtLabel}
+              {': '}
+              <ParkingLocalDateTime iso={checkout.paidAt} locale={locale} />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -27,6 +27,7 @@ type ParkingHistoryItemProps = {
   showActiveCountdown?: boolean;
   showExpiredBadge?: boolean;
   expiredLabel: string;
+  paidAtLabel: string;
 };
 
 export function ParkingHistoryItem({
@@ -42,6 +43,7 @@ export function ParkingHistoryItem({
   showActiveCountdown = false,
   showExpiredBadge = false,
   expiredLabel,
+  paidAtLabel,
 }: ParkingHistoryItemProps) {
   const href = `/parking/sessions/${item.session.id}`;
 
@@ -75,6 +77,8 @@ export function ParkingHistoryItem({
           showActiveCountdown={showActiveCountdown}
           showExpiredBadge={showExpiredBadge}
           expiredLabel={expiredLabel}
+          locale={locale}
+          paidAtLabel={paidAtLabel}
         />
       </Link>
     </li>

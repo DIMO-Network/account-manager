@@ -9,6 +9,7 @@ import type {
   ParkingServicesCatalog,
   StartCorporateCheckoutResponse,
 } from '@/types/parking-assist';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '@/components/ui';
@@ -18,11 +19,13 @@ import { BORDER_RADIUS, COLORS, RESPONSIVE } from '@/utils/designSystem';
 import { isNoPaymentRequiredCheckout } from '@/utils/parking-checkout';
 import {
   findCatalogService,
+  getMaximumDurationMinutes,
   getMinimumDurationMinutes,
   getParkingDurationLabel,
   initialParkingCheckoutSelections,
   isDurationAllowedForCatalogService,
 } from '@/utils/parking-services';
+import { getPaidSessionExpiresAtMs } from '@/utils/parkingSessionExpiry';
 import { hasZoneCode, normalizeZoneCode } from '@/utils/zone-code';
 import { ParkingCheckoutStatusIndicator } from './ParkingCheckoutStatusIndicator';
 import { formatParkingSessionDateTime } from './parkingDateTime';
@@ -34,6 +37,7 @@ import {
   resolveCheckoutSummary,
 } from './parkingDisplayHelpers';
 import { ParkingSessionClientSkeleton } from './ParkingSessionClientSkeleton';
+import { ParkingSessionPaidDurationStatus } from './ParkingSessionPaidDurationStatus';
 
 type ParkingSessionClientProps = {
   sessionId: string;
@@ -62,6 +66,7 @@ type ParkingSessionClientProps = {
     zone_code_placeholder: string;
     zone_code_required_error: string;
     location_unknown: string;
+    paid_at_label: string;
     triggered_at_label: string;
     checkout_status_label: string;
     pay_for_parking: string;
@@ -205,6 +210,7 @@ export function ParkingSessionClient({
   locale,
 }: ParkingSessionClientProps) {
   const router = useRouter();
+  const parkingT = useTranslations('Parking');
   const hydrated = useHydrated();
 
   const initialSelections = useMemo(
@@ -343,6 +349,9 @@ export function ParkingSessionClient({
 
   const checkout = detail.latestCheckout;
   const showPaidCheckoutSummary = checkoutStatus === 'paid';
+  const paidExpiresAtMs = showPaidCheckoutSummary && checkout
+    ? getPaidSessionExpiresAtMs(checkout)
+    : null;
   const showInProgressCheckoutSummary = checkoutStatus === 'pending' || checkoutStatus === 'running';
 
   const checkoutSummary = useMemo(() => {
@@ -352,23 +361,47 @@ export function ParkingSessionClient({
     return resolveCheckoutSummary(checkout, parkingServicesCatalog, t.durationLabels);
   }, [checkout, parkingServicesCatalog, t.durationLabels]);
 
+  const formatMaxDurationSecondary = useCallback(
+    (serviceId: ParkingService | null | undefined) => {
+      const entry = findCatalogService(parkingServicesCatalog, serviceId);
+      if (!entry) {
+        return undefined;
+      }
+      const duration = getParkingDurationLabel(
+        getMaximumDurationMinutes(entry),
+        t.durationLabels,
+      );
+      return parkingT('parking_max_duration', { duration });
+    },
+    [parkingServicesCatalog, parkingT, t.durationLabels],
+  );
+
   const renderCheckoutSummaryFields = () => {
     if (!checkoutSummary) {
       return null;
     }
+    const maxDurationSecondary = formatMaxDurationSecondary(checkout?.parkingService);
     return (
       <>
         <FieldRow label={t.parking_service_label}>
           {checkoutSummary.parkingServiceLabel}
         </FieldRow>
         {checkoutSummary.durationLabel && (
-          <FieldRow label={t.duration_label}>
+          <FieldRow
+            label={t.duration_label}
+            secondary={maxDurationSecondary}
+          >
             {checkoutSummary.durationLabel}
           </FieldRow>
         )}
         {checkoutSummary.zoneDisplay && (
           <FieldRow label={t.zone_code_label}>
             {checkoutSummary.zoneDisplay}
+          </FieldRow>
+        )}
+        {checkout?.paidAt && (
+          <FieldRow label={t.paid_at_label}>
+            {formatParkingSessionDateTime(checkout.paidAt, locale)}
           </FieldRow>
         )}
       </>
@@ -496,9 +529,17 @@ export function ParkingSessionClient({
         title={sessionTitle}
         className="mb-0"
       />
-      <p className={`${COLORS.text.secondary} leading-relaxed ${RESPONSIVE.text.body}`}>
-        {sessionDescription}
-      </p>
+      {checkoutStatus === 'paid' && paidExpiresAtMs != null
+        ? (
+            <ParkingSessionPaidDurationStatus expiresAtMs={paidExpiresAtMs} />
+          )
+        : checkoutStatus !== 'paid'
+          ? (
+              <p className={`${COLORS.text.secondary} leading-relaxed ${RESPONSIVE.text.body}`}>
+                {sessionDescription}
+              </p>
+            )
+          : null}
 
       <div className="flex flex-col justify-between bg-surface-default rounded-2xl py-3">
         {error && (
@@ -561,6 +602,11 @@ export function ParkingSessionClient({
                     disabled={!selectedCatalogEntry}
                     showSearch={false}
                   />
+                  {selectedCatalogEntry && (
+                    <p className={`${SECONDARY_VALUE_STYLE} mt-2`}>
+                      {formatMaxDurationSecondary(selectedCatalogEntry.id)}
+                    </p>
+                  )}
                 </div>
               </div>
 

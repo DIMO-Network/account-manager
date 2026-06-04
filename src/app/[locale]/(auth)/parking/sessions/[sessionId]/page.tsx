@@ -127,6 +127,7 @@ export default async function ParkingSessionPage(props: {
     zone_code_placeholder: t('zone_code_placeholder'),
     zone_code_required_error: t('zone_code_required_error'),
     location_unknown: t('history_location_unknown'),
+    paid_at_label: t('paid_at_label'),
     triggered_at_label: t('triggered_at_label'),
     checkout_status_label: t('checkout_status_label'),
     pay_for_parking: t('pay_for_parking'),

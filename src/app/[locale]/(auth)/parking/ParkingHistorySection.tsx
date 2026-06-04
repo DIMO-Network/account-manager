@@ -91,6 +91,7 @@ export async function ParkingHistorySection({ locale }: ParkingHistorySectionPro
     parkingServicesCatalog: catalogResult.data,
     durationLabels,
     expiredLabel: t('parking_session_expired'),
+    paidAtLabel: t('paid_at_label'),
   };
 
   const sectionHeadingClass = `text-lg font-semibold ${COLORS.text.primary} mb-3`;
