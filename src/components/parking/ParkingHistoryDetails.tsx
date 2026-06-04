@@ -1,10 +1,17 @@
 import type { VehicleDefinitionSummary } from './parkingDisplayHelpers';
-import type { ParkingAssistHistoryItem, ParkingCorporateCheckoutStatus } from '@/types/parking-assist';
+import type {
+  ParkingAssistHistoryItem,
+  ParkingCorporateCheckoutStatus,
+  ParkingServicesCatalog,
+} from '@/types/parking-assist';
 import {
-  formatLicensePlateLine,
-  formatTriggerLocationLine,
+  formatCheckoutSummaryLine,
+  formatHistoryLicensePlate,
+  formatHistoryTriggerLocation,
   formatVehicleLine,
   getParkingCheckoutStatusDisplay,
+  isCheckoutSummaryStatus,
+  resolveCheckoutSummary,
 } from './parkingDisplayHelpers';
 
 type ParkingHistoryDetailsProps = {
@@ -14,11 +21,11 @@ type ParkingHistoryDetailsProps = {
   vehicleDefinition?: VehicleDefinitionSummary;
   triggerLocation?: string;
   detailLabels: {
-    locationPrefix: string;
     locationUnknown: string;
-    licensePlatePrefix: string;
     licensePlateNotSet: string;
   };
+  parkingServicesCatalog: ParkingServicesCatalog;
+  durationLabels: Record<string, string>;
 };
 
 export function ParkingHistoryDetails({
@@ -28,7 +35,14 @@ export function ParkingHistoryDetails({
   vehicleDefinition,
   triggerLocation,
   detailLabels,
+  parkingServicesCatalog,
+  durationLabels,
 }: ParkingHistoryDetailsProps) {
+  const checkout = item.latestCheckout;
+  const checkoutSummary = checkout && isCheckoutSummaryStatus(checkout.status)
+    ? resolveCheckoutSummary(checkout, parkingServicesCatalog, durationLabels)
+    : null;
+
   const statusDisplay = getParkingCheckoutStatusDisplay(
     item.latestCheckout?.status,
     statusLabels,
@@ -46,18 +60,18 @@ export function ParkingHistoryDetails({
       </div>
 
       <div className="text-xs text-text-secondary mt-1">
-        {formatTriggerLocationLine(item, triggerLocation, {
-          prefix: detailLabels.locationPrefix,
-          unknown: detailLabels.locationUnknown,
-        })}
+        {formatHistoryLicensePlate(item, detailLabels.licensePlateNotSet)}
       </div>
 
       <div className="text-xs text-text-secondary">
-        {formatLicensePlateLine(item, {
-          prefix: detailLabels.licensePlatePrefix,
-          notSet: detailLabels.licensePlateNotSet,
-        })}
+        {formatHistoryTriggerLocation(item, triggerLocation, detailLabels.locationUnknown)}
       </div>
+
+      {checkoutSummary && (
+        <div className="text-xs text-text-secondary">
+          {formatCheckoutSummaryLine(checkoutSummary)}
+        </div>
+      )}
     </div>
   );
 }

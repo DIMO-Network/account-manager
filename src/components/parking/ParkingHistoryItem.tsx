@@ -1,5 +1,9 @@
 import type { VehicleDefinitionSummary } from './parkingDisplayHelpers';
-import type { ParkingAssistHistoryItem, ParkingCorporateCheckoutStatus } from '@/types/parking-assist';
+import type {
+  ParkingAssistHistoryItem,
+  ParkingCorporateCheckoutStatus,
+  ParkingServicesCatalog,
+} from '@/types/parking-assist';
 import Link from 'next/link';
 import { ChevronIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
@@ -15,11 +19,11 @@ type ParkingHistoryItemProps = {
   vehicleDefinition?: VehicleDefinitionSummary;
   triggerLocation?: string;
   detailLabels: {
-    locationPrefix: string;
     locationUnknown: string;
-    licensePlatePrefix: string;
     licensePlateNotSet: string;
   };
+  parkingServicesCatalog: ParkingServicesCatalog;
+  durationLabels: Record<string, string>;
 };
 
 export function ParkingHistoryItem({
@@ -30,6 +34,8 @@ export function ParkingHistoryItem({
   vehicleDefinition,
   triggerLocation,
   detailLabels,
+  parkingServicesCatalog,
+  durationLabels,
 }: ParkingHistoryItemProps) {
   const href = `/parking/sessions/${item.session.id}`;
 
@@ -58,6 +64,8 @@ export function ParkingHistoryItem({
           vehicleDefinition={vehicleDefinition}
           triggerLocation={triggerLocation}
           detailLabels={detailLabels}
+          parkingServicesCatalog={parkingServicesCatalog}
+          durationLabels={durationLabels}
         />
       </Link>
     </li>

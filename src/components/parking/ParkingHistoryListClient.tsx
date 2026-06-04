@@ -1,7 +1,11 @@
 'use client';
 
 import type { VehicleDefinitionSummary } from './parkingDisplayHelpers';
-import type { ParkingAssistHistoryItem, ParkingCorporateCheckoutStatus } from '@/types/parking-assist';
+import type {
+  ParkingAssistHistoryItem,
+  ParkingCorporateCheckoutStatus,
+  ParkingServicesCatalog,
+} from '@/types/parking-assist';
 import { ListPagination } from '@/components/ui/ListPagination';
 import { ParkingHistoryItem } from './ParkingHistoryItem';
 
@@ -15,11 +19,11 @@ type ParkingHistoryListClientProps = {
   vehicleDefinitionsByTokenId: Record<number, VehicleDefinitionSummary>;
   triggerLocationBySessionId: Record<string, string>;
   detailLabels: {
-    locationPrefix: string;
     locationUnknown: string;
-    licensePlatePrefix: string;
     licensePlateNotSet: string;
   };
+  parkingServicesCatalog: ParkingServicesCatalog;
+  durationLabels: Record<string, string>;
 };
 
 export function ParkingHistoryListClient({
@@ -30,6 +34,8 @@ export function ParkingHistoryListClient({
   vehicleDefinitionsByTokenId,
   triggerLocationBySessionId,
   detailLabels,
+  parkingServicesCatalog,
+  durationLabels,
 }: ParkingHistoryListClientProps) {
   return (
     <ListPagination
@@ -48,6 +54,8 @@ export function ParkingHistoryListClient({
               vehicleDefinition={vehicleDefinitionsByTokenId[item.session.vehicleTokenId]}
               triggerLocation={triggerLocationBySessionId[item.session.id]}
               detailLabels={detailLabels}
+              parkingServicesCatalog={parkingServicesCatalog}
+              durationLabels={durationLabels}
             />
           ))}
         </ul>

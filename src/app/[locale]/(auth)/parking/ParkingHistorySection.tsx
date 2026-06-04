@@ -1,10 +1,14 @@
-import type { ParkingAssistHistory, ParkingCorporateCheckoutStatus } from '@/types/parking-assist';
+import type { ParkingAssistHistory, ParkingCorporateCheckoutStatus, ParkingServicesCatalog } from '@/types/parking-assist';
 import { getTranslations } from 'next-intl/server';
 import { ParkingHistoryListClient } from '@/components/parking/ParkingHistoryListClient';
 import { fetchParkingAssistBackend } from '@/libs/ParkingAssistBackend';
 import { resolveTriggerLocationsBySessionId } from '@/libs/parkingTriggerLocations';
 import { resolveVehicleDefinitionsByTokenId } from '@/libs/parkingVehicleDefinitions';
 import { COLORS, RESPONSIVE } from '@/utils/designSystem';
+import {
+  PARKING_DURATION_I18N_KEYS,
+  parkingDurationTranslationKey,
+} from '@/utils/parking-services';
 
 type ParkingHistorySectionProps = {
   locale: string;
@@ -24,14 +28,25 @@ export async function ParkingHistorySection({ locale }: ParkingHistorySectionPro
     cancelled: t('status_cancelled'),
   };
 
-  const historyResult = await fetchParkingAssistBackend<ParkingAssistHistory>(
-    '/account/parking-assist/history?limit=20&offset=0',
-  );
+  const [historyResult, catalogResult] = await Promise.all([
+    fetchParkingAssistBackend<ParkingAssistHistory>(
+      '/account/parking-assist/history?limit=20&offset=0',
+    ),
+    fetchParkingAssistBackend<ParkingServicesCatalog>('/account/parking-assist/parking-services'),
+  ]);
 
   if ('error' in historyResult) {
     return (
       <p className={`${RESPONSIVE.text.body} ${COLORS.feedback.error}`}>
         {t('history_load_error')}
+      </p>
+    );
+  }
+
+  if ('error' in catalogResult || catalogResult.data.services.length === 0) {
+    return (
+      <p className={`${RESPONSIVE.text.body} ${COLORS.feedback.error}`}>
+        {t('catalog_load_error')}
       </p>
     );
   }
@@ -52,11 +67,16 @@ export async function ParkingHistorySection({ locale }: ParkingHistorySectionPro
   ]);
 
   const detailLabels = {
-    locationPrefix: t('history_location_prefix'),
     locationUnknown: t('history_location_unknown'),
-    licensePlatePrefix: t('history_license_plate_prefix'),
     licensePlateNotSet: t('license_plate_not_set'),
   };
+
+  const durationLabels = Object.fromEntries(
+    PARKING_DURATION_I18N_KEYS.map(minutes => [
+      parkingDurationTranslationKey(minutes),
+      t(parkingDurationTranslationKey(minutes) as Parameters<typeof t>[0]),
+    ]),
+  ) as Record<string, string>;
 
   return (
     <ParkingHistoryListClient
@@ -67,6 +87,8 @@ export async function ParkingHistorySection({ locale }: ParkingHistorySectionPro
       vehicleDefinitionsByTokenId={Object.fromEntries(vehicleDefinitionsByTokenId)}
       triggerLocationBySessionId={Object.fromEntries(triggerLocationBySessionId)}
       detailLabels={detailLabels}
+      parkingServicesCatalog={catalogResult.data}
+      durationLabels={durationLabels}
     />
   );
 }

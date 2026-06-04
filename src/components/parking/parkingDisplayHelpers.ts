@@ -1,8 +1,11 @@
 import type {
   ParkingAssistHistoryItem,
   ParkingAssistSessionDetail,
+  ParkingCorporateCheckout,
   ParkingCorporateCheckoutStatus,
+  ParkingServicesCatalog,
 } from '@/types/parking-assist';
+import { findCatalogService, getParkingDurationLabel } from '@/utils/parking-services';
 
 export type VehicleDefinitionSummary = {
   year?: number | null;
@@ -95,34 +98,64 @@ export function formatLicensePlateDisplay(
   return trimmed;
 }
 
-export function formatLicensePlateLine(
-  item: Pick<ParkingAssistHistoryItem, 'vehicleLicensePlate' | 'vehicleState' | 'latestCheckout'>,
-  labels: { prefix: string; notSet: string },
-): string {
-  const plate = item.vehicleLicensePlate?.trim() || item.latestCheckout?.licensePlate?.trim();
-  if (!plate) {
-    return `${labels.prefix}: ${labels.notSet}`;
-  }
-  const state = item.vehicleState?.trim();
-  if (state) {
-    return `${labels.prefix}: ${plate} - ${state}`;
-  }
-  return `${labels.prefix}: ${plate}`;
+export type CheckoutSummary = {
+  parkingServiceLabel: string;
+  durationLabel: string | null;
+  zoneDisplay: string | null;
+};
+
+export function isCheckoutSummaryStatus(status: ParkingCorporateCheckoutStatus | undefined): boolean {
+  return status === 'pending' || status === 'running' || status === 'paid';
 }
 
-export function formatTriggerLocationLine(
+export function resolveCheckoutSummary(
+  checkout: ParkingCorporateCheckout,
+  catalog: ParkingServicesCatalog,
+  durationLabels: Record<string, string | undefined>,
+): CheckoutSummary {
+  const serviceEntry = findCatalogService(catalog, checkout.parkingService);
+  const durationLabel = checkout.durationMinutes == null
+    ? null
+    : getParkingDurationLabel(checkout.durationMinutes, durationLabels);
+
+  return {
+    parkingServiceLabel: serviceEntry?.label ?? checkout.parkingService,
+    durationLabel,
+    zoneDisplay: checkout.zoneLabel ?? checkout.zoneId,
+  };
+}
+
+export function formatHistoryLicensePlate(
+  item: Pick<ParkingAssistHistoryItem, 'vehicleLicensePlate' | 'vehicleState' | 'latestCheckout'>,
+  notSetLabel: string,
+): string {
+  const plate = item.vehicleLicensePlate ?? item.latestCheckout?.licensePlate ?? null;
+  return formatLicensePlateDisplay(plate, item.vehicleState, notSetLabel);
+}
+
+export function formatHistoryTriggerLocation(
   item: Pick<ParkingAssistHistoryItem, 'session'>,
   triggerLocation: string | undefined,
-  labels: { prefix: string; unknown: string },
+  unknownLabel: string,
 ): string {
   if (triggerLocation) {
-    return `${labels.prefix}: ${triggerLocation}`;
+    return triggerLocation;
   }
 
   const { triggerLatitude: lat, triggerLongitude: lng } = item.session;
   if (lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng)) {
-    return `${labels.prefix}: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   }
 
-  return `${labels.prefix}: ${labels.unknown}`;
+  return unknownLabel;
+}
+
+export function formatCheckoutSummaryLine(summary: CheckoutSummary): string {
+  return [
+    summary.parkingServiceLabel,
+    summary.durationLabel,
+    summary.zoneDisplay,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(', ');
 }

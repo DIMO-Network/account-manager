@@ -30,6 +30,8 @@ import {
   formatLicensePlateDisplay,
   formatSessionVehicleLine,
   getParkingCheckoutStatusDisplay,
+  isCheckoutSummaryStatus,
+  resolveCheckoutSummary,
 } from './parkingDisplayHelpers';
 import { ParkingSessionClientSkeleton } from './ParkingSessionClientSkeleton';
 
@@ -137,10 +139,6 @@ function initialZoneCodeInput(detail: ParkingAssistSessionDetail): string {
     return '';
   }
   return checkout.zoneLabel ?? checkout.zoneId ?? '';
-}
-
-function isCheckoutSummaryStatus(status: ParkingCorporateCheckoutStatus | undefined): boolean {
-  return status === 'pending' || status === 'running' || status === 'paid';
 }
 
 function durationRangeHintForService(
@@ -343,25 +341,39 @@ export function ParkingSessionClient({
 
   const durationRangeHint = durationRangeHintForService(parkingServiceId, t);
 
-  const showCheckoutSummary = isCheckoutSummaryStatus(checkoutStatus);
   const checkout = detail.latestCheckout;
+  const showPaidCheckoutSummary = checkoutStatus === 'paid';
+  const showInProgressCheckoutSummary = checkoutStatus === 'pending' || checkoutStatus === 'running';
 
   const checkoutSummary = useMemo(() => {
-    if (!showCheckoutSummary || !checkout) {
+    if (!checkout || !isCheckoutSummaryStatus(checkout.status)) {
       return null;
     }
-    const serviceEntry = findCatalogService(parkingServicesCatalog, checkout.parkingService);
-    const zoneDisplay = checkout.zoneLabel ?? checkout.zoneId;
-    const durationDisplay = checkout.durationMinutes == null
-      ? null
-      : getParkingDurationLabel(checkout.durationMinutes, t.durationLabels);
+    return resolveCheckoutSummary(checkout, parkingServicesCatalog, t.durationLabels);
+  }, [checkout, parkingServicesCatalog, t.durationLabels]);
 
-    return {
-      parkingServiceLabel: serviceEntry?.label ?? checkout.parkingService,
-      durationLabel: durationDisplay,
-      zoneDisplay,
-    };
-  }, [showCheckoutSummary, checkout, parkingServicesCatalog, t.durationLabels]);
+  const renderCheckoutSummaryFields = () => {
+    if (!checkoutSummary) {
+      return null;
+    }
+    return (
+      <>
+        <FieldRow label={t.parking_service_label}>
+          {checkoutSummary.parkingServiceLabel}
+        </FieldRow>
+        {checkoutSummary.durationLabel && (
+          <FieldRow label={t.duration_label}>
+            {checkoutSummary.durationLabel}
+          </FieldRow>
+        )}
+        {checkoutSummary.zoneDisplay && (
+          <FieldRow label={t.zone_code_label}>
+            {checkoutSummary.zoneDisplay}
+          </FieldRow>
+        )}
+      </>
+    );
+  };
 
   const checkoutStatusDisplay = useMemo(() => {
     if (!detail.latestCheckout) {
@@ -507,6 +519,8 @@ export function ParkingSessionClient({
             {vehicleLabel}
           </FieldRow>
 
+          {showPaidCheckoutSummary && renderCheckoutSummaryFields()}
+
           <FieldRow label={t.triggered_at_label} secondary={locationDisplay}>
             {formatParkingSessionDateTime(detail.session.triggeredAt, locale)}
           </FieldRow>
@@ -518,23 +532,7 @@ export function ParkingSessionClient({
             {checkoutStatusDisplay.text}
           </FieldRow>
 
-          {checkoutSummary && (
-            <>
-              <FieldRow label={t.parking_service_label}>
-                {checkoutSummary.parkingServiceLabel}
-              </FieldRow>
-              {checkoutSummary.durationLabel && (
-                <FieldRow label={t.duration_label}>
-                  {checkoutSummary.durationLabel}
-                </FieldRow>
-              )}
-              {checkoutSummary.zoneDisplay && (
-                <FieldRow label={t.zone_code_label}>
-                  {checkoutSummary.zoneDisplay}
-                </FieldRow>
-              )}
-            </>
-          )}
+          {showInProgressCheckoutSummary && renderCheckoutSummaryFields()}
 
           {showPayForm && (
             <>
