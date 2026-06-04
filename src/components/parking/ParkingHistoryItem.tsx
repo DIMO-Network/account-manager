@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { ChevronIcon } from '@/components/Icons';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { ParkingCheckoutStatusIndicator } from './ParkingCheckoutStatusIndicator';
-import { formatSessionDateTime } from './parkingDisplayHelpers';
 import { ParkingHistoryDetails } from './ParkingHistoryDetails';
+import { ParkingLocalDateTime } from './ParkingLocalDateTime';
 
 type ParkingHistoryItemProps = {
   item: ParkingAssistHistoryItem;
@@ -45,7 +45,7 @@ export function ParkingHistoryItem({
                 noCheckoutLabel={noCheckoutLabel}
               />
               <h3 className="text-base font-medium leading-6 truncate">
-                {formatSessionDateTime(item.session.triggeredAt, locale)}
+                <ParkingLocalDateTime iso={item.session.triggeredAt} locale={locale} />
               </h3>
             </div>
             <ChevronIcon orientation="right" className={`w-2 h-3 shrink-0 ${COLORS.text.secondary}`} />

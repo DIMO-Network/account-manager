@@ -110,16 +110,6 @@ export function formatLicensePlateLine(
   return `${labels.prefix}: ${plate}`;
 }
 
-export function formatSessionDateTime(iso: string, locale: string): string {
-  return new Date(iso).toLocaleString(locale, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-}
-
 export function formatTriggerLocationLine(
   item: Pick<ParkingAssistHistoryItem, 'session'>,
   triggerLocation: string | undefined,

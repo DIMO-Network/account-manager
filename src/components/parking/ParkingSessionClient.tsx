@@ -25,6 +25,7 @@ import {
 } from '@/utils/parking-services';
 import { hasZoneCode, normalizeZoneCode } from '@/utils/zone-code';
 import { ParkingCheckoutStatusIndicator } from './ParkingCheckoutStatusIndicator';
+import { formatParkingSessionDateTime } from './parkingDateTime';
 import {
   formatLicensePlateDisplay,
   formatSessionVehicleLine,
@@ -446,15 +447,6 @@ export function ParkingSessionClient({
     }
   };
 
-  const formatDateTime = (iso: string) =>
-    new Date(iso).toLocaleString(locale, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-
   const vehicleDefinition = useMemo(
     () => resolveVehicleDefinition(serverVehicleDefinition, detail),
     [serverVehicleDefinition, detail],
@@ -516,7 +508,7 @@ export function ParkingSessionClient({
           </FieldRow>
 
           <FieldRow label={t.triggered_at_label} secondary={locationDisplay}>
-            {formatDateTime(detail.session.triggeredAt)}
+            {formatParkingSessionDateTime(detail.session.triggeredAt, locale)}
           </FieldRow>
 
           <FieldRow
