@@ -112,6 +112,8 @@ export default async function ParkingSessionPage(props: {
     duration_label: t('duration_label'),
     duration_range_parkdetroit: t('duration_range_parkdetroit'),
     duration_range_parkmobile: t('duration_range_parkmobile'),
+    duration_range_parkferndale: t('duration_range_parkferndale'),
+    parkferndale_do_not_back_disclaimer: t('parkferndale_do_not_back_disclaimer'),
     durationLabels: Object.fromEntries(
       PARKING_DURATION_I18N_KEYS.map(minutes => [
         parkingDurationTranslationKey(minutes),

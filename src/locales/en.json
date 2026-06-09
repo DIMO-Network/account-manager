@@ -95,6 +95,8 @@
     "duration_label": "Duration",
     "duration_range_parkdetroit": "Minimum parking duration is 1 hour. Maximum is 2 hours.",
     "duration_range_parkmobile": "Minimum parking duration is 30 minutes. Maximum is 3 hours.",
+    "duration_range_parkferndale": "Minimum parking duration is 30 minutes. Maximum is 2 hours.",
+    "parkferndale_do_not_back_disclaimer": "Do not back into spaces when parking with ParkFerndale.",
     "duration_option_30": "30 minutes",
     "duration_option_40": "40 minutes",
     "duration_option_50": "50 minutes",

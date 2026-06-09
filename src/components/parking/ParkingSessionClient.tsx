@@ -56,6 +56,8 @@ type ParkingSessionClientProps = {
     duration_label: string;
     duration_range_parkdetroit: string;
     duration_range_parkmobile: string;
+    duration_range_parkferndale: string;
+    parkferndale_do_not_back_disclaimer: string;
     durationLabels: Record<string, string>;
     note_label: string;
     duration_missing_hint: string;
@@ -148,13 +150,19 @@ function initialZoneCodeInput(detail: ParkingAssistSessionDetail): string {
 
 function durationRangeHintForService(
   serviceId: ParkingService | '',
-  translations: Pick<ParkingSessionClientProps['translations'], 'duration_range_parkdetroit' | 'duration_range_parkmobile'>,
+  translations: Pick<
+    ParkingSessionClientProps['translations'],
+    'duration_range_parkdetroit' | 'duration_range_parkmobile' | 'duration_range_parkferndale'
+  >,
 ): string | null {
   if (serviceId === 'parkdetroit') {
     return translations.duration_range_parkdetroit;
   }
   if (serviceId === 'parkmobile') {
     return translations.duration_range_parkmobile;
+  }
+  if (serviceId === 'parkferndale') {
+    return translations.duration_range_parkferndale;
   }
   return null;
 }
@@ -346,6 +354,7 @@ export function ParkingSessionClient({
   );
 
   const durationRangeHint = durationRangeHintForService(parkingServiceId, t);
+  const showParkFerndaleDisclaimer = parkingServiceId === 'parkferndale';
 
   const checkout = detail.latestCheckout;
   const showPaidCheckoutSummary = checkoutStatus === 'paid';
@@ -586,6 +595,9 @@ export function ParkingSessionClient({
                     onChangeAction={handleParkingServiceChange}
                     showSearch={false}
                   />
+                  {showParkFerndaleDisclaimer && (
+                    <p className={`${SECONDARY_VALUE_STYLE} mt-2`}>{t.parkferndale_do_not_back_disclaimer}</p>
+                  )}
                 </div>
               </div>
 
