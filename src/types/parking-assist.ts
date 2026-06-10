@@ -5,7 +5,7 @@ export type ParkingCorporateCheckoutStatus
     | 'failed'
     | 'cancelled';
 
-export type ParkingService = 'parkdetroit' | 'parkmobile';
+export type ParkingService = 'parkdetroit' | 'parkmobile' | 'parkferndale';
 
 export type ParkingCorporateCheckout = {
   id: string;

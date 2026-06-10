@@ -31,6 +31,18 @@ const catalog: ParkingServicesCatalog = {
         { minutes: 100, label: '1 hour 40 min' },
       ],
     },
+    {
+      id: 'parkferndale',
+      label: 'ParkFerndale',
+      zoneCodeHint: 'Zone code',
+      defaultDurationMinutes: 60,
+      durationOptions: [
+        { minutes: 30, label: '30 min' },
+        { minutes: 60, label: '1 hour' },
+        { minutes: 90, label: '1 hour 30 min' },
+        { minutes: 120, label: '2 hours' },
+      ],
+    },
   ],
 };
 
@@ -210,5 +222,19 @@ describe('parking-services', () => {
       parkingServiceId: 'parkmobile',
       durationMinutes: 30,
     });
+  });
+
+  it('uses suggested ParkFerndale service and minimum duration', () => {
+    expect(initialParkingCheckoutSelections(catalog, null, 'parkferndale')).toEqual({
+      parkingServiceId: 'parkferndale',
+      durationMinutes: 30,
+    });
+  });
+
+  it('validates ParkFerndale duration options', () => {
+    const entry = findCatalogService(catalog, 'parkferndale');
+
+    expect(isDurationAllowedForCatalogService(entry, 120)).toBe(true);
+    expect(isDurationAllowedForCatalogService(entry, 45)).toBe(false);
   });
 });

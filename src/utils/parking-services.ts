@@ -26,11 +26,14 @@ export const PARKMOBILE_DURATION_MINUTES_OPTIONS = [
   180,
 ] as const;
 
+export const PARKFERNDALE_DURATION_MINUTES_OPTIONS = [30, 60, 90, 120] as const;
+
 /** All duration minutes that have locale keys under Parking.duration_option_ */
 export const PARKING_DURATION_I18N_KEYS = [
   ...new Set([
     ...PARKDETROIT_DURATION_MINUTES_OPTIONS,
     ...PARKMOBILE_DURATION_MINUTES_OPTIONS,
+    ...PARKFERNDALE_DURATION_MINUTES_OPTIONS,
   ]),
 ].sort((a, b) => a - b) as readonly number[];
 
