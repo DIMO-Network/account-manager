@@ -1,3 +1,10 @@
+# [2.37.0](https://github.com/DIMO-Network/account-manager/compare/v2.36.0...v2.37.0) (2026-06-10)
+
+
+### Features
+
+* add ParkFerndale service ([#133](https://github.com/DIMO-Network/account-manager/issues/133)) ([dad343d](https://github.com/DIMO-Network/account-manager/commit/dad343d956d5cc4717ac3b4ba57a68d18b5cf229))
+
 # [2.36.0](https://github.com/DIMO-Network/account-manager/compare/v2.35.0...v2.36.0) (2026-06-04)
 
 
