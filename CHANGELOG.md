@@ -1,3 +1,10 @@
+## [2.37.1](https://github.com/DIMO-Network/account-manager/compare/v2.37.0...v2.37.1) (2026-06-22)
+
+
+### Bug Fixes
+
+* remove server-only Spotlight import ([997be8f](https://github.com/DIMO-Network/account-manager/commit/997be8f070539345525139cf03f90ff2b9327b89))
+
 # [2.37.0](https://github.com/DIMO-Network/account-manager/compare/v2.36.0...v2.37.0) (2026-06-10)
 
 
