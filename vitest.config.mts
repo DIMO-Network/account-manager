@@ -12,7 +12,7 @@ export default defineConfig({
       include: ['src/**/*'],
       exclude: ['src/**/*.stories.{js,jsx,ts,tsx}', '**/*.d.ts'],
     },
-    workspace: [
+    projects: [
       {
         extends: true, // Inherit root config (plugins, globals, coverage, setupFiles, env)
         test: {
