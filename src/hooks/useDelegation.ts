@@ -36,6 +36,7 @@ export const useDelegation = () => {
   const [error, setError] = useState<string | null>(null);
   const [submit, setSubmit] = useState<SubmitStatus>({ phase: 'idle' });
   const mountedRef = useRef(true);
+  const inFlightRef = useRef(false);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -110,12 +111,17 @@ export const useDelegation = () => {
   }, [session, readState]);
 
   const delegateTo = useCallback(async (delegatee: `0x${string}`) => {
+    if (inFlightRef.current) {
+      return;
+    }
+
     if (!session?.walletAddress || !session?.dimoToken || !session?.subOrganizationId) {
       setSubmit({ phase: 'error', message: 'Missing session data. Please sign out and sign in again.' });
       return;
     }
 
     const wallet = session.walletAddress as `0x${string}`;
+    inFlightRef.current = true;
 
     try {
       setSubmit({ phase: 'authorizing' });
@@ -162,6 +168,8 @@ export const useDelegation = () => {
         const message = err instanceof Error ? err.message : 'Delegation failed';
         setSubmit({ phase: 'error', message });
       }
+    } finally {
+      inFlightRef.current = false;
     }
   }, [session, readState]);
 
