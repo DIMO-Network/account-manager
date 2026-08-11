@@ -1,3 +1,10 @@
+## [2.38.1](https://github.com/DIMO-Network/account-manager/compare/v2.38.0...v2.38.1) (2026-08-11)
+
+
+### Bug Fixes
+
+* remove misleading voting power stat and correct staked DIMO copy ([#161](https://github.com/DIMO-Network/account-manager/issues/161)) ([f83b590](https://github.com/DIMO-Network/account-manager/commit/f83b5908fd585cf2393b3ccdfb2d2c274c2874a5))
+
 # [2.38.0](https://github.com/DIMO-Network/account-manager/compare/v2.37.1...v2.38.0) (2026-08-11)
 
 
