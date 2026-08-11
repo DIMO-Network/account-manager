@@ -8,6 +8,7 @@ export { ChevronIcon } from './ChevronIcon';
 export { CloseIcon } from './CloseIcon';
 export { ConnectionIcon } from './ConnectionIcon';
 export { CreditCardIcon } from './CreditCardIcon';
+export { DelegateIcon } from './DelegateIcon';
 export { DIMOLogo } from './DIMOLogo';
 export { EditIcon } from './EditIcon';
 export { HomeIcon } from './HomeIcon';

@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { LayoutWrapper } from '@/components/Layout';
+import { DelegateLayoutClient } from './DelegateLayoutClient';
 
-export default async function ParkingLayout(props: {
+export default async function DelegateLayout(props: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
@@ -13,8 +13,7 @@ export default async function ParkingLayout(props: {
   });
 
   return (
-    <LayoutWrapper
-      layoutType="auth"
+    <DelegateLayoutClient
       translations={{
         dashboard_link: t('dashboard_link'),
         subscriptions_link: t('subscriptions_link'),
@@ -28,6 +27,6 @@ export default async function ParkingLayout(props: {
       }}
     >
       {props.children}
-    </LayoutWrapper>
+    </DelegateLayoutClient>
   );
 }

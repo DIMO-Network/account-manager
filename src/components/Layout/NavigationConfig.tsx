@@ -1,12 +1,13 @@
 import type { MenuItemConfig } from '@/types/menu';
 import { SignOutButton } from '@/components/auth/SignOutButton';
-import { CarIcon, HomeIcon, LogoutIcon, RecoveryIcon, TransactionIcon, WalletIcon } from '@/components/Icons';
+import { CarIcon, DelegateIcon, HomeIcon, LogoutIcon, RecoveryIcon, TransactionIcon, WalletIcon } from '@/components/Icons';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { MenuActionButton } from '@/components/Menu/MenuActionButton';
 import { FEATURE_FLAGS } from '@/utils/FeatureFlags';
 
 export type AuthNavigationTranslations = {
   dashboard_link: string;
+  delegate_link: string;
   payment_methods_link: string;
   parking_link: string;
   recovery_link: string;
@@ -88,6 +89,15 @@ export const createAuthNavigation = (
     icon: RecoveryIcon,
     iconClassName: 'h-5 w-5 text-text-secondary',
     link: '/recovery/',
+    section: 'main',
+  });
+
+  // Add delegate link
+  menuItems.push({
+    label: translations.delegate_link,
+    icon: DelegateIcon,
+    iconClassName: 'h-5 w-5 text-text-secondary',
+    link: '/delegate/',
     section: 'main',
   });
 

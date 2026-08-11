@@ -21,6 +21,7 @@ export default async function TransactionsLayout(props: {
         parking_link: t('parking_link'),
         transactions_link: t('transactions_link'),
         recovery_link: t('recovery_link'),
+        delegate_link: t('delegate_link'),
         user_profile_link: t('user_profile_link'),
         sign_out: t('sign_out'),
       }}

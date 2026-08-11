@@ -30,6 +30,7 @@
     "parking_link": "Parking",
     "transactions_link": "Transactions",
     "recovery_link": "Récupération",
+    "delegate_link": "Déléguer",
     "user_profile_link": "Gérer votre compte",
     "sign_out": "Se déconnecter"
   },
@@ -141,6 +142,11 @@
     "title": "Récupération",
     "description": "Récupération",
     "coming_soon": "Coming soon"
+  },
+  "Delegate": {
+    "meta_title": "Déléguer",
+    "title": "Déléguer",
+    "description": "Déléguez votre pouvoir de vote DIMO"
   },
   "monthly": "monthly",
   "annually": "annually"

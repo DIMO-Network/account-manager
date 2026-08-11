@@ -30,6 +30,7 @@
     "parking_link": "Parking",
     "transactions_link": "Transactions",
     "recovery_link": "Recovery",
+    "delegate_link": "Delegate",
     "user_profile_link": "Account",
     "sign_out": "Sign out"
   },
@@ -144,6 +145,11 @@
     "pending_queued_message": "Payment is still processing. Refresh this page to check the latest status.",
     "pay_submitted_message": "Your payment was submitted. You can close this page. We'll send a notification when checkout finishes, usually within a few minutes.",
     "suggested_service_hint": "Suggested service for this location: {service}"
+  },
+  "Delegate": {
+    "meta_title": "Delegate",
+    "title": "Delegate",
+    "description": "Delegate your DIMO voting power"
   },
   "monthly": "monthly",
   "annually": "annually"
