@@ -57,6 +57,9 @@ export function DelegateClient({ translations }: DelegateClientProps) {
   const sameAsCurrent = Boolean(
     inputValid && state?.isDelegated && isSameAddress(trimmedInput, state.delegatee),
   );
+  const sameAsWallet = Boolean(
+    inputValid && walletAddress && isSameAddress(trimmedInput, walletAddress),
+  );
   const busy = submit.phase === 'authorizing' || submit.phase === 'submitting' || submit.phase === 'confirming';
   const isSelfDelegated = Boolean(
     state?.isDelegated && walletAddress && isSameAddress(state.delegatee, walletAddress),
@@ -69,19 +72,9 @@ export function DelegateClient({ translations }: DelegateClientProps) {
     }
   };
 
-  const handleSelfDelegate = () => {
-    if (walletAddress) {
-      setAddressInput(walletAddress);
-      setTouched(true);
-      if (submit.phase === 'success' || submit.phase === 'error') {
-        resetSubmit();
-      }
-    }
-  };
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!inputValid || sameAsCurrent || busy) {
+    if (!inputValid || sameAsCurrent || sameAsWallet || busy) {
       return;
     }
 
@@ -222,22 +215,12 @@ export function DelegateClient({ translations }: DelegateClientProps) {
               disabled={busy}
               className="rounded-md bg-surface-sunken px-4 py-2 w-full font-mono text-sm placeholder:text-gray-600 disabled:opacity-60"
             />
-            <div className="mt-1.5 flex items-center justify-between gap-2">
-              <p className="text-xs text-gray-500">
-                The address that will vote with your
-                {' '}
-                {tokenSymbol}
-                . You keep full control of your tokens.
-              </p>
-              <button
-                type="button"
-                onClick={handleSelfDelegate}
-                disabled={busy}
-                className="shrink-0 text-xs text-dimo-blue hover:underline cursor-pointer disabled:opacity-60"
-              >
-                Delegate to myself
-              </button>
-            </div>
+            <p className="mt-1.5 text-xs text-gray-500">
+              The address that will vote with your
+              {' '}
+              {tokenSymbol}
+              . You keep full control of your tokens.
+            </p>
           </div>
 
           {touched && trimmedInput.length > 0 && !inputValid && (
@@ -252,6 +235,14 @@ export function DelegateClient({ translations }: DelegateClientProps) {
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <p className="text-yellow-800 text-sm">
                 Your voting power is already delegated to this address.
+              </p>
+            </div>
+          )}
+
+          {sameAsWallet && !sameAsCurrent && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-yellow-800 text-sm">
+                Self-delegation is not supported — DIMO governance votes run on Snapshot, which does not count power you delegate to yourself. Choose a different delegate address.
               </p>
             </div>
           )}
@@ -305,9 +296,9 @@ export function DelegateClient({ translations }: DelegateClientProps) {
           <div className="flex flex-col pt-2">
             <button
               type="submit"
-              disabled={!inputValid || sameAsCurrent || busy}
+              disabled={!inputValid || sameAsCurrent || sameAsWallet || busy}
               className={`${BORDER_RADIUS.full} font-medium w-full py-3 px-4 ${
-                !inputValid || sameAsCurrent || busy
+                !inputValid || sameAsCurrent || sameAsWallet || busy
                   ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                   : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
               }`}
@@ -334,11 +325,11 @@ export function DelegateClient({ translations }: DelegateClientProps) {
         <div className="flex flex-col">
           <h3 className="text-base font-medium leading-6">How This Works</h3>
           <p className="text-sm text-text-secondary font-light leading-4.5 mt-1">
-            DIMO uses on-chain governance. Holding
+            DIMO governance votes run on Snapshot. Holding
             {' '}
             {tokenSymbol}
             {' '}
-            gives you zero voting power until you delegate it — even to yourself. Delegating never moves or locks your tokens, and you can change your delegate at any time.
+            gives you no voting power until you delegate it to a delegate address. Delegating never moves or locks your tokens, and you can change your delegate at any time.
           </p>
           <p className="text-sm text-text-secondary font-light leading-4.5 mt-1">
             Staked
@@ -350,15 +341,13 @@ export function DelegateClient({ translations }: DelegateClientProps) {
         </div>
       </div>
 
-      {/* Not delegated warning */}
-      {!loading && !error && state && !state.isDelegated && state.balance > BigInt(0) && (
+      {/* Not delegated / self-delegated warning */}
+      {!loading && !error && state && (!state.isDelegated || isSelfDelegated) && state.balance > BigInt(0) && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <p className="text-yellow-800 text-sm">
-            Your
-            {' '}
-            {tokenSymbol}
-            {' '}
-            currently has no voting power. Delegate to yourself or another address to activate it.
+            {isSelfDelegated
+              ? 'You are currently self-delegated, but Snapshot does not count self-delegated power in DIMO governance votes. Delegate to another address to activate your voting power.'
+              : `Your ${tokenSymbol} currently has no voting power. Delegate it to a delegate address to activate it.`}
           </p>
         </div>
       )}
