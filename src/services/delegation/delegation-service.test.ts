@@ -74,22 +74,18 @@ describe('buildDelegateCall', () => {
 describe('readDelegationState', () => {
   type ReadArgs = { address: string; functionName: string; args: readonly string[] };
 
-  const stubClient = (delegatee: string, balance: bigint, votes: bigint) => ({
+  const stubClient = (delegatee: string, balance: bigint) => ({
     readContract: vi.fn(async ({ functionName }: ReadArgs) => {
       if (functionName === 'delegates') {
         return delegatee;
       }
 
-      if (functionName === 'balanceOf') {
-        return balance;
-      }
-
-      return votes;
+      return balance;
     }),
   });
 
   it('maps chain reads into delegation state', async () => {
-    const client = stubClient(DELEGATEE, BigInt('1500000000000000000'), BigInt('1500000000000000000'));
+    const client = stubClient(DELEGATEE, BigInt('1500000000000000000'));
 
     const state = await readDelegationState(client, WALLET);
 
@@ -97,25 +93,23 @@ describe('readDelegationState', () => {
       delegatee: DELEGATEE,
       isDelegated: true,
       balance: BigInt('1500000000000000000'),
-      votes: BigInt('1500000000000000000'),
     });
   });
 
   it('reports not delegated for the zero address', async () => {
-    const client = stubClient(ZERO_ADDRESS, BigInt(5), BigInt(0));
+    const client = stubClient(ZERO_ADDRESS, BigInt(5));
 
     const state = await readDelegationState(client, WALLET);
 
     expect(state.isDelegated).toBe(false);
-    expect(state.votes).toBe(BigInt(0));
   });
 
-  it('queries the configured token contract for all three reads', async () => {
-    const client = stubClient(ZERO_ADDRESS, BigInt(0), BigInt(0));
+  it('queries the configured token contract for both reads', async () => {
+    const client = stubClient(ZERO_ADDRESS, BigInt(0));
 
     await readDelegationState(client, WALLET);
 
-    expect(client.readContract).toHaveBeenCalledTimes(3);
+    expect(client.readContract).toHaveBeenCalledTimes(2);
 
     for (const call of client.readContract.mock.calls) {
       expect(call[0].address).toBe(getDelegationContracts().dimoToken);
