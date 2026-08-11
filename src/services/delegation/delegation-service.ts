@@ -6,14 +6,13 @@ export type DelegationState = {
   delegatee: `0x${string}`;
   isDelegated: boolean;
   balance: bigint;
-  votes: bigint;
 };
 
 export type DelegationReadClient = {
   readContract: (args: {
     address: `0x${string}`;
     abi: typeof DIMO_VOTES_ABI;
-    functionName: 'delegates' | 'getVotes' | 'balanceOf';
+    functionName: 'delegates' | 'balanceOf';
     args: readonly [`0x${string}`];
   }) => Promise<unknown>;
 };
@@ -46,17 +45,15 @@ export const readDelegationState = async (
 ): Promise<DelegationState> => {
   const { dimoToken } = getDelegationContracts();
 
-  const [delegatee, balance, votes] = await Promise.all([
+  const [delegatee, balance] = await Promise.all([
     client.readContract({ address: dimoToken, abi: DIMO_VOTES_ABI, functionName: 'delegates', args: [wallet] }),
     client.readContract({ address: dimoToken, abi: DIMO_VOTES_ABI, functionName: 'balanceOf', args: [wallet] }),
-    client.readContract({ address: dimoToken, abi: DIMO_VOTES_ABI, functionName: 'getVotes', args: [wallet] }),
   ]);
 
   return {
     delegatee: delegatee as `0x${string}`,
     isDelegated: !isSameAddress(delegatee as string, ZERO_ADDRESS),
     balance: balance as bigint,
-    votes: votes as bigint,
   };
 };
 

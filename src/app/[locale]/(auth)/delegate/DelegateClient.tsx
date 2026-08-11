@@ -128,27 +128,18 @@ export function DelegateClient({ translations }: DelegateClientProps) {
 
     return (
       <div className={`${BORDER_RADIUS.xl} ${COLORS.background.secondary} p-6`}>
-        <h3 className={`text-lg font-semibold ${COLORS.text.primary} mb-4`}>Your Voting Power</h3>
+        <h3 className={`text-lg font-semibold ${COLORS.text.primary} mb-4`}>Your Delegation</h3>
         <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className={`${BORDER_RADIUS.lg} bg-surface-sunken p-4`}>
-              <p className="text-xs text-gray-500 mb-1">
-                {tokenSymbol}
-                {' '}
-                Balance
-              </p>
-              <p className={`text-xl font-semibold ${COLORS.text.primary}`}>
-                {formatDimoAmount(state.balance)}
-                <span className="ml-1.5 text-sm font-normal text-gray-500">{tokenSymbol}</span>
-              </p>
-            </div>
-            <div className={`${BORDER_RADIUS.lg} bg-surface-sunken p-4`}>
-              <p className="text-xs text-gray-500 mb-1">Voting Power</p>
-              <p className={`text-xl font-semibold ${COLORS.text.primary}`}>
-                {formatDimoAmount(state.votes)}
-                <span className="ml-1.5 text-sm font-normal text-gray-500">votes</span>
-              </p>
-            </div>
+          <div className={`${BORDER_RADIUS.lg} bg-surface-sunken p-4`}>
+            <p className="text-xs text-gray-500 mb-1">
+              {tokenSymbol}
+              {' '}
+              Balance
+            </p>
+            <p className={`text-xl font-semibold ${COLORS.text.primary}`}>
+              {formatDimoAmount(state.balance)}
+              <span className="ml-1.5 text-sm font-normal text-gray-500">{tokenSymbol}</span>
+            </p>
           </div>
 
           <div>
@@ -336,7 +327,7 @@ export function DelegateClient({ translations }: DelegateClientProps) {
             {' '}
             {tokenSymbol}
             {' '}
-            is delegated separately and is not covered by this page.
+            cannot be delegated.
           </p>
         </div>
       </div>
