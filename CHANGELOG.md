@@ -1,3 +1,10 @@
+# [2.38.0](https://github.com/DIMO-Network/account-manager/compare/v2.37.1...v2.38.0) (2026-08-11)
+
+
+### Features
+
+* add delegate page for DIMO voting power ([#159](https://github.com/DIMO-Network/account-manager/issues/159)) ([5c9f5de](https://github.com/DIMO-Network/account-manager/commit/5c9f5debe8f7590a7b57bc94329b1422a055b46d))
+
 ## [2.37.1](https://github.com/DIMO-Network/account-manager/compare/v2.37.0...v2.37.1) (2026-06-22)
 
 
