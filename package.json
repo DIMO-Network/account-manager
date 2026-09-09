@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev:codegen": "graphql-codegen --watch",
-    "dev:spotlight": "spotlight-sidecar",
+    "dev:spotlight": "spotlight",
     "dev:next": "next dev --turbopack --experimental-https --experimental-https-key ./local.dimo.org+2-key.pem --experimental-https-cert ./local.dimo.org+2.pem",
     "dev": "npm run codegen && run-p dev:*",
     "build": "npm run codegen && next build",
