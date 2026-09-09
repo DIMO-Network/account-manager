@@ -1125,6 +1125,11 @@ export type VehicleEdge = {
  * Vehicles must match all of the specified criteria.
  */
 export type VehiclesFilter = {
+  /**
+   * Filter for vehicles paired with a synthetic device that belongs to the connection at
+   * this address.
+   */
+  connection?: InputMaybe<Scalars['Address']['input']>;
   /** Filter for vehicles by device definition id. */
   deviceDefinitionId?: InputMaybe<Scalars['String']['input']>;
   /** Make filters for vehicles that are of the given make. */
