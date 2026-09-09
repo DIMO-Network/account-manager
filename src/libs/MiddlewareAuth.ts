@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { decryptSession } from './Session';
 
-// Verify session from cookies (for middleware)
+// Verify session from cookies (for proxy)
 export async function verifySessionFromCookies(request: NextRequest) {
   const sessionCookie = request.cookies.get('session')?.value;
 
@@ -14,12 +14,12 @@ export async function verifySessionFromCookies(request: NextRequest) {
     const session = await decryptSession(sessionCookie);
     return session;
   } catch (error) {
-    console.error('Failed to verify session in middleware:', error);
+    console.error('Failed to verify session in proxy:', error);
     return null;
   }
 }
 
-// Check if user is authenticated (for middleware)
+// Check if user is authenticated (for proxy)
 export async function isAuthenticated(request: NextRequest): Promise<boolean> {
   const session = await verifySessionFromCookies(request);
   return !!session;
