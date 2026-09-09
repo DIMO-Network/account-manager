@@ -1,6 +1,5 @@
 import type { FC } from 'react';
 import type { IconProps } from './index';
-import React from 'react';
 
 export const ConnectionIcon: FC<IconProps> = ({ className = '' }) => (
   <svg
