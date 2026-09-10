@@ -2,6 +2,7 @@ import antfu from '@antfu/eslint-config';
 import nextPlugin from '@next/eslint-plugin-next';
 import jestDom from 'eslint-plugin-jest-dom';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
+import storybook from 'eslint-plugin-storybook';
 
 export default antfu(
   {
@@ -66,4 +67,5 @@ export default antfu(
       'test/prefer-lowercase-title': 'off', // Allow using uppercase titles in test titles
     },
   },
+  ...storybook.configs['flat/recommended'],
 );

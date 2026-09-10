@@ -6,12 +6,15 @@ import './src/libs/Env';
 
 // Define the base Next.js configuration
 const baseConfig: NextConfig = {
-  eslint: {
-    dirs: ['.'],
-  },
   poweredByHeader: false,
   reactStrictMode: true,
   serverExternalPackages: ['@electric-sql/pglite'],
+  // Next 16 blocks cross-origin /_next/hmr in dev. Needed for local.dimo.org certs and ngrok.
+  allowedDevOrigins: [
+    'local.dimo.org',
+    '*.ngrok-free.app',
+    '*.ngrok.app',
+  ],
 };
 
 // Initialize the Next-Intl plugin
@@ -47,7 +50,7 @@ if (!process.env.NEXT_PUBLIC_SENTRY_DISABLED) {
 
     // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
     // This can increase your server load as well as your hosting bill.
-    // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
+    // Note: Check that the configured route will not match with your Next.js proxy, otherwise reporting of client-
     // side errors will fail.
     tunnelRoute: '/monitoring',
 

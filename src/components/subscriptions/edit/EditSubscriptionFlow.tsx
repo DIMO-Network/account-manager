@@ -6,7 +6,7 @@ import type { CanceledTrialPreview, PreviewInvoice, ScheduledChangePreview, Sche
 import type { ProductPrice } from '@/app/actions/getProductPrices';
 import type { StripeSubscription } from '@/types/subscription';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useTransition } from 'react';
+import { useTransition } from 'react';
 import { EditConfirmationCard } from './EditConfirmationCard';
 import { EditConfirmationCardSkeleton } from './EditConfirmationCardSkeleton';
 import { EditSubscriptionCard } from './EditSubscriptionCard';

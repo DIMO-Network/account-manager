@@ -67,7 +67,7 @@ const aj = arcjet.withRule(
   }),
 );
 
-export default async function middleware(
+export default async function proxy(
   request: NextRequest,
   _event: NextFetchEvent,
 ) {

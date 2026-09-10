@@ -90,7 +90,7 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
               : (
                   <button
                     className={`${clickableValueStyle} ${borderStyle} w-full text-left pb-4`}
-                    onClick={() => window.location.href = `/subscriptions/${subscription.id}/edit`}
+                    onClick={() => router.push(`/subscriptions/${subscription.id}/edit`)}
                     type="button"
                   >
                     {getSubscriptionTypeAndPrice(subscription, nextScheduledPrice).displayText}
@@ -159,7 +159,7 @@ export const SubscriptionDetailCard: React.FC<SubscriptionDetailCardProps> = ({ 
                   : `${COLORS.button.tertiary}`
               }`}
               type="button"
-              onClick={() => window.location.href = `/subscriptions/${subscription.id}/cancel`}
+              onClick={() => router.push(`/subscriptions/${subscription.id}/cancel`)}
               disabled={shouldDisableCancel}
             >
               {shouldDisableCancel ? 'Subscription Canceled' : 'Cancel Subscription'}

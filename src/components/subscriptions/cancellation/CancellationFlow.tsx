@@ -4,7 +4,7 @@ import type { VehicleDetail } from '@/app/actions/getDimoVehicleDetails';
 import type { StripeCancellationFeedback } from '@/libs/StripeSubscriptionService';
 import type { StripeSubscription } from '@/types/subscription';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { CarIcon } from '@/components/Icons';
 import { PageHeader } from '@/components/ui';
 import { COLORS, SPACING } from '@/utils/designSystem';
