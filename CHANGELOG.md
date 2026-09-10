@@ -1,3 +1,10 @@
+# [2.39.0](https://github.com/DIMO-Network/account-manager/compare/v2.38.1...v2.39.0) (2026-09-10)
+
+
+### Features
+
+* next 16 migration ([#177](https://github.com/DIMO-Network/account-manager/issues/177)) ([26840c7](https://github.com/DIMO-Network/account-manager/commit/26840c777e558f9ad660ebd6219d6cb05deb1a8a))
+
 ## [2.38.1](https://github.com/DIMO-Network/account-manager/compare/v2.38.0...v2.38.1) (2026-08-11)
 
 
