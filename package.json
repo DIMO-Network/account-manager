@@ -115,7 +115,7 @@
     "tailwindcss": "^4.1.11",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.1.10",
+    "vitest": "^4.1.11",
     "vitest-fail-on-console": "^0.10.1"
   },
   "config": {
