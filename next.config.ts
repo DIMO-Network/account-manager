@@ -9,6 +9,12 @@ const baseConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   serverExternalPackages: ['@electric-sql/pglite'],
+  // Next 16 blocks cross-origin /_next/hmr in dev. Needed for local.dimo.org certs and ngrok.
+  allowedDevOrigins: [
+    'local.dimo.org',
+    '*.ngrok-free.app',
+    '*.ngrok.app',
+  ],
 };
 
 // Initialize the Next-Intl plugin
