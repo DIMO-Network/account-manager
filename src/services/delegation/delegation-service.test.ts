@@ -65,9 +65,9 @@ describe('buildDelegateCall', () => {
   it('targets the delegate function with the delegatee parameter', () => {
     const call = buildDelegateCall(DELEGATEE);
 
-    expect(call.functionName).toBe('delegate');
-    expect(call.parameters).toEqual([DELEGATEE]);
-    expect(call.contractAddress).toBe(getDelegationContracts().dimoToken);
+    expect(call.to).toBe(getDelegationContracts().dimoToken);
+    expect(call.value).toBe(BigInt(0));
+    expect(call.data).toBe(encodeDelegateCallData(DELEGATEE));
   });
 });
 

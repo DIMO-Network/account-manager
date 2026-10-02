@@ -33,10 +33,9 @@ export const encodeDelegateCallData = (delegatee: `0x${string}`): `0x${string}` 
   });
 
 export const buildDelegateCall = (delegatee: `0x${string}`) => ({
-  contractAddress: getDelegationContracts().dimoToken,
-  abi: DIMO_VOTES_ABI as unknown as any[],
-  functionName: 'delegate',
-  parameters: [delegatee],
+  to: getDelegationContracts().dimoToken,
+  value: BigInt(0),
+  data: encodeDelegateCallData(delegatee),
 });
 
 export const readDelegationState = async (

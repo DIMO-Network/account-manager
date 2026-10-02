@@ -17,8 +17,8 @@ export type SubmitStatus
   = | { phase: 'idle' }
     | { phase: 'authorizing' }
     | { phase: 'submitting' }
-    | { phase: 'confirming'; userOpHash: string }
-    | { phase: 'success'; userOpHash: string; confirmed: boolean }
+    | { phase: 'confirming'; transactionHash: string }
+    | { phase: 'success'; transactionHash: string; confirmed: boolean }
     | { phase: 'error'; message: string };
 
 const CONFIRM_POLL_INTERVAL_MS = 3000;
@@ -143,8 +143,8 @@ export const useDelegation = () => {
         throw new Error(result.error || 'Delegation transaction failed');
       }
 
-      const userOpHash = result.transactionHash;
-      setSubmit({ phase: 'confirming', userOpHash });
+      const transactionHash = result.transactionHash;
+      setSubmit({ phase: 'confirming', transactionHash });
 
       for (let attempt = 0; attempt < CONFIRM_POLL_ATTEMPTS; attempt++) {
         await wait(CONFIRM_POLL_INTERVAL_MS);
@@ -155,13 +155,13 @@ export const useDelegation = () => {
         }
 
         if (next && isSameAddress(next.delegatee, delegatee)) {
-          setSubmit({ phase: 'success', userOpHash, confirmed: true });
+          setSubmit({ phase: 'success', transactionHash, confirmed: true });
           return;
         }
       }
 
       if (mountedRef.current) {
-        setSubmit({ phase: 'success', userOpHash, confirmed: false });
+        setSubmit({ phase: 'success', transactionHash, confirmed: false });
       }
     } catch (err) {
       if (mountedRef.current) {

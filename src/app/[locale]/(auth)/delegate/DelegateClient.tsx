@@ -259,9 +259,9 @@ export function DelegateClient({ translations }: DelegateClientProps) {
                       : 'Delegation submitted — waiting for it to land on-chain. Check back in a moment.'}
                   </p>
                   <p className="text-xs text-green-600 mt-1 truncate font-mono">
-                    UserOp:
+                    Tx:
                     {' '}
-                    {shortenAddress(submit.userOpHash)}
+                    {shortenAddress(submit.transactionHash)}
                   </p>
                   <p className="text-xs text-green-600 mt-1">
                     <a
