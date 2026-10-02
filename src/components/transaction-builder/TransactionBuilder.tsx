@@ -5,9 +5,11 @@ import type {
   RecoveryTemplate,
   TransactionBuilderConfig,
 } from '@/services/transaction-builder';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { formatUnits } from 'viem';
 import { useTransactionBuilder } from '@/hooks/useTransactionBuilder';
 import { createRecoveryService } from '@/services/recovery/recovery-service';
+import { getPublicClient } from '@/services/recovery/zerodev-service';
 import { createTransactionBuilder, getContractAddresses, getNetworkConfig } from '@/services/transaction-builder';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 import { ContractSelector } from './ContractSelector';
@@ -51,6 +53,9 @@ export const TransactionBuilder = ({
   });
 
   const [selectedAction, setSelectedAction] = useState<RecoveryTemplate | null>(null);
+  const [nativeBalance, setNativeBalance] = useState<bigint | null>(null);
+  // Bumped to remount ParameterInputs when the amount is set from outside (e.g. "Use max")
+  const [parameterInputsKey, setParameterInputsKey] = useState(0);
 
   const {
     templates,
@@ -65,8 +70,44 @@ export const TransactionBuilder = ({
     setSuccessMessage,
   } = useTransactionBuilder(config);
 
+  const isNativeTransfer = Boolean(config.isNativeTransfer);
+  const isCallConfigured = isNativeTransfer || Boolean(config.contractAddress && config.functionName);
+
+  // Load the smart account's native balance so the user can send all of it
+  useEffect(() => {
+    const chainName = SUPPORTED_CHAINS[Number.parseInt(networkId) as keyof typeof SUPPORTED_CHAINS];
+    if (!isNativeTransfer || !walletAddress || !chainName) {
+      return;
+    }
+
+    let cancelled = false;
+    getPublicClient(chainName as SupportedChains)
+      .getBalance({ address: walletAddress as `0x${string}` })
+      .then((balance) => {
+        if (!cancelled) {
+          setNativeBalance(balance);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setNativeBalance(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isNativeTransfer, networkId, walletAddress]);
+
+  // Any edit invalidates the preview, since execution sends exactly what was previewed
+  const clearPreview = () => {
+    setTransactionPreview(null);
+    setSuccessMessage(null);
+  };
+
   const handleTemplateSelect = (template: RecoveryTemplate) => {
     setSelectedAction(template);
+    clearPreview();
 
     // Preselect first quick select token for ERC-20 transfers
     let initialContractAddress = '';
@@ -83,12 +124,14 @@ export const TransactionBuilder = ({
       abi: template.abi,
       functionName: template.defaultFunction,
       parameters: template.parameterTemplates.map(p => p.value),
+      isNativeTransfer: template.contractType === 'NATIVE',
     });
     setError(null);
   };
 
   const handleContractAddressChange = (address: string) => {
     setConfig(prev => ({ ...prev, contractAddress: address }));
+    clearPreview();
     setError(null);
   };
 
@@ -96,7 +139,18 @@ export const TransactionBuilder = ({
     const newParameters = [...config.parameters];
     newParameters[index] = value;
     setConfig(prev => ({ ...prev, parameters: newParameters }));
+    clearPreview();
     setError(null);
+  };
+
+  const handleUseMaxBalance = () => {
+    if (nativeBalance === null) {
+      return;
+    }
+
+    // Gas is sponsored by the paymaster, so the full balance can be sent
+    handleParameterChange(1, nativeBalance.toString());
+    setParameterInputsKey(key => key + 1);
   };
 
   const handlePreviewTransaction = async () => {
@@ -108,11 +162,11 @@ export const TransactionBuilder = ({
       missingFields.push('Recovery Action');
     }
 
-    if (!config.contractAddress) {
+    if (!isNativeTransfer && !config.contractAddress) {
       missingFields.push('Contract Address');
     }
 
-    if (!config.functionName) {
+    if (!isNativeTransfer && !config.functionName) {
       missingFields.push('Function');
     }
 
@@ -224,6 +278,11 @@ export const TransactionBuilder = ({
       return;
     }
 
+    if (!transactionPreview) {
+      setError('Preview the transaction before executing it');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -236,13 +295,12 @@ export const TransactionBuilder = ({
         throw new Error('Unsupported network selected');
       }
 
+      // Execute exactly what the user reviewed in the preview
       const result = await recoveryService.executeTransaction({
         targetChain: chainName as SupportedChains,
-        contractAddress: config.contractAddress,
-        abi: config.abi,
-        functionName: config.functionName,
-        parameters: config.parameters,
-        value: BigInt(0),
+        to: transactionPreview.to,
+        value: transactionPreview.value,
+        data: transactionPreview.data,
       });
 
       if (result.success && result.transactionHash) {
@@ -295,7 +353,7 @@ export const TransactionBuilder = ({
           {/* Recovery Templates */}
           <div className="flex flex-col gap-2">
             <p className={`text-xs ${COLORS.text.muted} mb-3`}>
-              Select the type of asset you want to recover (ERC-20 tokens or ERC-721 NFTs). ERC-20 transfers don't require approval.
+              Select the type of asset you want to recover (native ETH, ERC-20 tokens or ERC-721 NFTs). ERC-20 transfers don't require approval.
             </p>
             <div className={`text-sm font-medium ${COLORS.text.secondary} mb-2`}>
               Asset Recovery Actions
@@ -330,8 +388,9 @@ export const TransactionBuilder = ({
               <p className="text-blue-800 text-sm mb-3">
                 <strong>Recovery Workflow:</strong>
                 <br />
-                ERC-20 transfers don't require approval. ERC-721 NFTs require approval before transfer.
-                Select the appropriate action based on your asset type and current approval status.
+                {isNativeTransfer
+                  ? 'Native transfers send the network\'s currency (e.g. ETH) straight from your smart account. Gas is sponsored, so you can send your full balance.'
+                  : 'ERC-20 transfers don\'t require approval. ERC-721 NFTs require approval before transfer. Select the appropriate action based on your asset type and current approval status.'}
               </p>
               <ul className="text-xs text-blue-800">
                 <li>
@@ -339,11 +398,13 @@ export const TransactionBuilder = ({
                   {' '}
                   {selectedAction.name}
                 </li>
-                <li>
-                  Function:
-                  {' '}
-                  {selectedAction.defaultFunction}
-                </li>
+                {selectedAction.defaultFunction && (
+                  <li>
+                    Function:
+                    {' '}
+                    {selectedAction.defaultFunction}
+                  </li>
+                )}
                 <li>
                   Contract Type:
                   {' '}
@@ -353,8 +414,8 @@ export const TransactionBuilder = ({
             </div>
           )}
 
-          {/* Contract Address - Only show when action is selected */}
-          {selectedAction && (
+          {/* Contract Address - Only show when a contract action is selected */}
+          {selectedAction && !isNativeTransfer && (
             <ContractSelector
               value={config.contractAddress}
               onChangeAction={handleContractAddressChange}
@@ -367,11 +428,34 @@ export const TransactionBuilder = ({
           {/* Parameter Inputs */}
           {functionParameters.length > 0 && (
             <ParameterInputs
+              key={parameterInputsKey}
               parameters={functionParameters}
               values={config.parameters}
               onParameterChangeAction={handleParameterChange}
               networkConfig={networkConfig}
+              amountUnit={isNativeTransfer ? networkConfig?.nativeCurrency.symbol : undefined}
             />
+          )}
+
+          {/* Native balance of the smart account on this network */}
+          {isNativeTransfer && nativeBalance !== null && (
+            <div className={`flex items-center justify-between text-xs ${COLORS.text.muted}`}>
+              <span>
+                Available:
+                {' '}
+                {formatUnits(nativeBalance, networkConfig?.nativeCurrency.decimals ?? 18)}
+                {' '}
+                {networkConfig?.nativeCurrency.symbol || 'ETH'}
+              </span>
+              <button
+                type="button"
+                onClick={handleUseMaxBalance}
+                disabled={nativeBalance === BigInt(0)}
+                className="underline cursor-pointer disabled:cursor-not-allowed disabled:no-underline"
+              >
+                Use max
+              </button>
+            </div>
           )}
 
           {/* Action Buttons */}
@@ -379,9 +463,9 @@ export const TransactionBuilder = ({
             <button
               type="button"
               onClick={handlePreviewTransaction}
-              disabled={loading || !config.contractAddress || !config.functionName}
+              disabled={loading || !isCallConfigured}
               className={`${BORDER_RADIUS.full} font-medium w-full py-3 px-4 ${
-                loading || !config.contractAddress || !config.functionName
+                loading || !isCallConfigured
                   ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                   : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}

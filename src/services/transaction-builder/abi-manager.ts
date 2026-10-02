@@ -125,8 +125,22 @@ export const COMMON_ABIS = {
   ] as ABIItem[],
 };
 
+export const NATIVE_TRANSFER_TEMPLATE_ID = 'native-transfer';
+
 // Recovery templates for common scenarios
 export const RECOVERY_TEMPLATES: RecoveryTemplate[] = [
+  {
+    id: NATIVE_TRANSFER_TEMPLATE_ID,
+    name: 'Transfer Native Token (ETH)',
+    description: 'Send the network\'s native currency, e.g. ETH on Ethereum or Base, to another address',
+    contractType: 'NATIVE',
+    abi: [],
+    defaultFunction: '',
+    parameterTemplates: [
+      { name: 'to', type: 'address', value: '', required: true },
+      { name: 'amount', type: 'uint256', value: '', required: true },
+    ],
+  },
   {
     id: 'erc20-transfer',
     name: 'Transfer ERC-20 Token',
