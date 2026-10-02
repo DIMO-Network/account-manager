@@ -1,12 +1,14 @@
+import type { Address } from 'viem';
 import type {
   ABIItem,
   FunctionParameter,
   TransactionBuilderConfig,
+  TransactionCall,
   TransactionPreview,
 } from './types';
 
-import { encodeFunctionData } from 'viem';
-import { getFunctionABI, validateABI } from './abi-manager';
+import { encodeFunctionData, isAddress, isAddressEqual, zeroAddress } from 'viem';
+import { getFunctionABI, getRecoveryTemplate, NATIVE_TRANSFER_TEMPLATE_ID, validateABI } from './abi-manager';
 import { getNetworkConfig } from './network-config';
 
 export class TransactionBuilderService {
@@ -45,6 +47,42 @@ export class TransactionBuilderService {
   }
 
   /**
+   * Parse the native transfer amount (wei); null if it isn't a positive integer
+   */
+  private getNativeTransferAmount(): bigint | null {
+    try {
+      const amount = BigInt(String(this.config.parameters[1] ?? ''));
+      return amount > BigInt(0) ? amount : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Build the call the smart account will execute
+   */
+  buildCall(): TransactionCall {
+    if (this.config.isNativeTransfer) {
+      const amount = this.getNativeTransferAmount();
+      if (amount === null) {
+        throw new Error('Amount must be greater than 0');
+      }
+
+      return {
+        to: String(this.config.parameters[0]) as Address,
+        value: amount,
+        data: '0x',
+      };
+    }
+
+    return {
+      to: this.config.contractAddress as Address,
+      value: this.config.value || BigInt(0),
+      data: this.buildTransactionData() as TransactionCall['data'],
+    };
+  }
+
+  /**
    * Create transaction preview with gas estimation
    */
   async createTransactionPreview(): Promise<TransactionPreview> {
@@ -54,7 +92,7 @@ export class TransactionBuilderService {
         throw new Error(`Unsupported network: ${this.config.network}`);
       }
 
-      const data = this.buildTransactionData();
+      const call = this.buildCall();
 
       // For Account Abstraction transactions, skip gas estimation and show paymaster info
       // Standard eth_estimateGas fails for AA because it simulates wrong execution path
@@ -64,7 +102,7 @@ export class TransactionBuilderService {
         estimatedCost: 'Sponsored by ZeroDev Paymaster',
       };
 
-      // Create function parameters for preview
+      // Create function parameters for preview (a native transfer is fully described by to + value)
       const functionABI = getFunctionABI(this.config.abi, this.config.functionName);
       const parameters: FunctionParameter[] = functionABI?.inputs.map((input, index) => ({
         name: input.name,
@@ -74,9 +112,9 @@ export class TransactionBuilderService {
       })) || [];
 
       return {
-        to: this.config.contractAddress,
-        data,
-        value: this.config.value || BigInt(0),
+        to: call.to,
+        data: call.data,
+        value: call.value,
         gasLimit: gasEstimate.gasLimit,
         gasPrice: gasEstimate.gasPrice,
         estimatedCost: gasEstimate.estimatedCost,
@@ -99,6 +137,27 @@ export class TransactionBuilderService {
     const networkConfig = getNetworkConfig(this.config.network);
     if (!networkConfig) {
       errors.push(`Unsupported network: ${this.config.network}`);
+    }
+
+    if (this.config.isNativeTransfer) {
+      const recipient = String(this.config.parameters[0] ?? '');
+      if (!isAddress(recipient)) {
+        errors.push('Invalid recipient address');
+      } else if (isAddressEqual(recipient, zeroAddress)) {
+        // Funds sent to the zero address are burned
+        errors.push('Recipient cannot be the zero address');
+      } else if (this.config.fromAddress && isAddress(this.config.fromAddress) && isAddressEqual(recipient, this.config.fromAddress)) {
+        errors.push('Recipient cannot be your own smart account');
+      }
+
+      if (this.getNativeTransferAmount() === null) {
+        errors.push('Amount must be greater than 0');
+      }
+
+      return {
+        isValid: errors.length === 0,
+        errors,
+      };
     }
 
     // Validate contract address
@@ -150,6 +209,11 @@ export class TransactionBuilderService {
    * Get function parameters for a specific function
    */
   getFunctionParameters(functionName: string): FunctionParameter[] {
+    if (this.config.isNativeTransfer) {
+      const template = getRecoveryTemplate(NATIVE_TRANSFER_TEMPLATE_ID);
+      return template?.parameterTemplates.map(param => ({ ...param })) || [];
+    }
+
     const functionABI = getFunctionABI(this.config.abi, functionName);
     if (!functionABI) {
       return [];

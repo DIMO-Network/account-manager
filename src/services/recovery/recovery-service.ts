@@ -1,6 +1,8 @@
 import type { SupportedChains } from './turnkey-bridge';
 import type { TurnkeyAccountClient } from './zerodev-service';
+import type { TransactionCall } from '@/services/transaction-builder/types';
 import { generateP256KeyPair } from '@turnkey/crypto';
+import { isAddressEqual } from 'viem';
 import { createTurnkeyClient, getTurnkeyClient, getTurnkeyConfig, getTurnkeyWalletAddress } from './turnkey-bridge';
 import { getKernelClient } from './zerodev-service';
 
@@ -25,29 +27,48 @@ export class RecoveryService {
   }
 
   /**
+   * Create a kernel client for the target chain, refusing to continue unless the smart account
+   * derived from the Turnkey signer is the user's DIMO wallet. Otherwise we would deploy (and
+   * send from) a different account while the user's funds stay where they are.
+   */
+  private async getVerifiedKernelClient(targetChain: SupportedChains) {
+    // Create Turnkey client using LIWD session data
+    const turnkeyClient = getTurnkeyClient({
+      authKey: this.session.dimoToken,
+      eKey: this.session.eKey,
+    });
+
+    // Get signer address from Turnkey
+    const signerAddress = await getTurnkeyWalletAddress({
+      subOrganizationId: this.session.subOrganizationId,
+      client: turnkeyClient,
+    });
+
+    // Create ZeroDev kernel client for the target chain
+    const kernelClient = await getKernelClient({
+      subOrganizationId: this.session.subOrganizationId,
+      walletAddress: signerAddress,
+      client: turnkeyClient as TurnkeyAccountClient,
+      targetChain,
+    });
+
+    const derivedAddress = kernelClient.account.address;
+    if (!isAddressEqual(derivedAddress, this.session.walletAddress as `0x${string}`)) {
+      throw new Error(
+        `The smart account derived from your signer (${derivedAddress}) does not match your DIMO wallet (${this.session.walletAddress}). `
+        + 'Nothing was sent. Please contact DIMO support to recover these funds.',
+      );
+    }
+
+    return kernelClient;
+  }
+
+  /**
    * Deploy smart account on the target chain
    */
   async deployAccount(targetChain: SupportedChains): Promise<DeploymentResult> {
     try {
-      // Create Turnkey client using LIWD session data
-      const turnkeyClient = getTurnkeyClient({
-        authKey: this.session.dimoToken,
-        eKey: this.session.eKey,
-      });
-
-      // Get wallet address from Turnkey
-      const walletAddress = await getTurnkeyWalletAddress({
-        subOrganizationId: this.session.subOrganizationId,
-        client: turnkeyClient,
-      });
-
-      // Create ZeroDev kernel client for the target chain
-      const kernelClient = await getKernelClient({
-        subOrganizationId: this.session.subOrganizationId,
-        walletAddress,
-        client: turnkeyClient as TurnkeyAccountClient,
-        targetChain,
-      });
+      const kernelClient = await this.getVerifiedKernelClient(targetChain);
 
       // Send a dummy transaction to trigger account deployment
       // This is the pattern from Ed's implementation
@@ -69,95 +90,40 @@ export class RecoveryService {
   }
 
   /**
-   * Check if account is already deployed on target chain
-   */
-  async isAccountDeployed(targetChain: SupportedChains): Promise<boolean> {
-    try {
-      const turnkeyClient = getTurnkeyClient({
-        authKey: this.session.dimoToken,
-        eKey: this.session.eKey,
-      });
-
-      const walletAddress = await getTurnkeyWalletAddress({
-        subOrganizationId: this.session.subOrganizationId,
-        client: turnkeyClient,
-      });
-
-      // Try to create kernel client - if it fails, account is not deployed
-      await getKernelClient({
-        subOrganizationId: this.session.subOrganizationId,
-        walletAddress,
-        client: turnkeyClient as TurnkeyAccountClient,
-        targetChain,
-      });
-
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  /**
-   * Execute a transaction using the smart account
+   * Execute a call (contract call or native transfer) using the smart account
    */
   async executeTransaction({
     targetChain,
-    contractAddress,
-    abi,
-    functionName,
-    parameters,
-    value = BigInt(0),
-  }: {
+    to,
+    value,
+    data,
+  }: TransactionCall & {
     targetChain: SupportedChains;
-    contractAddress: string;
-    abi: any[];
-    functionName: string;
-    parameters: any[];
-    value?: bigint;
   }): Promise<DeploymentResult> {
     try {
-      // Create Turnkey client using LIWD session data
-      const turnkeyClient = getTurnkeyClient({
-        authKey: this.session.dimoToken,
-        eKey: this.session.eKey,
-      });
-
-      // Get wallet address from Turnkey
-      const walletAddress = await getTurnkeyWalletAddress({
-        subOrganizationId: this.session.subOrganizationId,
-        client: turnkeyClient,
-      });
-
-      // Create ZeroDev kernel client for the target chain
-      const kernelClient = await getKernelClient({
-        subOrganizationId: this.session.subOrganizationId,
-        walletAddress,
-        client: turnkeyClient as TurnkeyAccountClient,
-        targetChain,
-      });
-
-      // Encode the function call
-      const { encodeFunctionData } = await import('viem');
-      const callData = encodeFunctionData({
-        abi,
-        functionName,
-        args: parameters,
-      });
+      const kernelClient = await this.getVerifiedKernelClient(targetChain);
 
       // Send the transaction
-      const transactionHash = await kernelClient.sendUserOperation({
-        callData: await kernelClient.account.encodeCalls([
-          {
-            to: contractAddress as `0x${string}`,
-            value,
-            data: callData,
-          },
-        ]),
+      const userOperationHash = await kernelClient.sendUserOperation({
+        callData: await kernelClient.account.encodeCalls([{ to, value, data }]),
       });
+
+      // Wait until it lands: the user operation hash isn't a transaction hash explorers know about,
+      // and an included user operation can still revert
+      const { success, receipt } = await kernelClient.waitForUserOperationReceipt({
+        hash: userOperationHash,
+      });
+
+      if (!success) {
+        return {
+          success: false,
+          error: `Transaction reverted on-chain (${receipt.transactionHash})`,
+        };
+      }
 
       return {
         success: true,
-        transactionHash,
+        transactionHash: receipt.transactionHash,
       };
     } catch (error) {
       console.error('Transaction execution failed:', error);

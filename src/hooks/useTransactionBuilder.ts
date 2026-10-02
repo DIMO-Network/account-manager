@@ -66,7 +66,7 @@ export const useTransactionBuilder = (config: TransactionBuilderConfig) => {
 
   // Update function parameters when function changes
   const updateFunctionParameters = useCallback(() => {
-    if (config.functionName && config.abi.length > 0) {
+    if (config.isNativeTransfer || (config.functionName && config.abi.length > 0)) {
       const builder = createTransactionBuilder(config);
       const parameters = builder.getFunctionParameters(config.functionName);
       dispatch({ type: 'SET_FUNCTION_PARAMETERS', payload: parameters });
