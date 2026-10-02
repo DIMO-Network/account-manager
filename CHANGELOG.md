@@ -1,3 +1,10 @@
+# [2.40.0](https://github.com/DIMO-Network/account-manager/compare/v2.39.0...v2.40.0) (2026-10-02)
+
+
+### Features
+
+* recover native ETH via recovery flow ([#187](https://github.com/DIMO-Network/account-manager/issues/187)) ([d21d5f1](https://github.com/DIMO-Network/account-manager/commit/d21d5f11a4076a6dc7724c4f170b999bf308c52a))
+
 # [2.39.0](https://github.com/DIMO-Network/account-manager/compare/v2.38.1...v2.39.0) (2026-09-10)
 
 
