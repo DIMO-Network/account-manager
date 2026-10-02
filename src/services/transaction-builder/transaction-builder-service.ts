@@ -7,7 +7,7 @@ import type {
   TransactionPreview,
 } from './types';
 
-import { encodeFunctionData, isAddress } from 'viem';
+import { encodeFunctionData, isAddress, isAddressEqual, zeroAddress } from 'viem';
 import { getFunctionABI, getRecoveryTemplate, NATIVE_TRANSFER_TEMPLATE_ID, validateABI } from './abi-manager';
 import { getNetworkConfig } from './network-config';
 
@@ -140,8 +140,14 @@ export class TransactionBuilderService {
     }
 
     if (this.config.isNativeTransfer) {
-      if (!isAddress(String(this.config.parameters[0] ?? ''))) {
+      const recipient = String(this.config.parameters[0] ?? '');
+      if (!isAddress(recipient)) {
         errors.push('Invalid recipient address');
+      } else if (isAddressEqual(recipient, zeroAddress)) {
+        // Funds sent to the zero address are burned
+        errors.push('Recipient cannot be the zero address');
+      } else if (this.config.fromAddress && isAddress(this.config.fromAddress) && isAddressEqual(recipient, this.config.fromAddress)) {
+        errors.push('Recipient cannot be your own smart account');
       }
 
       if (this.getNativeTransferAmount() === null) {

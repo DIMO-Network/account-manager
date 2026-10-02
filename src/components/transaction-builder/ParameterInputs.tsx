@@ -195,7 +195,7 @@ export const ParameterInputs = ({
       return 'The address that will receive the tokens/assets';
     }
     if (lowerName.includes('amount') || lowerName.includes('value')) {
-      return 'Amount in DIMO tokens';
+      return `Amount in ${amountUnit}`;
     }
     if (lowerName.includes('from') || lowerName.includes('sender')) {
       return 'The address sending the tokens/assets';
@@ -251,18 +251,20 @@ export const ParameterInputs = ({
       return;
     }
 
-    // For amount/value parameters, convert to wei for the parent
+    // For amount/value parameters, convert to wei for the parent. The parent only ever receives
+    // a positive wei integer or '' (missing), never raw input like '.0' or '-0.5'
     if (type === 'uint256' && (paramName.toLowerCase().includes('amount') || paramName.toLowerCase().includes('value'))) {
+      let weiValue = '';
       if (processedValue && !Number.isNaN(Number(processedValue)) && Number(processedValue) > 0) {
         // Convert to wei exactly, so a full balance can be sent without overshooting by a few wei
         try {
-          onParameterChangeAction(index, parseUnits(processedValue, AMOUNT_DECIMALS).toString());
+          weiValue = parseUnits(processedValue, AMOUNT_DECIMALS).toString();
         } catch {
           // Not a plain decimal (e.g. "1e-5"); treat as missing so it can't be submitted
-          onParameterChangeAction(index, '');
         }
-        return;
       }
+      onParameterChangeAction(index, weiValue);
+      return;
     }
 
     onParameterChangeAction(index, processedValue);

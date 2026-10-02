@@ -90,35 +90,6 @@ export class RecoveryService {
   }
 
   /**
-   * Check if account is already deployed on target chain
-   */
-  async isAccountDeployed(targetChain: SupportedChains): Promise<boolean> {
-    try {
-      const turnkeyClient = getTurnkeyClient({
-        authKey: this.session.dimoToken,
-        eKey: this.session.eKey,
-      });
-
-      const walletAddress = await getTurnkeyWalletAddress({
-        subOrganizationId: this.session.subOrganizationId,
-        client: turnkeyClient,
-      });
-
-      // Try to create kernel client - if it fails, account is not deployed
-      await getKernelClient({
-        subOrganizationId: this.session.subOrganizationId,
-        walletAddress,
-        client: turnkeyClient as TurnkeyAccountClient,
-        targetChain,
-      });
-
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  /**
    * Execute a call (contract call or native transfer) using the smart account
    */
   async executeTransaction({
@@ -133,13 +104,26 @@ export class RecoveryService {
       const kernelClient = await this.getVerifiedKernelClient(targetChain);
 
       // Send the transaction
-      const transactionHash = await kernelClient.sendUserOperation({
+      const userOperationHash = await kernelClient.sendUserOperation({
         callData: await kernelClient.account.encodeCalls([{ to, value, data }]),
       });
 
+      // Wait until it lands: the user operation hash isn't a transaction hash explorers know about,
+      // and an included user operation can still revert
+      const { success, receipt } = await kernelClient.waitForUserOperationReceipt({
+        hash: userOperationHash,
+      });
+
+      if (!success) {
+        return {
+          success: false,
+          error: `Transaction reverted on-chain (${receipt.transactionHash})`,
+        };
+      }
+
       return {
         success: true,
-        transactionHash,
+        transactionHash: receipt.transactionHash,
       };
     } catch (error) {
       console.error('Transaction execution failed:', error);

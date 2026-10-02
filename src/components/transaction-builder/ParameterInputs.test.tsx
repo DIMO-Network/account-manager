@@ -32,7 +32,36 @@ describe('ParameterInputs', () => {
     );
 
     expect(screen.getByRole('spinbutton')).toHaveDisplayValue('0.123456789123456789');
-    expect(screen.getByText(/ETH/)).toBeInTheDocument();
+  });
+
+  it.each(['0.0', '-0.5'])('should pass up %s as missing rather than raw input', (input) => {
+    const onChange = vi.fn();
+    render(
+      <ParameterInputs
+        parameters={[AMOUNT_PARAM]}
+        values={['']}
+        onParameterChangeAction={onChange}
+        networkConfig={null}
+      />,
+    );
+
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: input } });
+
+    expect(onChange).toHaveBeenLastCalledWith(0, '');
+  });
+
+  it('should describe the amount in the given unit', () => {
+    render(
+      <ParameterInputs
+        parameters={[AMOUNT_PARAM]}
+        values={['']}
+        onParameterChangeAction={vi.fn()}
+        networkConfig={null}
+        amountUnit="ETH"
+      />,
+    );
+
+    expect(screen.getByText('Amount in ETH')).toBeInTheDocument();
   });
 
   it('should not pass up an amount that is not a plain decimal', () => {
