@@ -192,14 +192,15 @@ export const TransactionPreviewComponent = ({
           <button
             type="button"
             onClick={onExecuteAction}
-            disabled={isExecuting}
+            // Once sent, this preview can't be executed again (prevents sending the same funds twice)
+            disabled={isExecuting || Boolean(successMessage)}
             className={`${BORDER_RADIUS.full} font-medium w-full py-3 px-4 cursor-pointer ${
-              isExecuting
+              isExecuting || successMessage
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                 : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
-            {isExecuting ? 'Confirming...' : 'Execute Transaction'}
+            {isExecuting ? 'Confirming...' : successMessage ? 'Executed' : 'Execute Transaction'}
           </button>
         </div>
 

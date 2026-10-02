@@ -4,6 +4,7 @@ import { SupportedChains } from './turnkey-bridge';
 const mocks = vi.hoisted(() => ({
   getKernelClient: vi.fn(),
   sendUserOperation: vi.fn(),
+  waitForUserOperationReceipt: vi.fn(),
   encodeCalls: vi.fn(),
 }));
 
@@ -24,6 +25,7 @@ const RECIPIENT = '0x1111111111111111111111111111111111111111';
 const kernelClientAt = (address: string) => ({
   account: { address, encodeCalls: mocks.encodeCalls },
   sendUserOperation: mocks.sendUserOperation,
+  waitForUserOperationReceipt: mocks.waitForUserOperationReceipt,
 });
 
 const createService = () => new RecoveryService({
@@ -38,6 +40,7 @@ describe('RecoveryService', () => {
     vi.clearAllMocks();
     mocks.sendUserOperation.mockResolvedValue('0xuserop');
     mocks.encodeCalls.mockResolvedValue('0xencoded');
+    mocks.waitForUserOperationReceipt.mockResolvedValue({ success: true, receipt: { transactionHash: '0xtx' } });
   });
 
   describe('deployAccount', () => {
@@ -64,7 +67,7 @@ describe('RecoveryService', () => {
   });
 
   describe('executeTransaction', () => {
-    it('should send the given call from the smart account', async () => {
+    it('should send the given call and return the mined transaction hash', async () => {
       mocks.getKernelClient.mockResolvedValue(kernelClientAt(WALLET));
 
       const result = await createService().executeTransaction({
@@ -74,9 +77,25 @@ describe('RecoveryService', () => {
         data: '0x',
       });
 
-      expect(result).toEqual({ success: true, transactionHash: '0xuserop' });
+      expect(result).toEqual({ success: true, transactionHash: '0xtx' });
       expect(mocks.encodeCalls).toHaveBeenCalledWith([{ to: RECIPIENT, value: BigInt('42'), data: '0x' }]);
       expect(mocks.sendUserOperation).toHaveBeenCalledWith({ callData: '0xencoded' });
+      expect(mocks.waitForUserOperationReceipt).toHaveBeenCalledWith({ hash: '0xuserop' });
+    });
+
+    it('should report failure when the user operation reverts on-chain', async () => {
+      mocks.getKernelClient.mockResolvedValue(kernelClientAt(WALLET));
+      mocks.waitForUserOperationReceipt.mockResolvedValue({ success: false, receipt: { transactionHash: '0xtx' } });
+
+      const result = await createService().executeTransaction({
+        targetChain: SupportedChains.BASE,
+        to: RECIPIENT,
+        value: BigInt('42'),
+        data: '0x',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('0xtx');
     });
 
     it('should refuse to send when the derived smart account differs from the DIMO wallet', async () => {

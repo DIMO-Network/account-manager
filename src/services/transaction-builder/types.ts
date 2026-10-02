@@ -14,6 +14,8 @@ export type TransactionBuilderConfig = {
   // Send the network's native currency instead of calling a contract.
   // parameters are [recipient, amount in wei].
   isNativeTransfer?: boolean;
+  // The sending smart account; a native transfer to itself is rejected
+  fromAddress?: string;
 };
 
 // The single call the smart account executes

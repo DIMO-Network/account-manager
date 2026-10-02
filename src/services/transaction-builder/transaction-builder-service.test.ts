@@ -49,6 +49,21 @@ describe('TransactionBuilderService', () => {
       expect(builder.validateConfig().errors).toContain('Invalid recipient address');
     });
 
+    it('should reject the zero address as recipient', () => {
+      const builder = createTransactionBuilder(nativeConfig(['0x0000000000000000000000000000000000000000', '1']));
+
+      expect(builder.validateConfig().errors).toContain('Recipient cannot be the zero address');
+    });
+
+    it('should reject sending to the sending smart account itself', () => {
+      const builder = createTransactionBuilder({
+        ...nativeConfig([RECIPIENT, '1']),
+        fromAddress: RECIPIENT.toUpperCase().replace('0X', '0x'),
+      });
+
+      expect(builder.validateConfig().errors).toContain('Recipient cannot be your own smart account');
+    });
+
     it('should reject a zero or malformed amount', () => {
       expect(createTransactionBuilder(nativeConfig([RECIPIENT, '0'])).validateConfig().errors)
         .toContain('Amount must be greater than 0');

@@ -50,12 +50,15 @@ export const TransactionBuilder = ({
     abi: [],
     functionName: '',
     parameters: [],
+    fromAddress: walletAddress,
   });
 
   const [selectedAction, setSelectedAction] = useState<RecoveryTemplate | null>(null);
   const [nativeBalance, setNativeBalance] = useState<bigint | null>(null);
   // Bumped to remount ParameterInputs when the amount is set from outside (e.g. "Use max")
   const [parameterInputsKey, setParameterInputsKey] = useState(0);
+  // Bumped after a confirmed send so the balance (and "Use max") reflect what was spent
+  const [balanceRefreshKey, setBalanceRefreshKey] = useState(0);
 
   const {
     templates,
@@ -97,7 +100,7 @@ export const TransactionBuilder = ({
     return () => {
       cancelled = true;
     };
-  }, [isNativeTransfer, networkId, walletAddress]);
+  }, [isNativeTransfer, networkId, walletAddress, balanceRefreshKey]);
 
   // Any edit invalidates the preview, since execution sends exactly what was previewed
   const clearPreview = () => {
@@ -125,6 +128,7 @@ export const TransactionBuilder = ({
       functionName: template.defaultFunction,
       parameters: template.parameterTemplates.map(p => p.value),
       isNativeTransfer: template.contractType === 'NATIVE',
+      fromAddress: walletAddress,
     });
     setError(null);
   };
@@ -136,9 +140,12 @@ export const TransactionBuilder = ({
   };
 
   const handleParameterChange = (index: number, value: any) => {
-    const newParameters = [...config.parameters];
-    newParameters[index] = value;
-    setConfig(prev => ({ ...prev, parameters: newParameters }));
+    // Update from prev: ENS resolution calls this asynchronously and must not clobber newer edits
+    setConfig((prev) => {
+      const newParameters = [...prev.parameters];
+      newParameters[index] = value;
+      return { ...prev, parameters: newParameters };
+    });
     clearPreview();
     setError(null);
   };
@@ -194,7 +201,12 @@ export const TransactionBuilder = ({
           // Validate token amounts
           // Note: value is in wei (smallest unit), so we need to convert back to tokens for validation
           if (param.type === 'uint256' && (param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value'))) {
-            const weiValue = BigInt(String(value));
+            let weiValue = BigInt(0);
+            try {
+              weiValue = BigInt(String(value));
+            } catch {
+              // Not an integer wei amount; reported as invalid below
+            }
             if (weiValue <= BigInt(0)) {
               validationErrors.push(`${param.name} must be a valid positive number`);
             } else {
@@ -283,6 +295,11 @@ export const TransactionBuilder = ({
       return;
     }
 
+    // This preview was already sent; a new one is required to send again
+    if (successMessage) {
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -317,6 +334,9 @@ export const TransactionBuilder = ({
         // Clear any previous errors
         setError(null);
 
+        // Refresh the balance now that the transfer is on-chain
+        setBalanceRefreshKey(key => key + 1);
+
         // Scroll to success message after a brief delay
         setTimeout(() => {
           successRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -349,7 +369,8 @@ export const TransactionBuilder = ({
           </div>
         )}
 
-        <div className="space-y-6">
+        {/* Locked while building or sending: an edit would clear the preview that shows the result */}
+        <fieldset disabled={loading} className="space-y-6 min-w-0">
           {/* Recovery Templates */}
           <div className="flex flex-col gap-2">
             <p className={`text-xs ${COLORS.text.muted} mb-3`}>
@@ -484,7 +505,7 @@ export const TransactionBuilder = ({
               {selectedAction ? 'set' : 'missing'}
             </div>
           )}
-        </div>
+        </fieldset>
       </div>
 
       {/* Transaction Preview */}
