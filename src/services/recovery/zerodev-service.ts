@@ -1,3 +1,4 @@
+import type { TurnkeyClient } from '@turnkey/http';
 import type { KernelAccountClient } from '@zerodev/sdk';
 import type { Client, RpcSchema, Transport } from 'viem';
 import type {
@@ -20,7 +21,8 @@ import { createPublicClient, http } from 'viem';
 import { base, baseSepolia, mainnet, polygon, polygonAmoy, sepolia } from 'viem/chains';
 import { getTurnkeyConfig, SupportedChains } from './turnkey-bridge';
 
-export type TurnkeyAccountClient = Parameters<typeof createAccount>[0]['client'];
+/** @turnkey/viem createAccount client type; runtime uses TurnkeyClient from @turnkey/http */
+export type TurnkeyAccountClient = TurnkeyClient;
 
 const getRpcUrl = (targetChain: SupportedChains): string => {
   const config = getTurnkeyConfig();
