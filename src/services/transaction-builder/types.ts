@@ -1,5 +1,7 @@
 // Transaction Builder Types
 
+import type { Address, Hex } from 'viem';
+
 export type TransactionBuilderConfig = {
   network: string;
   contractAddress: string;
@@ -9,6 +11,16 @@ export type TransactionBuilderConfig = {
   gasLimit?: bigint;
   gasPrice?: bigint;
   value?: bigint;
+  // Send the network's native currency instead of calling a contract.
+  // parameters are [recipient, amount in wei].
+  isNativeTransfer?: boolean;
+};
+
+// The single call the smart account executes
+export type TransactionCall = {
+  to: Address;
+  value: bigint;
+  data: Hex;
 };
 
 export type NetworkConfig = {
@@ -48,8 +60,8 @@ export type FunctionParameter = {
 };
 
 export type TransactionPreview = {
-  to: string;
-  data: string;
+  to: Address;
+  data: Hex;
   value: bigint;
   gasLimit: bigint;
   gasPrice: bigint;
@@ -70,7 +82,7 @@ export type RecoveryTemplate = {
   id: string;
   name: string;
   description: string;
-  contractType: 'ERC20' | 'ERC721' | 'ERC1155' | 'CUSTOM';
+  contractType: 'NATIVE' | 'ERC20' | 'ERC721' | 'ERC1155' | 'CUSTOM';
   abi: ABIItem[];
   defaultFunction: string;
   parameterTemplates: FunctionParameter[];

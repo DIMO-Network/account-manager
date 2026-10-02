@@ -1,6 +1,7 @@
 'use client';
 
 import type { NetworkConfig, TransactionPreview } from '@/services/transaction-builder';
+import { formatUnits } from 'viem';
 import { BORDER_RADIUS, COLORS } from '@/utils/designSystem';
 
 type TransactionPreviewProps = {
@@ -29,8 +30,11 @@ export const TransactionPreviewComponent = ({
     return null;
   }
   const formatValue = (value: bigint): string => {
-    return value.toString();
+    return formatUnits(value, networkConfig?.nativeCurrency.decimals ?? 18);
   };
+
+  // A call with no calldata is a plain transfer of the native currency
+  const isNativeTransfer = preview.data === '0x';
 
   const truncateAddress = (address: string | undefined): string => {
     if (!address || typeof address !== 'string') {
@@ -72,19 +76,33 @@ export const TransactionPreviewComponent = ({
             </span>
           </div>
 
-          <div className="flex justify-between">
-            <span className={`text-sm font-medium ${COLORS.text.muted}`}>To (Target Contract):</span>
-            <span className={`text-sm ${COLORS.text.primary} font-mono`}>
-              {truncateAddress(preview.to)}
-            </span>
-          </div>
+          {isNativeTransfer
+            ? (
+                <div className="flex justify-between gap-4">
+                  <span className={`text-sm font-medium ${COLORS.text.muted} shrink-0`}>To (Recipient):</span>
+                  {/* Full address so the recipient can be checked character by character */}
+                  <span className={`text-sm ${COLORS.text.primary} font-mono break-all text-right`}>
+                    {preview.to}
+                  </span>
+                </div>
+              )
+            : (
+                <>
+                  <div className="flex justify-between">
+                    <span className={`text-sm font-medium ${COLORS.text.muted}`}>To (Target Contract):</span>
+                    <span className={`text-sm ${COLORS.text.primary} font-mono`}>
+                      {truncateAddress(preview.to)}
+                    </span>
+                  </div>
 
-          <div className="flex justify-between">
-            <span className={`text-sm font-medium ${COLORS.text.muted}`}>Function to Call:</span>
-            <span className={`text-sm ${COLORS.text.primary} font-mono`}>
-              {preview.functionName}
-            </span>
-          </div>
+                  <div className="flex justify-between">
+                    <span className={`text-sm font-medium ${COLORS.text.muted}`}>Function to Call:</span>
+                    <span className={`text-sm ${COLORS.text.primary} font-mono`}>
+                      {preview.functionName}
+                    </span>
+                  </div>
+                </>
+              )}
 
           <div className="flex justify-between">
             <span className={`text-sm font-medium ${COLORS.text.muted}`}>Value:</span>
