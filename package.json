@@ -6,7 +6,7 @@
     "Ixartz (https://github.com/ixartz)"
   ],
   "engines": {
-    "node": ">=24.22.1"
+    "node": "24.22.1"
   },
   "scripts": {
     "dev:codegen": "graphql-codegen --watch",
