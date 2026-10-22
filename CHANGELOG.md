@@ -1,3 +1,10 @@
+## [2.40.1](https://github.com/DIMO-Network/account-manager/compare/v2.40.0...v2.40.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* **deps:** pin Node 24.22.1 for the October 2026 Node.js security release ([8ad4cea](https://github.com/DIMO-Network/account-manager/commit/8ad4ceab6072260014bb67f6cdaf9348f2f31be0))
+
 # [2.40.0](https://github.com/DIMO-Network/account-manager/compare/v2.39.0...v2.40.0) (2026-10-02)
 
 
