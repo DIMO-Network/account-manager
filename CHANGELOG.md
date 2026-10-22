@@ -1,3 +1,10 @@
+## [2.40.2](https://github.com/DIMO-Network/account-manager/compare/v2.40.1...v2.40.2) (2026-10-22)
+
+
+### Bug Fixes
+
+* **build:** build on Railpack so the exact Node version is honored ([ad02564](https://github.com/DIMO-Network/account-manager/commit/ad0256444d8b2e5e51bab718a5e035c13d21e80a)), closes [#206](https://github.com/DIMO-Network/account-manager/issues/206)
+
 ## [2.40.1](https://github.com/DIMO-Network/account-manager/compare/v2.40.0...v2.40.1) (2026-10-22)
 
 
