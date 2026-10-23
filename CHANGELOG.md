@@ -1,3 +1,10 @@
+## [2.40.3](https://github.com/DIMO-Network/account-manager/compare/v2.40.2...v2.40.3) (2026-10-23)
+
+
+### Bug Fixes
+
+* **recovery:** send ERC-20 amounts in the token's own decimals ([6794007](https://github.com/DIMO-Network/account-manager/commit/67940071f0c783d823e7d055920d1ba9f01a7712))
+
 ## [2.40.2](https://github.com/DIMO-Network/account-manager/compare/v2.40.1...v2.40.2) (2026-10-22)
 
 
