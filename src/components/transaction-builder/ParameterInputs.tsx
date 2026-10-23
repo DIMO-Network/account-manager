@@ -13,10 +13,10 @@ type ParameterInputsProps = {
   networkConfig: NetworkConfig | null;
   // Unit shown next to amount fields, e.g. 'ETH' for native transfers
   amountUnit?: string;
+  // Amounts are entered in whole units and passed up in the asset's smallest unit,
+  // e.g. 18 for ETH or DIMO, 6 for USDC
+  amountDecimals?: number;
 };
-
-// Amounts are entered in whole units and passed up in wei (18 decimals)
-const AMOUNT_DECIMALS = 18;
 
 export const ParameterInputs = ({
   parameters,
@@ -24,6 +24,7 @@ export const ParameterInputs = ({
   onParameterChangeAction,
   networkConfig,
   amountUnit = 'tokens',
+  amountDecimals = 18,
 }: ParameterInputsProps) => {
   const validateAddress = (address: string): boolean => {
     return /^0x[a-fA-F0-9]{40}$/.test(address);
@@ -56,13 +57,13 @@ export const ParameterInputs = ({
       if (param.type === 'uint256' && (param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value'))) {
         if (weiValue && !Number.isNaN(Number(weiValue)) && Number(weiValue) > 0) {
           // Convert wei back to tokens exactly (floating point would round off the last digits)
-          return formatUnits(BigInt(String(weiValue)), AMOUNT_DECIMALS);
+          return formatUnits(BigInt(String(weiValue)), amountDecimals);
         }
       }
 
       return weiValue.toString();
     });
-  }, [parameters, values, inputValues]);
+  }, [parameters, values, inputValues, amountDecimals]);
 
   // Create viem client for ENS resolution (only for Ethereum mainnet and Sepolia)
   const getViemClient = () => {
@@ -258,7 +259,7 @@ export const ParameterInputs = ({
       if (processedValue && !Number.isNaN(Number(processedValue)) && Number(processedValue) > 0) {
         // Convert to wei exactly, so a full balance can be sent without overshooting by a few wei
         try {
-          weiValue = parseUnits(processedValue, AMOUNT_DECIMALS).toString();
+          weiValue = parseUnits(processedValue, amountDecimals).toString();
         } catch {
           // Not a plain decimal (e.g. "1e-5"); treat as missing so it can't be submitted
         }
