@@ -33,7 +33,7 @@
     "@dimo-network/login-with-dimo": "^0.0.27",
     "@hookform/resolvers": "^5.1.1",
     "@logtail/pino": "^0.5.4",
-    "@sentry/nextjs": "^10.68.0",
+    "@sentry/nextjs": "^10.75.2",
     "@stripe/stripe-js": "^7.4.0",
     "@t3-oss/env-nextjs": "^0.13.8",
     "@turnkey/api-key-stamper": "^0.5.0",
