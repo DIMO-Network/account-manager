@@ -59,7 +59,7 @@
     "react-hot-toast": "^2.5.2",
     "stripe": "^18.3.0",
     "viem": "^2.38.5",
-    "zod": "^3.25.67"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.16.1",
