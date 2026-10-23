@@ -37,6 +37,24 @@ describe('ParameterInputs', () => {
     expect(onChange).toHaveBeenCalledWith(0, '170235000');
   });
 
+  it('should reject an amount with more decimal places than the token has instead of rounding it', () => {
+    const onChange = vi.fn();
+    render(
+      <ParameterInputs
+        parameters={[AMOUNT_PARAM]}
+        values={['']}
+        onParameterChangeAction={onChange}
+        networkConfig={null}
+        amountDecimals={6}
+      />,
+    );
+
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '0.9999999' } });
+
+    expect(onChange).toHaveBeenLastCalledWith(0, '');
+    expect(screen.getByText('Amount can have at most 6 decimal places')).toBeInTheDocument();
+  });
+
   it('should display an amount using the token\'s decimals', () => {
     render(
       <ParameterInputs

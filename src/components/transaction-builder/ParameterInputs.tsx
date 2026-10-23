@@ -217,6 +217,9 @@ export const ParameterInputs = ({
     return 'Enter the required value for this parameter';
   };
 
+  // parseUnits rounds digits past the asset's decimals, which would send a different amount than shown
+  const hasTooManyDecimals = (value: string): boolean => (value.split('.')[1]?.length ?? 0) > amountDecimals;
+
   const handleInputChange = (index: number, value: any, type: string, paramName: string) => {
     let processedValue = value;
 
@@ -256,7 +259,7 @@ export const ParameterInputs = ({
     // a positive wei integer or '' (missing), never raw input like '.0' or '-0.5'
     if (type === 'uint256' && (paramName.toLowerCase().includes('amount') || paramName.toLowerCase().includes('value'))) {
       let weiValue = '';
-      if (processedValue && !Number.isNaN(Number(processedValue)) && Number(processedValue) > 0) {
+      if (processedValue && !Number.isNaN(Number(processedValue)) && Number(processedValue) > 0 && !hasTooManyDecimals(processedValue)) {
         // Convert to wei exactly, so a full balance can be sent without overshooting by a few wei
         try {
           weiValue = parseUnits(processedValue, amountDecimals).toString();
@@ -395,6 +398,9 @@ export const ParameterInputs = ({
                   )}
                   {Number(displayValues[index]) > 1e9 && (
                     <p className="text-xs text-red-600">Amount seems too large (max 1 billion tokens)</p>
+                  )}
+                  {hasTooManyDecimals(String(displayValues[index])) && (
+                    <p className="text-xs text-red-600">{`Amount can have at most ${amountDecimals} decimal places`}</p>
                   )}
                 </>
               )}
