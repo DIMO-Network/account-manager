@@ -20,6 +20,37 @@ describe('ParameterInputs', () => {
     expect(onChange).toHaveBeenCalledWith(0, '123456789123456789');
   });
 
+  it('should convert an amount using the token\'s decimals', () => {
+    const onChange = vi.fn();
+    render(
+      <ParameterInputs
+        parameters={[AMOUNT_PARAM]}
+        values={['']}
+        onParameterChangeAction={onChange}
+        networkConfig={null}
+        amountDecimals={6}
+      />,
+    );
+
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '170.235' } });
+
+    expect(onChange).toHaveBeenCalledWith(0, '170235000');
+  });
+
+  it('should display an amount using the token\'s decimals', () => {
+    render(
+      <ParameterInputs
+        parameters={[AMOUNT_PARAM]}
+        values={['170235000']}
+        onParameterChangeAction={vi.fn()}
+        networkConfig={null}
+        amountDecimals={6}
+      />,
+    );
+
+    expect(screen.getByRole('spinbutton')).toHaveDisplayValue('170.235');
+  });
+
   it('should display a wei amount exactly', () => {
     render(
       <ParameterInputs

@@ -2,11 +2,12 @@
 
 import type { SupportedChains } from '@/services/recovery/turnkey-bridge';
 import type {
+  FunctionParameter,
   RecoveryTemplate,
   TransactionBuilderConfig,
 } from '@/services/transaction-builder';
 import { useEffect, useRef, useState } from 'react';
-import { formatUnits } from 'viem';
+import { erc20Abi, formatUnits, isAddress } from 'viem';
 import { useTransactionBuilder } from '@/hooks/useTransactionBuilder';
 import { createRecoveryService } from '@/services/recovery/recovery-service';
 import { getPublicClient } from '@/services/recovery/zerodev-service';
@@ -24,6 +25,10 @@ const SUPPORTED_CHAINS = {
   80002: 'POLYGON',
   84532: 'BASE',
 } as const;
+
+// Amount parameters are entered in whole units and stored in the asset's smallest unit
+const isAmountParameter = (param: FunctionParameter | undefined): boolean =>
+  param?.type === 'uint256' && (param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value'));
 
 type TransactionBuilderProps = {
   networkId: string;
@@ -59,6 +64,8 @@ export const TransactionBuilder = ({
   const [parameterInputsKey, setParameterInputsKey] = useState(0);
   // Bumped after a confirmed send so the balance (and "Use max") reflect what was spent
   const [balanceRefreshKey, setBalanceRefreshKey] = useState(0);
+  // decimals() of the last ERC-20 read, keyed by network and address; null if it couldn't be read
+  const [tokenDecimals, setTokenDecimals] = useState<{ token: string; decimals: number | null } | null>(null);
 
   const {
     templates,
@@ -74,7 +81,13 @@ export const TransactionBuilder = ({
   } = useTransactionBuilder(config);
 
   const isNativeTransfer = Boolean(config.isNativeTransfer);
-  const isCallConfigured = isNativeTransfer || Boolean(config.contractAddress && config.functionName);
+  const isErc20Transfer = selectedAction?.contractType === 'ERC20';
+  const tokenKey = `${networkId}:${config.contractAddress.toLowerCase()}`;
+  // The selected token's decimals: undefined while reading, null if they couldn't be read.
+  // Amounts can't be converted without them (USDC has 6, not 18)
+  const erc20Decimals = tokenDecimals?.token === tokenKey ? tokenDecimals.decimals : undefined;
+  const isAmountReady = !isErc20Transfer || typeof erc20Decimals === 'number';
+  const isCallConfigured = isNativeTransfer || Boolean(config.contractAddress && config.functionName && isAmountReady);
 
   // Load the smart account's native balance so the user can send all of it
   useEffect(() => {
@@ -101,6 +114,34 @@ export const TransactionBuilder = ({
       cancelled = true;
     };
   }, [isNativeTransfer, networkId, walletAddress, balanceRefreshKey]);
+
+  // Read the selected ERC-20's decimals so amounts are sent in its smallest unit
+  useEffect(() => {
+    const chainName = SUPPORTED_CHAINS[Number.parseInt(networkId) as keyof typeof SUPPORTED_CHAINS];
+    const token = config.contractAddress;
+    if (!isErc20Transfer || !chainName || !isAddress(token, { strict: false })) {
+      return;
+    }
+
+    let cancelled = false;
+    const key = `${networkId}:${token.toLowerCase()}`;
+    getPublicClient(chainName as SupportedChains)
+      .readContract({ address: token, abi: erc20Abi, functionName: 'decimals' })
+      .then((decimals) => {
+        if (!cancelled) {
+          setTokenDecimals({ token: key, decimals });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setTokenDecimals({ token: key, decimals: null });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isErc20Transfer, networkId, config.contractAddress]);
 
   // Any edit invalidates the preview, since execution sends exactly what was previewed
   const clearPreview = () => {
@@ -134,7 +175,12 @@ export const TransactionBuilder = ({
   };
 
   const handleContractAddressChange = (address: string) => {
-    setConfig(prev => ({ ...prev, contractAddress: address }));
+    // An amount is in the previous token's smallest unit, so it can't carry over to another token
+    setConfig(prev => ({
+      ...prev,
+      contractAddress: address,
+      parameters: prev.parameters.map((value, index) => (isAmountParameter(functionParameters[index]) ? '' : value)),
+    }));
     clearPreview();
     setError(null);
   };
@@ -200,7 +246,7 @@ export const TransactionBuilder = ({
 
           // Validate token amounts
           // Note: value is in wei (smallest unit), so we need to convert back to tokens for validation
-          if (param.type === 'uint256' && (param.name.toLowerCase().includes('amount') || param.name.toLowerCase().includes('value'))) {
+          if (isAmountParameter(param)) {
             let weiValue = BigInt(0);
             try {
               weiValue = BigInt(String(value));
@@ -210,8 +256,8 @@ export const TransactionBuilder = ({
             if (weiValue <= BigInt(0)) {
               validationErrors.push(`${param.name} must be a valid positive number`);
             } else {
-              // Convert wei to tokens (divide by 10^18) for validation
-              const tokenValue = Number(weiValue) / 1e18;
+              // Convert to whole tokens for validation
+              const tokenValue = Number(formatUnits(weiValue, erc20Decimals ?? 18));
               if (tokenValue > 1e9) {
                 validationErrors.push(`${param.name} amount seems too large (max 1 billion tokens)`);
               }
@@ -446,8 +492,17 @@ export const TransactionBuilder = ({
             />
           )}
 
-          {/* Parameter Inputs */}
-          {functionParameters.length > 0 && (
+          {isErc20Transfer && erc20Decimals === null && (
+            <p className="text-sm text-red-600">
+              Couldn't read this token's decimals on
+              {' '}
+              {networkConfig?.name || 'this network'}
+              . Check that the address is an ERC-20 token on this network.
+            </p>
+          )}
+
+          {/* Parameter Inputs: an ERC-20 amount waits until the token's decimals are known */}
+          {functionParameters.length > 0 && isAmountReady && (
             <ParameterInputs
               key={parameterInputsKey}
               parameters={functionParameters}
@@ -455,6 +510,7 @@ export const TransactionBuilder = ({
               onParameterChangeAction={handleParameterChange}
               networkConfig={networkConfig}
               amountUnit={isNativeTransfer ? networkConfig?.nativeCurrency.symbol : undefined}
+              amountDecimals={erc20Decimals ?? undefined}
             />
           )}
 
