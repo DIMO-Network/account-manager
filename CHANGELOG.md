@@ -1,3 +1,10 @@
+## [2.40.4](https://github.com/DIMO-Network/account-manager/compare/v2.40.3...v2.40.4) (2026-10-26)
+
+
+### Bug Fixes
+
+* **recovery:** reject amounts finer than the token's decimals ([40e8551](https://github.com/DIMO-Network/account-manager/commit/40e8551d8f9f04ee92e04157c2ba77dc939b8f95))
+
 ## [2.40.3](https://github.com/DIMO-Network/account-manager/compare/v2.40.2...v2.40.3) (2026-10-23)
 
 
