@@ -181,6 +181,8 @@ export const TransactionBuilder = ({
       contractAddress: address,
       parameters: prev.parameters.map((value, index) => (isAmountParameter(functionParameters[index]) ? '' : value)),
     }));
+    // Remount so the amount field drops the typed text too, even when the token's decimals are already known
+    setParameterInputsKey(key => key + 1);
     clearPreview();
     setError(null);
   };

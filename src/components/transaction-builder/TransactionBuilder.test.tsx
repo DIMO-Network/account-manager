@@ -156,6 +156,17 @@ describe('TransactionBuilder ERC-20 transfer', () => {
     expect(await screen.findByRole('spinbutton')).toHaveDisplayValue('');
   });
 
+  it('should clear the shown amount when the same token is picked again', async () => {
+    renderBuilder('137');
+    fireEvent.click(screen.getByRole('button', { name: /Transfer ERC-20 Token/ }));
+    fireEvent.change(await screen.findByRole('spinbutton'), { target: { value: '170' } });
+
+    // Same token, so its decimals are already known and the inputs stay mounted
+    fireEvent.click(screen.getByRole('button', { name: /DIMO \(Polygon\)/ }));
+
+    expect(screen.getByRole('spinbutton')).toHaveDisplayValue('');
+  });
+
   it('should not build a transfer when the token\'s decimals can\'t be read', async () => {
     mocks.readContract.mockRejectedValue(new Error('execution reverted'));
     renderBuilder('137');
