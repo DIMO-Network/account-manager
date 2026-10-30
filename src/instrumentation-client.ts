@@ -15,8 +15,9 @@ if (!process.env.NEXT_PUBLIC_SENTRY_DISABLED) {
       Sentry.replayIntegration(),
     ],
 
-    // Adds request headers and IP for users, for more info visit
-    sendDefaultPii: true,
+    // Adds request headers and IP for users. Leaving this out turns that collection off,
+    // and an empty object applies Sentry's defaults, which replace sendDefaultPii: true.
+    dataCollection: {},
 
     // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
     tracesSampleRate: 1,
