@@ -151,6 +151,9 @@
   },
   "overrides": {
     "@types/react": "19.3.0",
-    "eslint": "$eslint"
+    "eslint": "$eslint",
+    "tinypool": "^2.2.0",
+    "uuid": "^11.1.1",
+    "webpack-dev-middleware": "^7.4.6"
   }
 }
