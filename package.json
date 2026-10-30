@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@arcjet/next": "^1.15.0",
-    "@dimo-network/login-with-dimo": "^0.0.27",
+    "@dimo-network/login-with-dimo": "^0.0.35",
     "@hookform/resolvers": "^6.0.2",
     "@logtail/pino": "^0.5.12",
     "@sentry/nextjs": "^11.10.0",
