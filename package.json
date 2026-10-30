@@ -6,7 +6,7 @@
     "Ixartz (https://github.com/ixartz)"
   ],
   "engines": {
-    "node": "24.22.1"
+    "node": "24.22.2"
   },
   "scripts": {
     "dev:codegen": "graphql-codegen --watch",
@@ -85,7 +85,7 @@
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
-    "@types/node": "^22.18.13",
+    "@types/node": "^24.19.2",
     "@types/react": "19.3.0",
     "@vitejs/plugin-react": "^6.0.4",
     "@vitest/coverage-v8": "^4.1.10",

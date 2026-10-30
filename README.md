@@ -70,7 +70,7 @@ A Next.js web application for managing device subscriptions and connected vehicl
 
 ### Prerequisites
 
-- Node.js 20+ and npm
+- Node.js 24 LTS and npm
 - Backend API service for subscription management
 - Stripe account for payment processing
 - DIMO developer account and API credentials

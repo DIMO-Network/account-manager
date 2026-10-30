@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        node-version: [22.x, 24.x]
+        node-version: [24.x]
 
     name: Build with ${{ matrix.node-version }}
     runs-on: ubuntu-latest
@@ -40,7 +40,7 @@ jobs:
         env:
           NEXT_PUBLIC_SENTRY_DISABLED: 'true'
 
-      - if: matrix.node-version == '22.x' && success()
+      - if: matrix.node-version == '24.x' && success()
         name: Cache Next.js build output
         uses: actions/cache/save@v4
         with:
@@ -51,7 +51,7 @@ jobs:
   static:
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [24.x]
 
     name: Run static checks
     runs-on: ubuntu-latest
@@ -79,7 +79,7 @@ jobs:
   test:
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [24.x]
 
     name: Run tests
     runs-on: ubuntu-latest
