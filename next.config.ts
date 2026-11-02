@@ -1,6 +1,6 @@
 import type { NextConfig } from 'next';
 import withBundleAnalyzer from '@next/bundle-analyzer';
-import { withSentryConfig } from '@sentry/nextjs';
+import { withSentryConfig } from '@sentry/nextjs/config';
 import createNextIntlPlugin from 'next-intl/plugin';
 import './src/libs/Env';
 
@@ -55,7 +55,11 @@ if (!process.env.NEXT_PUBLIC_SENTRY_DISABLED) {
     tunnelRoute: '/monitoring',
 
     // Automatically tree-shake Sentry logger statements to reduce bundle size
-    disableLogger: true,
+    webpack: {
+      treeshake: {
+        removeDebugLogging: true,
+      },
+    },
 
     // Disable Sentry telemetry
     telemetry: false,
