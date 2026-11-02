@@ -1,3 +1,12 @@
+## [2.40.5](https://github.com/DIMO-Network/account-manager/compare/v2.40.4...v2.40.5) (2026-11-02)
+
+
+### Bug Fixes
+
+* **deps:** declare jose, which JWT verification imports ([16a5171](https://github.com/DIMO-Network/account-manager/commit/16a5171e75b4765450f124560ec9147fc278e5d5)), closes [dimo-developer-console#336](https://github.com/dimo-developer-console/issues/336)
+* **deps:** pin ZeroDev to the versions the console signs with ([6c7e484](https://github.com/DIMO-Network/account-manager/commit/6c7e48460a028ba117afd7a8b4e8cc2f3e5a02ea)), closes [#336](https://github.com/DIMO-Network/account-manager/issues/336)
+* **sentry:** remove the dataCollection option, which does nothing ([76be38a](https://github.com/DIMO-Network/account-manager/commit/76be38a6024e0f1dff1a043c38797048de8ce193))
+
 ## [2.40.4](https://github.com/DIMO-Network/account-manager/compare/v2.40.3...v2.40.4) (2026-10-26)
 
 
